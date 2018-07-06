@@ -1,0 +1,112 @@
+.plugin-slide img,
+.contact-maps img {
+  width: 100% !important;
+}
+.owl-carousel .owl-item {
+  height: 100%;
+}
+
+.owl-carousel .owl-stage-outer {
+    height: 100%
+}
+.owl-carousel .owl-stage-outer {
+  height: 100%;
+}
+.plugin-slide,
+.plugin-slide img {
+  height: 100%;
+}
+
+.owl-carousel .owl-stage {
+    height: 100%;
+}
+
+.plugin-slide,
+.plugin-slide img {
+  height: 100%;
+}
+
+.demo {
+  background: rgba(51, 51, 51, 0.726);
+}
+
+#carousel {
+  height: 35%;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+}
+
+.panel {
+  margin-bottom: 0px;
+}
+
+.text-center {
+  height: 100%;
+  line-height: 50px;
+}
+
+.tab-active {
+  background: #ffffff;
+}
+
+* {
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+#slideshow {
+  position: relative;
+  /* bottom: -27%; */
+}
+
+#pluginsContainer {
+  position: relative;
+  /* bottom: -27%; */
+  width: 103%;
+  left: -1.5%;
+}
+
+#pagination {
+  display: flex;
+  height: 50px;
+}
+
+.page {
+  flex: 1;
+  line-height: 50%;
+}
+
+.slide {
+  display: none;
+  height: 100%;
+  border: 0px;
+}
+
+#container {
+  position: relative;
+  height: 100%;
+  background: #000000;
+}
+
+.panel-body {
+  padding: 0px 0px 0px 0px;
+  position: relative;
+  z-index: 10000;
+}
+
+.panel-heading {
+  text-align: center;
+  position: absolute;
+  line-height: 80px;
+  font-size: 25px;
+  width: 100%;
+  height: 100px;
+  top: 82%;
+  background: rgba(51, 51, 51, 0.726);
+  left: 50.5%;
+  transform: translate(-50%, -50%);
+  color: white;
+}
