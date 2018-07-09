@@ -84,6 +84,22 @@ class Widget extends Component {
       let slide = document.createElement("li");
       slide.classList.add("js_slide");
       slide.innerHTML = plugin.data.title;
+      slide.onclick = e => {
+        console.log(e.target);
+        let index = document.getElementById(e.target.id).getAttribute("index");
+        console.log(index);
+
+        let target = this.state.plugins[index].data;
+
+        let pluginData = {
+          pluginId: target.pluginTypeId,
+          instanceId: target.instanceId,
+          folderName: target._buildfire.pluginType.result[0].folderName,
+          title: target.title
+        };
+
+        buildfire.navigation.navigateTo(pluginData);
+      };
       slides.appendChild(slide);
     });
 
