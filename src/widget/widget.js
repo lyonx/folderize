@@ -56,11 +56,15 @@ class Widget extends Component {
 
   renderPlugins() {
     let plugins = this.state.plugins;
-    console.log(document.getElementById("container"));
-    // main framework
+
+    // QUERY SELECTORS
+    var dot_navs = document.querySelector(".js_dots.dots");
     let div = document.getElementById("container");
     div.innerHTML = "";
+    dot_navs.innerHTML = "";
+    console.log(dot_navs);
 
+    // MAIN FRAMEWORK
     let slider = document.createElement("div");
     slider.classList.add("slider");
     slider.classList.add("js_simple");
@@ -73,17 +77,19 @@ class Widget extends Component {
     slides.classList.add("slides");
     slides.classList.add("js_slides");
 
-    // for (let i = 0; i < n; i++) {
-    //   let slide = document.createElement("li");
-    //   slide.classList.add("js_slide");
-    //   slide.innerHTML = "slide";
-    //   slides.appendChild(slide);
-    // }
     plugins.forEach(plugin => {
-      console.log(plugin);
+      let index = plugins.indexOf(plugin);
+      // PLUGIN SLIDE
       let slide = document.createElement("li");
+      let dot = document.createElement("li");
       slide.classList.add("js_slide");
       slide.innerHTML = plugin.data.title;
+      slide.setAttribute("index", index);
+      slide.setAttribute("id", `plugin${index}`);
+      slide.setAttribute(
+        "style",
+        `background-image: url("${plugin.data.iconUrl}`
+      );
       slide.onclick = e => {
         console.log(e.target);
         let index = document.getElementById(e.target.id).getAttribute("index");
@@ -101,7 +107,11 @@ class Widget extends Component {
         buildfire.navigation.navigateTo(pluginData);
       };
       slides.appendChild(slide);
+      dot_navs.appendChild(dot);
     });
+
+    // DOT NAVS
+    let dot_count = plugins.length;
 
     // assembly
     frame.appendChild(slides);
@@ -119,57 +129,7 @@ class Widget extends Component {
   render() {
     return (
       <div id="container">
-        <div className="slider js_simple">
-          <div className="frame js_frame">
-            <ul id="slideContainer" className="slides js_slides">
-              <li className="js_slide">1</li>
-              <li className="js_slide">2</li>
-              <li className="js_slide">3</li>
-            </ul>
-          </div>
-          <span className="js_prev prev">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="50"
-              height="50"
-              viewBox="0 0 501.5 501.5"
-            >
-              <g>
-                <path
-                  fill="#2E435A"
-                  d="M302.67 90.877l55.77 55.508L254.575 250.75 358.44 355.116l-55.77 55.506L143.56 250.75z"
-                />
-              </g>
-            </svg>
-          </span>
-          <span className="js_next next">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="50"
-              height="50"
-              viewBox="0 0 501.5 501.5"
-            >
-              <g>
-                <path
-                  fill="#2E435A"
-                  d="M199.33 410.622l-55.77-55.508L247.425 250.75 143.56 146.384l55.77-55.507L358.44 250.75z"
-                />
-              </g>
-            </svg>
-          </span>
-        </div>
-
-        <ul className="js_dots dots">
-          <li className="" />
-          <li className="active" />
-          <li />
-          <li />
-          <li />
-          <li />
-        </ul>
-        <button className="btn btn-default" onClick={() => this.test(3)}>
-          Add
-        </button>
+        <ul className="js_dots dots" id="dot-nav" />
       </div>
     );
   }
