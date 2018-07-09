@@ -74,11 +74,21 @@ class Content extends Component {
     //     });
     //   });
     // });
-    buildfire.datastore.search({}, "carouselItems", (err, res) => {
+    buildfire.datastore.search({}, "plugin", (err, res) => {
       console.log(err, res);
       res.forEach(instance => {
         console.log(instance.id);
-        buildfire.datastore.delete(instance.id, "carouselItems", (err, result) => {
+        buildfire.datastore.delete(instance.id, "plugin", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
+      });
+    });
+    buildfire.datastore.search({}, "img", (err, res) => {
+      console.log(err, res);
+      res.forEach(instance => {
+        console.log(instance.id);
+        buildfire.datastore.delete(instance.id, "img", (err, result) => {
           if (err) throw err;
           console.log(result);
         });
@@ -86,20 +96,43 @@ class Content extends Component {
     });
   }
 
-
   logData() {
-    buildfire.datastore.search({}, "carouselItems", (err, res) => {
+    buildfire.datastore.search({}, "img", (err, res) => {
+      if (err) console.log(err);
       console.log(res);
     });
     buildfire.datastore.search({}, "plugin", (err, res) => {
+      if (err) console.log(err);
       console.log(res);
     });
     buildfire.datastore.search({}, (err, res) => {
+      if (err) console.log(err);
       console.log(res);
     });
   }
 
- 
+  addImg() {
+    buildfire.imageLib.showDialog({}, (err, result) => {
+      if (err) console.log(err);
+      console.log(result);
+      buildfire.datastore.search({}, "img", (err, res) => {
+        if (err) console.log(err);
+        console.log(res);
+        if (res[0]) {
+          console.log(res);
+          buildfire.datastore.delete(res[0].id, "img", (err, status) => {
+            if (err) console.log(err);
+            console.log(status);
+          });
+        }
+        buildfire.datastore.insert(result.selectedFiles, "img", (err, res) => {
+          if (err) console.log(err);
+          console.log(res);
+        });
+      });
+    });
+  }
+
   searchImgs() {
     e => {
       e.preventDefault();
@@ -120,6 +153,9 @@ class Content extends Component {
           onClick={this.showPluginDialog.bind(this)}
         >
           Add Plugin
+        </button>
+        <button className="btn btn-default" onClick={this.addImg}>
+          Add Image
         </button>
         <button className="btn btn-default" onClick={this.logData}>
           Log Data

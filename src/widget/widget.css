@@ -54,7 +54,7 @@ li {
 }
 
 .js_slide {
-  height: 100vh;
+  height: 45vh;
   background: #333333;
   background-size: cover;
   background-position: center;
@@ -62,5 +62,31 @@ li {
 
 ul {
   -webkit-padding-start: 0px;
+}
+
+#dot-nav > .active {
+  background: #ffffff;
+  color: black;
+}
+
+#dot-nav > li {
+  flex: 1;
+  text-align: center;
+  line-height: 10vh;
+  font-size: 20px;
+  color: #ffffff;
+  background: #333333;
+}
+
+#dot-nav {
+  display: flex;
+  height: 10vh;
+  margin: 0px;
+}
+
+#intro {
+  height: 45vh;
+  background-position: center !important;
+  background-size: cover !important;
 }
 

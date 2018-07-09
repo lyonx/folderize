@@ -21,18 +21,36 @@ class Widget extends Component {
       });
       this.renderPlugins();
     });
+    buildfire.datastore.search({}, "img", (err, result) => {
+      if (err) throw err;
+      if(result.length === 0) return;
+      console.log(result);
+      document
+        .getElementById("intro")
+        .setAttribute("style", `background: url("${result[0].data[0]}");`);
+    });
   }
 
   pluginListener() {
     buildfire.datastore.onUpdate(plugin => {
       console.log(`onUpdate ============= `);
       console.log("update return:", plugin);
-      let temp = this.state.plugins;
-      temp.push(plugin);
-      this.setState({
-        plugins: temp
-      });
-      this.renderPlugins();
+      if (plugin.tag === "plugin") {
+        let temp = this.state.plugins;
+        temp.push(plugin);
+        this.setState({
+          plugins: temp
+        });
+        this.renderPlugins();
+      } else {
+        buildfire.datastore.search({}, "img", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+          document
+            .getElementById("intro")
+            .setAttribute("style", `background: url("${result[0].data[0]}")`);
+        });
+      }
     });
   }
 
@@ -47,31 +65,98 @@ class Widget extends Component {
   }
 
   loryFormat() {
-    var simple = document.querySelector(".js_simple");
-    console.log(simple);
-    lory(simple, {
-      infinite: 1
+    let simple_dots = document.querySelector(".js_simple_dots");
+    let dot_count = this.state.plugins.length;
+    let dot_container = simple_dots.querySelector(".js_dots");
+
+    console.log(dot_container);
+    let dot_list_item = document.createElement("li");
+
+    function handleDotEvent(e) {
+      if (e.type === "before.lory.init") {
+        for (var i = 0, len = dot_count; i < len; i++) {
+          var clone = dot_list_item.cloneNode();
+          dot_container.appendChild(clone);
+        }
+        dot_container.childNodes[0].classList.add("active");
+      }
+      if (e.type === "after.lory.init") {
+        for (var i = 0, len = dot_count; i < len; i++) {
+          dot_container.childNodes[i].addEventListener("click", function(e) {
+            dot_navigation_slider.slideTo(
+              Array.prototype.indexOf.call(dot_container.childNodes, e.target)
+            );
+          });
+        }
+      }
+      if (e.type === "after.lory.slide") {
+        for (var i = 0, len = dot_container.childNodes.length; i < len; i++) {
+          dot_container.childNodes[i].classList.remove("active");
+        }
+        dot_container.childNodes[e.detail.currentSlide - 1].classList.add(
+          "active"
+        );
+      }
+      if (e.type === "on.lory.resize") {
+        for (var i = 0, len = dot_container.childNodes.length; i < len; i++) {
+          dot_container.childNodes[i].classList.remove("active");
+        }
+        dot_container.childNodes[0].classList.add("active");
+      }
+    }
+    simple_dots.addEventListener("before.lory.init", handleDotEvent);
+    simple_dots.addEventListener("after.lory.init", handleDotEvent);
+    simple_dots.addEventListener("after.lory.slide", handleDotEvent);
+    simple_dots.addEventListener("on.lory.resize", handleDotEvent);
+
+    setTimeout(() => {
+      let dot_tabs = simple_dots.querySelector(".js_dots").childNodes;
+      for (let i = 0; i < dot_tabs.length; i++) {
+        console.log(this.state.plugins);
+        dot_tabs[i].innerHTML = this.state.plugins[i].data.title;
+      }
+    }, 1);
+
+    var dot_navigation_slider = lory(simple_dots, {
+      infinite: 1,
+      enableMouseEvents: true
     });
+    // console.log(simple);
+    // lory(simple, {
+    //   infinite: 1
+    // });
   }
 
   renderPlugins() {
     let plugins = this.state.plugins;
-
+    console.log(plugins);
+    if (plugins.length <= 0) {
+      return;
+    }
     // QUERY SELECTORS
-    var dot_navs = document.querySelector(".js_dots.dots");
     let div = document.getElementById("container");
-    div.innerHTML = "";
-    dot_navs.innerHTML = "";
-    console.log(dot_navs);
 
     // MAIN FRAMEWORK
-    let slider = document.createElement("div");
-    slider.classList.add("slider");
-    slider.classList.add("js_simple");
+    let slider = document.querySelector(".js_simple_dots");
+    slider.innerHTML = "";
+    let dot_container = document.createElement("ul");
+    dot_container.classList.add("js_dots");
+    dot_container.classList.add("dots");
+    dot_container.setAttribute("id", "dot-nav");
+    slider.appendChild(dot_container);
+    console.log(slider);
 
-    let frame = document.createElement("div");
-    frame.classList.add("frame");
-    frame.classList.add("js_frame");
+    let preFrame = document.querySelector(".js_frame");
+    let frame;
+    console.log(preFrame);
+    if (preFrame) {
+      preFrame.innerHTML = "";
+      frame = preFrame;
+    } else {
+      frame = document.createElement("div");
+      frame.classList.add("frame");
+      frame.classList.add("js_frame");
+    }
 
     let slides = document.createElement("div");
     slides.classList.add("slides");
@@ -83,7 +168,6 @@ class Widget extends Component {
       let slide = document.createElement("li");
       let dot = document.createElement("li");
       slide.classList.add("js_slide");
-      slide.innerHTML = plugin.data.title;
       slide.setAttribute("index", index);
       slide.setAttribute("id", `plugin${index}`);
       slide.setAttribute(
@@ -107,11 +191,10 @@ class Widget extends Component {
         buildfire.navigation.navigateTo(pluginData);
       };
       slides.appendChild(slide);
-      dot_navs.appendChild(dot);
+      // dot_navs.appendChild(dot);
     });
 
     // DOT NAVS
-    let dot_count = plugins.length;
 
     // assembly
     frame.appendChild(slides);
@@ -129,7 +212,8 @@ class Widget extends Component {
   render() {
     return (
       <div id="container">
-        <ul className="js_dots dots" id="dot-nav" />
+        <div id="intro" />
+        <div className="slider js_simple_dots simple" />
       </div>
     );
   }
