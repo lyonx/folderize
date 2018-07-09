@@ -19,6 +19,7 @@ class Widget extends Component {
       this.setState({
         plugins: temp
       });
+      this.renderPlugins();
     });
   }
 
@@ -53,7 +54,8 @@ class Widget extends Component {
     });
   }
 
-  renderPlugins(plugins) {
+  renderPlugins() {
+    let plugins = this.state.plugins;
     console.log(document.getElementById("container"));
     // main framework
     let div = document.getElementById("container");
@@ -81,7 +83,7 @@ class Widget extends Component {
       console.log(plugin);
       let slide = document.createElement("li");
       slide.classList.add("js_slide");
-      slide.innerHTML = "slide";
+      slide.innerHTML = plugin.data.title;
       slides.appendChild(slide);
     });
 
@@ -90,7 +92,7 @@ class Widget extends Component {
     slider.appendChild(frame);
     div.appendChild(slider);
 
-    this.loryReInit();
+    this.loryFormat();
   }
 
   componentDidMount() {
