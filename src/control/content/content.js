@@ -2,12 +2,18 @@ import React, { Component } from "react";
 import { log } from "util";
 
 class Content extends Component {
+  constructor(props) {
+    super(props);
+    this.logData = this.logData.bind(this);
+    this.state = {};
+  }
+
   addPlugin(instance) {
-    console.log("instances", instance);
     buildfire.datastore.insert(instance, "plugin", (err, res) => {
       if (err) console.log(err);
       console.log(res);
     });
+    // this.updateCarousel();
   }
 
   getPluginDetails(pluginsInfo, pluginIds) {
@@ -41,12 +47,9 @@ class Content extends Component {
   prepPlugins(plugins) {
     // buildfire.datastore.search({}, "plugin", (err, result) => {
     //   if (err) throw err;
-    //   console.log(result);
-    console.log(plugins);
     plugins.forEach(plugin => {
       buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
         if (err) throw err;
-        console.log(inst);
         this.addPlugin(inst);
       });
     });
@@ -56,7 +59,6 @@ class Content extends Component {
   showPluginDialog() {
     buildfire.pluginInstance.showDialog({}, (err, instances) => {
       if (err) throw err;
-      console.log(instances);
       if (instances.length > 0) {
         this.prepPlugins(instances);
       } else return;
@@ -64,11 +66,19 @@ class Content extends Component {
   }
 
   clearData() {
-    buildfire.datastore.search({}, "plugin", (err, data) => {
-      console.log(data);
-      data.forEach(instance => {
-        console.log(instance);
-        buildfire.datastore.delete(instance.id, "plugin", (err, result) => {
+    // buildfire.datastore.search({}, "plugin", (err, data) => {
+    //   data.forEach(instance => {
+    //     buildfire.datastore.delete(instance.id, "plugin", (err, result) => {
+    //       if (err) throw err;
+    //       console.log(result);
+    //     });
+    //   });
+    // });
+    buildfire.datastore.search({}, "carouselItems", (err, res) => {
+      console.log(err, res);
+      res.forEach(instance => {
+        console.log(instance.id);
+        buildfire.datastore.delete(instance.id, "carouselItems", (err, result) => {
           if (err) throw err;
           console.log(result);
         });
@@ -76,63 +86,30 @@ class Content extends Component {
     });
   }
 
+
   logData() {
-    buildfire.datastore.search({}, (err, result) => {
-      if (err) throw err;
-      console.log(result);
+    buildfire.datastore.search({}, "carouselItems", (err, res) => {
+      console.log(res);
+    });
+    buildfire.datastore.search({}, "plugin", (err, res) => {
+      console.log(res);
+    });
+    buildfire.datastore.search({}, (err, res) => {
+      console.log(res);
     });
   }
 
-  initCarousel() {
-    var editor = new buildfire.components.carousel.editor("#carousel");
-    /// handle the loading
-    function loadItems(carouselItems) {
-      // create an instance and pass it the items if you don't have items yet just pass []
-      editor.loadItems(carouselItems);
-    }
-    /// call buildfire datastore to see if there are any previously saved items
-    buildfire.datastore.get(function(err, obj) {
-      if (err) alert("error");
-      else loadItems(obj.data.carouselItems);
-    });
-    /// save any changes in items
-    function save(items) {
-      console.log("saving...");
-      buildfire.datastore.save({ carouselItems: items }, function(e) {
-        if (e) alert("error");
-        else console.log("saved.");
-      });
-    }
-    // this method will be called when a new item added to the list
-    editor.onAddItems = function(items) {
-      save(editor.items);
-    };
-    // this method will be called when an item deleted from the list
-    editor.onDeleteItem = function(item, index) {
-      save(editor.items);
-    };
-    // this method will be called when you edit item details
-    editor.onItemChange = function(item) {
-      save(editor.items);
-    };
-    // this method will be called when you change the order of items
-    editor.onOrderChange = function(item, oldIndex, newIndex) {
-      save(editor.items);
-    };
-  }
-
+ 
   searchImgs() {
     e => {
       e.preventDefault();
-      buildfire.datastore.search({}, "img", (err, res) => {
-        if (err) console.log(err);
-        console.log(res);
-      });
+      console.log("test");
     };
   }
 
   componentDidMount() {
-    this.initCarousel();
+    // this.initCarousel();
+    // this.initPluginCarousel();
   }
 
   render() {
@@ -151,6 +128,7 @@ class Content extends Component {
           Clear Data
         </button>
         <div id="carousel" />
+        <div id="plugins-carousel" />
         <button onClick={this.searchImgs}>Search</button>
       </div>
     );

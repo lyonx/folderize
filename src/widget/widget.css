@@ -1,112 +1,64 @@
-.plugin-slide img,
-.contact-maps img {
-  width: 100% !important;
-}
-.owl-carousel .owl-item {
-  height: 100%;
-}
-
-.owl-carousel .owl-stage-outer {
-    height: 100%
-}
-.owl-carousel .owl-stage-outer {
-  height: 100%;
-}
-.plugin-slide,
-.plugin-slide img {
-  height: 100%;
+/**
+             * (optional) define here the style definitions which should be applied on the slider container
+             * e.g. width including further controls like arrows etc.
+             */
+.slider {
 }
 
-.owl-carousel .owl-stage {
-    height: 100%;
-}
+.frame {
+  /**
+                  * (optional) wrapper width, specifies width of the slider frame.
+                  */
+  width: 100vw;
 
-.plugin-slide,
-.plugin-slide img {
-  height: 100%;
-}
-
-.demo {
-  background: rgba(51, 51, 51, 0.726);
-}
-
-#carousel {
-  height: 35%;
-}
-
-.card-img {
-  width: 100%;
-  height: 100%;
-}
-
-.panel {
-  margin-bottom: 0px;
-}
-
-.text-center {
-  height: 100%;
-  line-height: 50px;
-}
-
-.tab-active {
-  background: #ffffff;
-}
-
-* {
-  overflow-y: hidden;
-  overflow-x: hidden;
-}
-
-#slideshow {
   position: relative;
-  /* bottom: -27%; */
+  font-size: 24px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-#pluginsContainer {
+.slides {
+  display: inline-block;
+}
+
+li {
   position: relative;
-  /* bottom: -27%; */
-  width: 103%;
-  left: -1.5%;
+  display: inline-block;
+
+  /**
+                  * (optional) if the content inside the slide element has a defined size.
+                  */
+  width: 100vw;
 }
 
-#pagination {
-  display: flex;
-  height: 50px;
-}
-
-.page {
-  flex: 1;
-  line-height: 50%;
-}
-
-.slide {
-  display: none;
-  height: 100%;
-  border: 0px;
-}
-
-#container {
-  position: relative;
-  height: 100%;
-  background: #000000;
-}
-
-.panel-body {
-  padding: 0px 0px 0px 0px;
-  position: relative;
-  z-index: 10000;
-}
-
-.panel-heading {
-  text-align: center;
+.prev,
+.next {
   position: absolute;
-  line-height: 80px;
-  font-size: 25px;
-  width: 100%;
-  height: 100px;
-  top: 82%;
-  background: rgba(51, 51, 51, 0.726);
-  left: 50.5%;
-  transform: translate(-50%, -50%);
-  color: white;
+  top: 50%;
+  margin-top: -25px;
+  display: block;
+  cursor: pointer;
 }
+
+.next {
+  right: 0;
+}
+
+.prev {
+  left: 0;
+}
+
+.next svg,
+.prev svg {
+  width: 25px;
+}
+
+.js_slide {
+  height: 100px;
+  background: #333333;
+}
+
+ul {
+  -webkit-padding-start: 0px;
+}
+
