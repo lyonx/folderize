@@ -54,7 +54,7 @@ li {
 }
 
 .js_slide {
-  height: 45vh;
+  height: 50vh;
   background: #333333;
   background-size: cover;
   background-position: center;
@@ -67,6 +67,7 @@ ul {
 #dot-nav > .active {
   background: #ffffff;
   color: black;
+  flex: 1.5;
 }
 
 #dot-nav > li {
@@ -85,8 +86,21 @@ ul {
 }
 
 #intro {
-  height: 45vh;
+  height: 40vh;
   background-position: center !important;
   background-size: cover !important;
+  position: relative;
 }
 
+#hero {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0px;
+}

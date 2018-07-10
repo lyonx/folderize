@@ -23,11 +23,19 @@ class Widget extends Component {
     });
     buildfire.datastore.search({}, "img", (err, result) => {
       if (err) throw err;
-      if(result.length === 0) return;
+      if (result.length === 0) return;
       console.log(result);
       document
         .getElementById("intro")
         .setAttribute("style", `background: url("${result[0].data[0]}");`);
+    });
+    buildfire.datastore.search({}, "text", (err, result) => {
+      if (err) throw err;
+      console.log(result);
+      if (!result[0]) return;
+      let hero = document.getElementById("hero");
+      hero.innerHTML = "";
+      hero.innerHTML = result[0].data.text;
     });
   }
 
@@ -36,13 +44,14 @@ class Widget extends Component {
       console.log(`onUpdate ============= `);
       console.log("update return:", plugin);
       if (plugin.tag === "plugin") {
+        if (!plugin.data) return;
         let temp = this.state.plugins;
         temp.push(plugin);
         this.setState({
           plugins: temp
         });
         this.renderPlugins();
-      } else {
+      } else if (plugin.tag === "img") {
         buildfire.datastore.search({}, "img", (err, result) => {
           if (err) throw err;
           console.log(result);
@@ -50,11 +59,28 @@ class Widget extends Component {
             .getElementById("intro")
             .setAttribute("style", `background: url("${result[0].data[0]}")`);
         });
+      } else if (plugin.tag === "text") {
+        buildfire.datastore.search({}, "text", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+          let hero = document.getElementById("hero");
+          hero.innerHTML = "";
+          hero.innerHTML = result[0].data.text;
+        });
+      } else if (plugin.tag === "heroColor") {
+        buildfire.datastore.search({}, "heroColor", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+          let hero = document.querySelector("#hero > h1");
+          hero.setAttribute("style", `${result[0].data.color.colorCSS}`);
+        });
+      } else {
+        return;
       }
     });
   }
 
-  loryInit(c) {
+  loryInit() {
     document.addEventListener("DOMContentLoaded", function() {
       var simple = document.querySelector(".js_simple");
       console.log(simple);
@@ -161,7 +187,7 @@ class Widget extends Component {
     let slides = document.createElement("div");
     slides.classList.add("slides");
     slides.classList.add("js_slides");
-
+    if (plugins.length === 0) return;
     plugins.forEach(plugin => {
       let index = plugins.indexOf(plugin);
       // PLUGIN SLIDE
@@ -212,7 +238,9 @@ class Widget extends Component {
   render() {
     return (
       <div id="container">
-        <div id="intro" />
+        <div id="intro">
+          <div id="hero" />
+        </div>
         <div className="slider js_simple_dots simple" />
       </div>
     );

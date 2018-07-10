@@ -1,0 +1,12 @@
+.plugin {
+    display: flex !important; 
+}
+
+.title {
+    flex: 1 !important
+}
+
+.delete {
+    flex: 1;
+    max-width: 20px !important;
+}
