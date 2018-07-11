@@ -15,7 +15,7 @@ class Widget extends Component {
   datastoreFetch() {
     buildfire.datastore.search({}, "plugin", (err, result) => {
       if (err) throw err;
-      this.setState({plugins: []});
+      this.setState({ plugins: [] });
       let temp = this.state.plugins;
       result.forEach(plugin => temp.push(plugin));
       this.setState({
@@ -43,8 +43,7 @@ class Widget extends Component {
     buildfire.datastore.onUpdate(snapshot => {
       console.log("update return:", snapshot);
       if (snapshot.tag === "plugin") {
-        if (!snapshot.data) 
-        {
+        if (!snapshot.data) {
           this.datastoreFetch();
           return;
         }
@@ -145,7 +144,6 @@ class Widget extends Component {
       enableMouseEvents: true
     });
   }
-  
 
   renderPlugins() {
     console.count("render");
