@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 
+let buildfire = window.buildfire;
+let tinymce = window.tinymce;
+
 class Content extends Component {
   constructor(props) {
     super(props);
@@ -11,16 +14,13 @@ class Content extends Component {
 
   addPlugin(instance) {
     buildfire.datastore.insert(instance, "plugin", (err, res) => {
-      if (err) console.log(err);
-      console.log(res);
+      if (err) throw err;
     });
-    // this.updateCarousel();
   }
 
   datastoreFetch() {
     buildfire.datastore.search({}, "plugin", (err, result) => {
       if (err) throw err;
-      console.log(result);
       this.setState({
         plugins: []
       });
@@ -37,7 +37,6 @@ class Content extends Component {
     let plugins = this.state.plugins;
     let pluginContainer = document.getElementById("plugins");
     pluginContainer.innerHTML = "";
-    console.log(plugins);
     if (plugins.length <= 0) {
       return;
     }
@@ -69,14 +68,13 @@ class Content extends Component {
       deleteBtn.setAttribute("id", `plugin${index}`);
       deleteBtn.setAttribute("index", index);
       deleteBtn.onclick = e => {
-        console.log(e);
         let index = document.getElementById(e.target.id).getAttribute("index");
 
         let target = this.state.plugins[index];
 
         buildfire.datastore.delete(target.id, "plugin", (err, result) => {
           if (err) throw err;
-          console.log(result);
+          console.warn(result);
         });
         this.datastoreFetch();
       };
@@ -109,42 +107,30 @@ class Content extends Component {
 
   clearData() {
     buildfire.datastore.search({}, "text", (err, res) => {
-      console.log(err, res);
       res.forEach(instance => {
-        console.log(instance.id);
         buildfire.datastore.delete(instance.id, "text", (err, result) => {
           if (err) throw err;
-          console.log(result);
         });
       });
     });
     buildfire.datastore.search({}, "plugin", (err, res) => {
-      console.log(err, res);
       res.forEach(instance => {
-        console.log(instance.id);
         buildfire.datastore.delete(instance.id, "plugin", (err, result) => {
           if (err) throw err;
-          console.log(result);
         });
       });
     });
     buildfire.datastore.search({}, "img", (err, res) => {
-      console.log(err, res);
       res.forEach(instance => {
-        console.log(instance.id);
         buildfire.datastore.delete(instance.id, "img", (err, result) => {
           if (err) throw err;
-          console.log(result);
         });
       });
     });
     buildfire.datastore.search({}, "heroColor", (err, res) => {
-      console.log(err, res);
       res.forEach(instance => {
-        console.log(instance.id);
         buildfire.datastore.delete(instance.id, "heroColor", (err, result) => {
           if (err) throw err;
-          console.log(result);
         });
       });
     });
@@ -152,47 +138,38 @@ class Content extends Component {
 
   logData() {
     buildfire.datastore.search({}, "img", (err, res) => {
-      if (err) console.log(err);
-      console.log(res);
+      if (err) throw err;
     });
     buildfire.datastore.search({}, "plugin", (err, res) => {
-      if (err) console.log(err);
-      console.log(res);
+      if (err) throw err;
     });
     buildfire.datastore.search({}, "heroColor", (err, res) => {
-      if (err) console.log(err);
-      console.log(res);
+      if (err) throw err;
     });
     buildfire.datastore.search({}, (err, res) => {
-      if (err) console.log(err);
-      console.log(res);
+      if (err) throw err;
     });
   }
 
   addImg() {
     buildfire.imageLib.showDialog({}, (err, result) => {
-      if (err) console.log(err);
-      console.log(result);
+      if (err) throw err;
       buildfire.datastore.search({}, "img", (err, res) => {
-        if (err) console.log(err);
-        console.log(res);
+        if (err) throw err;
         if (res[0]) {
-          console.log(res);
           buildfire.datastore.delete(res[0].id, "img", (err, status) => {
-            if (err) console.log(err);
-            console.log(status);
+            if (err) throw err;
           });
         }
         buildfire.datastore.insert(result.selectedFiles, "img", (err, res) => {
-          if (err) console.log(err);
-          console.log(res);
+          if (err) throw err;
         });
       });
     });
   }
 
   searchImgs() {
-    console.log(text);
+
   }
 
   colorPicker(target) {
@@ -203,22 +180,18 @@ class Content extends Component {
           { hideGradient: true },
           (err, res) => {
             if (err) throw err;
-            console.log(res);
           },
           (err, data) => {
             if (err) throw err;
             if (data.colorType === "solid") {
               buildfire.datastore.search({}, "heroColor", (err, res) => {
-                if (err) console.log(err);
-                console.log(res);
+                if (err) throw err;
                 if (res[0]) {
-                  console.log(res);
                   buildfire.datastore.delete(
                     res[0].id,
                     "heroColor",
                     (err, status) => {
-                      if (err) console.log(err);
-                      console.log(status);
+                      if (err) throw err;
                     }
                   );
                 }
@@ -226,8 +199,7 @@ class Content extends Component {
                   { color: data.solid },
                   "heroColor",
                   (err, res) => {
-                    if (err) console.log(err);
-                    console.log(res);
+                    if (err) throw err;
                   }
                 );
               });
@@ -248,30 +220,21 @@ class Content extends Component {
             editor.on("Change", e => {
               let text = tinymce.activeEditor.getContent();
               buildfire.datastore.search({}, "text", (err, res) => {
-                if (err) console.log(err);
-                console.log(res);
+                if (err) throw err;
                 if (res[0]) {
-                  console.log(res);
                   buildfire.datastore.delete(
                     res[0].id,
                     "text",
                     (err, status) => {
-                      if (err) console.log(err);
-                      console.log(status);
+                      if (err) throw err;
                     }
                   );
                 }
                 buildfire.datastore.insert({ text }, "text", (err, res) => {
                   if (err) throw err;
-                  console.log(res);
                 });
               });
             });
-            // buildfire.datastore.insert({text}, "text", (err, res) => {
-            //   if (err) throw err;
-            //   console.log(res);
-            // });
-            // });
           }
         }),
       3000
@@ -282,7 +245,7 @@ class Content extends Component {
   render() {
     return (
       <div>
-        <textarea name="content" onChange={() => console.log("changed")} />
+        <textarea name="content" />
         <ol id="plugins" />
         <button
           className="btn btn-default"
