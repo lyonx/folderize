@@ -1,52 +1,94 @@
 import React, { Component } from "react";
-import { log } from "util";
+
+let buildfire = window.buildfire;
+let tinymce = window.tinymce;
 
 class Content extends Component {
+  constructor(props) {
+    super(props);
+    this.logData = this.logData.bind(this);
+    this.state = {
+      plugins: []
+    };
+  }
+
   addPlugin(instance) {
-    console.log("instances", instance);
     buildfire.datastore.insert(instance, "plugin", (err, res) => {
-      if (err) console.log(err);
-      console.log(res);
+      if (err) throw err;
     });
   }
 
-  getPluginDetails(pluginsInfo, pluginIds) {
-    var returnPlugins = [];
-    var tempPlugin = null;
-    // for every plugin id
-    for (var id = 0; id < pluginIds.length; id++) {
-      // for each id
-      for (var i = 0; i < pluginsInfo.length; i++) {
-        tempPlugin = {};
-        if (pluginIds[id] == pluginsInfo[i].data.instanceId) {
-          tempPlugin.instanceId = pluginsInfo[i].data.instanceId;
-          if (pluginsInfo[i].data) {
-            tempPlugin.iconUrl = pluginsInfo[i].data.iconUrl;
-            tempPlugin.iconClassName = pluginsInfo[i].data.iconClassName;
-            tempPlugin.title = pluginsInfo[i].data.title;
-            tempPlugin.pluginTypeId = pluginsInfo[i].data.pluginType.token;
-            tempPlugin.folderName = pluginsInfo[i].data.pluginType.folderName;
-          } else {
-            tempPlugin.iconUrl = "";
-            tempPlugin.title = "[No title]";
-          }
-          returnPlugins.push(tempPlugin);
-        }
-        tempPlugin = null;
-      }
+  datastoreFetch() {
+    buildfire.datastore.search({}, "plugin", (err, result) => {
+      if (err) throw err;
+      this.setState({
+        plugins: []
+      });
+      let temp = this.state.plugins;
+      result.forEach(plugin => temp.push(plugin));
+      this.setState({
+        plugins: temp
+      });
+      this.renderPlugins();
+    });
+  }
+
+  renderPlugins() {
+    let plugins = this.state.plugins;
+    let pluginContainer = document.getElementById("plugins");
+    pluginContainer.innerHTML = "";
+    if (plugins.length <= 0) {
+      return;
     }
-    return returnPlugins;
+
+    plugins.forEach(plugin => {
+      let index = plugins.indexOf(plugin);
+
+      let pluginLi = document.createElement("li");
+      pluginLi.classList.add("carousel-items");
+      pluginLi.classList.add("hide-empty");
+      pluginLi.classList.add("draggable-list-view");
+      pluginLi.classList.add("margin-top-twenty");
+      pluginLi.classList.add("border-radius-four");
+      pluginLi.classList.add("border-grey");
+      pluginLi.classList.add("plugin");
+
+      let title = document.createElement("p");
+      title.innerHTML = plugin.data.title;
+      title.classList.add("title");
+      pluginLi.appendChild(title);
+      // pluginLi.innerHTML = plugin.data.title;
+
+      let deleteBtn = document.createElement("button");
+      deleteBtn.classList.add("btn-icon");
+      deleteBtn.classList.add("btn-delete-icon");
+      deleteBtn.classList.add("btn-danger");
+      deleteBtn.classList.add("transition-third");
+      deleteBtn.classList.add("delete");
+      deleteBtn.setAttribute("id", `plugin${index}`);
+      deleteBtn.setAttribute("index", index);
+      deleteBtn.onclick = e => {
+        let index = document.getElementById(e.target.id).getAttribute("index");
+
+        let target = this.state.plugins[index];
+
+        buildfire.datastore.delete(target.id, "plugin", (err, result) => {
+          if (err) throw err;
+          console.warn(result);
+        });
+        this.datastoreFetch();
+      };
+      pluginLi.appendChild(deleteBtn);
+      pluginContainer.appendChild(pluginLi);
+    });
   }
 
   prepPlugins(plugins) {
     // buildfire.datastore.search({}, "plugin", (err, result) => {
     //   if (err) throw err;
-    //   console.log(result);
-    console.log(plugins);
     plugins.forEach(plugin => {
       buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
         if (err) throw err;
-        console.log(inst);
         this.addPlugin(inst);
       });
     });
@@ -56,7 +98,7 @@ class Content extends Component {
   showPluginDialog() {
     buildfire.pluginInstance.showDialog({}, (err, instances) => {
       if (err) throw err;
-      console.log(instances);
+      if (!instances) return;
       if (instances.length > 0) {
         this.prepPlugins(instances);
       } else return;
@@ -64,85 +106,155 @@ class Content extends Component {
   }
 
   clearData() {
-    buildfire.datastore.search({}, "plugin", (err, data) => {
-      console.log(data);
-      data.forEach(instance => {
-        console.log(instance);
+    buildfire.datastore.search({}, "text", (err, res) => {
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "text", (err, result) => {
+          if (err) throw err;
+        });
+      });
+    });
+    buildfire.datastore.search({}, "plugin", (err, res) => {
+      res.forEach(instance => {
         buildfire.datastore.delete(instance.id, "plugin", (err, result) => {
           if (err) throw err;
-          console.log(result);
+        });
+      });
+    });
+    buildfire.datastore.search({}, "img", (err, res) => {
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "img", (err, result) => {
+          if (err) throw err;
+        });
+      });
+    });
+    buildfire.datastore.search({}, "heroColor", (err, res) => {
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "heroColor", (err, result) => {
+          if (err) throw err;
         });
       });
     });
   }
 
   logData() {
-    buildfire.datastore.search({}, (err, result) => {
+    buildfire.datastore.search({}, "img", (err, res) => {
       if (err) throw err;
-      console.log(result);
+    });
+    buildfire.datastore.search({}, "plugin", (err, res) => {
+      if (err) throw err;
+    });
+    buildfire.datastore.search({}, "heroColor", (err, res) => {
+      if (err) throw err;
+    });
+    buildfire.datastore.search({}, (err, res) => {
+      if (err) throw err;
     });
   }
 
-  initCarousel() {
-    var editor = new buildfire.components.carousel.editor("#carousel");
-    /// handle the loading
-    function loadItems(carouselItems) {
-      // create an instance and pass it the items if you don't have items yet just pass []
-      editor.loadItems(carouselItems);
-    }
-    /// call buildfire datastore to see if there are any previously saved items
-    buildfire.datastore.get(function(err, obj) {
-      if (err) alert("error");
-      else loadItems(obj.data.carouselItems);
-    });
-    /// save any changes in items
-    function save(items) {
-      console.log("saving...");
-      buildfire.datastore.save({ carouselItems: items }, function(e) {
-        if (e) alert("error");
-        else console.log("saved.");
+  addImg() {
+    buildfire.imageLib.showDialog({}, (err, result) => {
+      if (err) throw err;
+      buildfire.datastore.search({}, "img", (err, res) => {
+        if (err) throw err;
+        if (res[0]) {
+          buildfire.datastore.delete(res[0].id, "img", (err, status) => {
+            if (err) throw err;
+          });
+        }
+        buildfire.datastore.insert(result.selectedFiles, "img", (err, res) => {
+          if (err) throw err;
+        });
       });
-    }
-    // this method will be called when a new item added to the list
-    editor.onAddItems = function(items) {
-      save(editor.items);
-    };
-    // this method will be called when an item deleted from the list
-    editor.onDeleteItem = function(item, index) {
-      save(editor.items);
-    };
-    // this method will be called when you edit item details
-    editor.onItemChange = function(item) {
-      save(editor.items);
-    };
-    // this method will be called when you change the order of items
-    editor.onOrderChange = function(item, oldIndex, newIndex) {
-      save(editor.items);
-    };
+    });
   }
 
   searchImgs() {
-    e => {
-      e.preventDefault();
-      buildfire.datastore.search({}, "img", (err, res) => {
-        if (err) console.log(err);
-        console.log(res);
-      });
-    };
+
+  }
+
+  colorPicker(target) {
+    switch (target) {
+      case "hero": {
+        buildfire.colorLib.showDialog(
+          { colorType: "solid" },
+          { hideGradient: true },
+          (err, res) => {
+            if (err) throw err;
+          },
+          (err, data) => {
+            if (err) throw err;
+            if (data.colorType === "solid") {
+              buildfire.datastore.search({}, "heroColor", (err, res) => {
+                if (err) throw err;
+                if (res[0]) {
+                  buildfire.datastore.delete(
+                    res[0].id,
+                    "heroColor",
+                    (err, status) => {
+                      if (err) throw err;
+                    }
+                  );
+                }
+                buildfire.datastore.insert(
+                  { color: data.solid },
+                  "heroColor",
+                  (err, res) => {
+                    if (err) throw err;
+                  }
+                );
+              });
+            }
+          }
+        );
+      }
+    }
   }
 
   componentDidMount() {
-    this.initCarousel();
+    // this.initCarousel();
+    setTimeout(
+      () =>
+        tinymce.init({
+          selector: "textarea",
+          init_instance_callback: editor => {
+            editor.on("Change", e => {
+              let text = tinymce.activeEditor.getContent();
+              buildfire.datastore.search({}, "text", (err, res) => {
+                if (err) throw err;
+                if (res[0]) {
+                  buildfire.datastore.delete(
+                    res[0].id,
+                    "text",
+                    (err, status) => {
+                      if (err) throw err;
+                    }
+                  );
+                }
+                buildfire.datastore.insert({ text }, "text", (err, res) => {
+                  if (err) throw err;
+                });
+              });
+            });
+          }
+        }),
+      3000
+    );
+    this.datastoreFetch();
   }
 
   render() {
     return (
       <div>
+        <textarea name="content" />
+        <ol id="plugins" />
         <button
           className="btn btn-default"
           onClick={this.showPluginDialog.bind(this)}
         >
           Add Plugin
+        </button>
+        <button className="btn btn-default" onClick={this.addImg}>
+          Add Image
         </button>
         <button className="btn btn-default" onClick={this.logData}>
           Log Data
@@ -150,8 +262,11 @@ class Content extends Component {
         <button className="btn btn-default" onClick={this.clearData}>
           Clear Data
         </button>
-        <div id="carousel" />
-        <button onClick={this.searchImgs}>Search</button>
+        <button onClick={() => console.log(this.state)}>State</button>
+        <div id="plugins-carousel" />
+        <button onClick={() => this.colorPicker("hero")}>
+          Change Hero Text Color
+        </button>
       </div>
     );
   }

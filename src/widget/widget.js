@@ -1,49 +1,198 @@
 import React, { Component } from "react";
 // import Slides from "./components/Slides/slides.js";
+let buildfire = window.buildfire;
+let lory = window.lory;
 
 class Widget extends Component {
   constructor(props) {
     super(props);
-    this.plusDivs = this.plusDivs.bind(this);
-    this.currentDiv = this.currentDiv.bind(this);
     this.state = {
       plugins: [],
       slideIndex: 0
     };
   }
 
+  datastoreFetch() {
+    buildfire.datastore.search({}, "plugin", (err, result) => {
+      if (err) throw err;
+      this.setState({plugins: []});
+      let temp = this.state.plugins;
+      result.forEach(plugin => temp.push(plugin));
+      this.setState({
+        plugins: temp
+      });
+      this.renderPlugins();
+    });
+    buildfire.datastore.search({}, "img", (err, result) => {
+      if (err) throw err;
+      if (result.length === 0) return;
+      document
+        .getElementById("intro")
+        .setAttribute("style", `background: url("${result[0].data[0]}");`);
+    });
+    buildfire.datastore.search({}, "text", (err, result) => {
+      if (err) throw err;
+      if (!result[0]) return;
+      let hero = document.getElementById("hero");
+      hero.innerHTML = "";
+      hero.innerHTML = result[0].data.text;
+    });
+  }
+
+  datastoreListener() {
+    buildfire.datastore.onUpdate(snapshot => {
+      console.log("update return:", snapshot);
+      if (snapshot.tag === "plugin") {
+        if (!snapshot.data) 
+        {
+          this.datastoreFetch();
+          return;
+        }
+        let temp = this.state.plugins;
+        temp.push(snapshot);
+        this.setState({
+          plugins: temp
+        });
+        this.renderPlugins();
+      } else if (snapshot.tag === "img") {
+        buildfire.datastore.search({}, "img", (err, result) => {
+          if (err) throw err;
+          document
+            .getElementById("intro")
+            .setAttribute("style", `background: url("${result[0].data[0]}")`);
+        });
+      } else if (snapshot.tag === "text") {
+        buildfire.datastore.search({}, "text", (err, result) => {
+          if (err) throw err;
+          let hero = document.getElementById("hero");
+          hero.innerHTML = "";
+          hero.innerHTML = result[0].data.text;
+        });
+      } else if (snapshot.tag === "heroColor") {
+        buildfire.datastore.search({}, "heroColor", (err, result) => {
+          if (err) throw err;
+          let hero = document.querySelector("#hero > h1");
+          hero.setAttribute("style", `${result[0].data.color.colorCSS}`);
+        });
+      } else {
+        return;
+      }
+    });
+  }
+
+  loryInit() {
+    document.addEventListener("DOMContentLoaded", function() {
+      let simple = document.querySelector(".js_simple");
+      lory(simple, {
+        infinite: 1
+      });
+    });
+  }
+
+  loryFormat() {
+    let simple_dots = document.querySelector(".js_simple_dots");
+    let dot_count = this.state.plugins.length;
+    let dot_container = simple_dots.querySelector(".js_dots");
+
+    let dot_list_item = document.createElement("li");
+
+    function handleDotEvent(e) {
+      if (e.type === "before.lory.init") {
+        for (let i = 0, len = dot_count; i < len; i++) {
+          let clone = dot_list_item.cloneNode();
+          dot_container.appendChild(clone);
+        }
+        dot_container.childNodes[0].classList.add("active");
+      }
+      if (e.type === "after.lory.init") {
+        for (let i = 0, len = dot_count; i < len; i++) {
+          dot_container.childNodes[i].addEventListener("click", function(e) {
+            dot_navigation_slider.slideTo(
+              Array.prototype.indexOf.call(dot_container.childNodes, e.target)
+            );
+          });
+        }
+      }
+      if (e.type === "after.lory.slide") {
+        for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
+          dot_container.childNodes[i].classList.remove("active");
+        }
+        dot_container.childNodes[e.detail.currentSlide - 1].classList.add(
+          "active"
+        );
+      }
+      if (e.type === "on.lory.resize") {
+        for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
+          dot_container.childNodes[i].classList.remove("active");
+        }
+        dot_container.childNodes[0].classList.add("active");
+      }
+    }
+    simple_dots.addEventListener("before.lory.init", handleDotEvent);
+    simple_dots.addEventListener("after.lory.init", handleDotEvent);
+    simple_dots.addEventListener("after.lory.slide", handleDotEvent);
+    simple_dots.addEventListener("on.lory.resize", handleDotEvent);
+
+    setTimeout(() => {
+      let dot_tabs = simple_dots.querySelector(".js_dots").childNodes;
+      for (let i = 0; i < dot_tabs.length; i++) {
+        dot_tabs[i].innerHTML = this.state.plugins[i].data.title;
+      }
+    }, 1);
+
+    let dot_navigation_slider = lory(simple_dots, {
+      infinite: 1,
+      enableMouseEvents: true
+    });
+  }
+
   renderPlugins() {
+    console.count("render");
     let plugins = this.state.plugins;
-    if (plugins.length === 0) return console.log("no plugins");
-    // TARGET CONTAINERS
-    var pluginsContainer = document.getElementById("pluginsContainer");
-    let pages = document.getElementById("pagination");
-    pluginsContainer.innerHTML = "";
-    pages.innerHTML = "";
-    // LOOP THROUGH PLUGINS
+    console.table(plugins);
+    if (plugins.length <= 0) {
+      return;
+    }
+    // QUERY SELECTORS
+    let div = document.getElementById("container");
+
+    // MAIN FRAMEWORK
+    let slider = document.querySelector(".js_simple_dots");
+    slider.innerHTML = "";
+    let dot_container = document.createElement("ul");
+    dot_container.classList.add("js_dots");
+    dot_container.classList.add("dots");
+    dot_container.setAttribute("id", "dot-nav");
+    slider.appendChild(dot_container);
+
+    let preFrame = document.querySelector(".js_frame");
+    let frame;
+    if (preFrame) {
+      preFrame.innerHTML = "";
+      frame = preFrame;
+    } else {
+      frame = document.createElement("div");
+      frame.classList.add("frame");
+      frame.classList.add("js_frame");
+    }
+
+    let slides = document.createElement("div");
+    slides.classList.add("slides");
+    slides.classList.add("js_slides");
+    if (plugins.length === 0) return;
     plugins.forEach(plugin => {
-      // DEFINE INDEX
       let index = plugins.indexOf(plugin);
-      // PLUGIN CARD
-      let panel = document.createElement("div");
-      panel.classList.add("panel");
-      panel.classList.add("slide");
-      // CARD IMG
-      let img = document.createElement("img");
-      img.classList.add("card-img");
-      img.setAttribute("index", index);
-      img.setAttribute("id", `plugin${index}`);
-      img.setAttribute("src", plugin.data.iconUrl);
-      // PLUGIN CARD BODY
-      let body = document.createElement("div");
-      body.classList.add("panel-body");
-      body.setAttribute("id", `plugin${index}`);
-      body.setAttribute("index", index);
-      // CLICK NAV HANDLER
-      body.onclick = e => {
-        console.log(e.target);
+      // PLUGIN SLIDE
+      let slide = document.createElement("li");
+      slide.classList.add("js_slide");
+      slide.setAttribute("index", index);
+      slide.setAttribute("id", `plugin${index}`);
+      slide.setAttribute(
+        "style",
+        `background-image: url("${plugin.data.iconUrl}`
+      );
+      slide.onclick = e => {
         let index = document.getElementById(e.target.id).getAttribute("index");
-        console.log(index);
 
         let target = this.state.plugins[index].data;
 
@@ -56,158 +205,32 @@ class Widget extends Component {
 
         buildfire.navigation.navigateTo(pluginData);
       };
-      // // PLUGIN TITLE
-      // let title = document.createElement("h5");
-      // title.classList.add("panel-heading");
-      // title.setAttribute("index", index);
-      // title.setAttribute("id", `plugin${index}`);
-      // title.innerHTML = plugin.data.title;
-      // ASSEMBLY
-      // body.appendChild(title);
-      body.appendChild(img);
-      panel.appendChild(body);
-      pluginsContainer.appendChild(panel);
-      // PAGINATION
-      let page = document.createElement("div");
-      let pageTitle = document.createElement("p");
-      pageTitle.innerHTML = plugin.data.title;
-      pageTitle.classList.add("text-center");
-      page.appendChild(pageTitle);
-      page.classList.add("page");
-      page.classList.add("demo");
-      page.setAttribute("value", index + 1);
-      pages.appendChild(page);
-
-      let hammertime = new Hammer(panel);
-      // hammertime.get("pan").set({ direction: Hammer.DIRECTION_HORIZONTAL });
-      hammertime.get("pan").set({
-        direction: Hammer.DIRECTION_HORIZONTAL,
-        threshold: "10"
-      });
-
-      hammertime.on("swipe", e => {
-        console.log(e.direction);
-        switch (e.direction) {
-          case 4:
-            {
-              this.plusDivs(-1);
-            }
-            break;
-          case 2:
-            {
-              this.plusDivs(1);
-            }
-            break;
-        }
-      });
+      slides.appendChild(slide);
+      // dot_navs.appendChild(dot);
     });
-    this.plusDivs(1);
-  }
 
-  pluginFetch() {
-    buildfire.datastore.search({}, "plugin", (err, result) => {
-      if (err) throw err;
-      console.log(result);
-      let temp = this.state.plugins;
-      result.forEach(plugin => temp.push(plugin));
-      this.setState({
-        plugins: temp
-      });
-      this.renderPlugins();
-    });
-  }
+    // DOT NAVS
 
-  pluginListener() {
-    buildfire.datastore.onUpdate(plugin => {
-      console.log(`onUpdate ============= `);
-      console.log("update return:", plugin);
-      let temp = this.state.plugins;
-      temp.push(plugin);
-      this.setState({
-        plugins: temp
-      });
-      this.renderPlugins();
-    });
-  }
+    // assembly
+    frame.appendChild(slides);
+    slider.appendChild(frame);
+    div.appendChild(slider);
 
-  plusDivs(e) {
-    let n;
-    // IF INDEX IS PASSED DIRECTLY SET N TO INDEX
-    if (typeof e === "number") {
-      console.log(e);
-      n = e;
-    } else {
-      // OTHERWISE FETCH INDEX
-      n = parseInt(e.target.value);
-    }
-    let index = this.state.slideIndex;
-    console.log(index, n);
-    let newIndex = index + n;
-    this.setState({ slideIndex: newIndex });
-    this.showDivs(parseInt(this.state.slideIndex));
-  }
-
-  showDivs(n) {
-    let index = this.state.slideIndex;
-    var i;
-    let x = document.getElementsByClassName("slide");
-    let dots = document.getElementsByClassName("demo");
-    if (n > x.length) {
-      index = 1;
-      this.setState({ slideIndex: index });
-    }
-    if (n < 1) {
-      index = x.length;
-      this.setState({ slideIndex: index });
-    }
-    for (i = 0; i < x.length; i++) {
-      x[i].style.display = "none";
-    }
-    for (i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" tab-active", "");
-    }
-    x[index - 1].style.display = "block";
-    dots[index - 1].className += " tab-active";
-  }
-
-  currentDiv(e) {
-    let n = e.target.value;
-    let index = this.state.slideIndex;
-    this.setState({ slideIndex: index });
-    this.showDivs((index = n));
+    this.loryFormat();
   }
 
   componentDidMount() {
-    this.pluginFetch();
-    this.pluginListener();
-    ///create new instance of buildfire carousel viewer
-    var view = new buildfire.components.carousel.view("#carousel", []);
-    /// load items
-    function loadItems(carouselItems) {
-      // create an instance and pass it the items if you don't have items yet just pass []
-      view.loadItems(carouselItems);
-    }
-    /// load any previously saved items
-    buildfire.datastore.get(function(err, obj) {
-      console.log(obj);
-      if (err) alert("error");
-      else loadItems(obj.data.carouselItems);
-    });
-    /// handle any updates by reloading
-    buildfire.datastore.onUpdate(function(e) {
-      console.log(e.data);
-      loadItems(e.data.carouselItems);
-    });
+    this.datastoreFetch();
+    this.datastoreListener();
   }
 
   render() {
     return (
       <div id="container">
-        <div id="carousel" />
-        <div id="slideshow">
-          <div id="pagination" />
+        <div id="intro">
+          <div id="hero" />
         </div>
-        <div id="pluginsContainer" />
+        <div className="slider js_simple_dots simple" />
       </div>
     );
   }
