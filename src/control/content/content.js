@@ -18,9 +18,17 @@ class Content extends Component {
     });
   }
 
+  datastoreListener() {
+    buildfire.datastore.onUpdate(snapshot => {
+      console.info("update return: ", snapshot);
+      this.datastoreFetch();
+    });
+  }
+
   datastoreFetch() {
     buildfire.datastore.search({}, "plugin", (err, result) => {
       if (err) throw err;
+      console.dir(result);
       this.setState({
         plugins: []
       });
@@ -33,7 +41,10 @@ class Content extends Component {
     });
   }
 
+  
+
   renderPlugins() {
+    console.count("content render");
     let plugins = this.state.plugins;
     let pluginContainer = document.getElementById("plugins");
     pluginContainer.innerHTML = "";
@@ -45,13 +56,15 @@ class Content extends Component {
       let index = plugins.indexOf(plugin);
 
       let pluginLi = document.createElement("li");
-      pluginLi.classList.add("carousel-items");
-      pluginLi.classList.add("hide-empty");
-      pluginLi.classList.add("draggable-list-view");
-      pluginLi.classList.add("margin-top-twenty");
-      pluginLi.classList.add("border-radius-four");
-      pluginLi.classList.add("border-grey");
-      pluginLi.classList.add("plugin");
+      // pluginLi.classList.add("carousel-items");
+      // pluginLi.classList.add("hide-empty");
+      // pluginLi.classList.add("draggable-list-view");
+      // pluginLi.classList.add("margin-top-twenty");
+      // pluginLi.classList.add("border-radius-four");
+      // pluginLi.classList.add("border-grey");
+      // pluginLi.classList.add("plugin");
+      pluginLi.classList.add("d-item");
+      pluginLi.classList.add("clearfix");
 
       let title = document.createElement("p");
       title.innerHTML = plugin.data.title;
@@ -168,10 +181,6 @@ class Content extends Component {
     });
   }
 
-  searchImgs() {
-
-  }
-
   colorPicker(target) {
     switch (target) {
       case "hero": {
@@ -210,63 +219,64 @@ class Content extends Component {
     }
   }
 
-  componentDidMount() {
-    // this.initCarousel();
-    setTimeout(
-      () =>
-        tinymce.init({
-          selector: "textarea",
-          init_instance_callback: editor => {
-            editor.on("Change", e => {
-              let text = tinymce.activeEditor.getContent();
-              buildfire.datastore.search({}, "text", (err, res) => {
+  mceInit() {
+    tinymce.init({
+      selector: "textarea",
+      init_instance_callback: editor => {
+        editor.on("Change", e => {
+          let text = tinymce.activeEditor.getContent();
+          buildfire.datastore.search({}, "text", (err, res) => {
+            if (err) throw err;
+            if (res[0]) {
+              buildfire.datastore.delete(res[0].id, "text", (err, status) => {
                 if (err) throw err;
-                if (res[0]) {
-                  buildfire.datastore.delete(
-                    res[0].id,
-                    "text",
-                    (err, status) => {
-                      if (err) throw err;
-                    }
-                  );
-                }
-                buildfire.datastore.insert({ text }, "text", (err, res) => {
-                  if (err) throw err;
-                });
               });
+            }
+            buildfire.datastore.insert({ text }, "text", (err, res) => {
+              if (err) throw err;
             });
-          }
-        }),
-      3000
-    );
+          });
+        });
+      }
+    });
+  }
+
+  componentDidMount() {
     this.datastoreFetch();
+    this.datastoreListener();
+  }
+
+  componentDidUpdate() {
+    this.mceInit();
   }
 
   render() {
     return (
       <div>
         <textarea name="content" />
-        <ol id="plugins" />
-        <button
-          className="btn btn-default"
-          onClick={this.showPluginDialog.bind(this)}
-        >
-          Add Plugin
-        </button>
-        <button className="btn btn-default" onClick={this.addImg}>
-          Add Image
-        </button>
-        <button className="btn btn-default" onClick={this.logData}>
-          Log Data
-        </button>
-        <button className="btn btn-default" onClick={this.clearData}>
-          Clear Data
-        </button>
-        <button onClick={() => console.log(this.state)}>State</button>
-        <div id="plugins-carousel" />
-        <button onClick={() => this.colorPicker("hero")}>
-          Change Hero Text Color
-        </button>
+        <div>
+          <ol id="plugins" />
+          <button
+            className="btn btn-default"
+            onClick={this.showPluginDialog.bind(this)}
+          >
+            Add Plugin
+          </button>
+          <button className="btn btn-default" onClick={this.addImg}>
+            Add Image
+          </button>
+          <button className="btn btn-default" onClick={this.logData}>
+            Log Data
+          </button>
+          <button className="btn btn-default" onClick={this.clearData}>
+            Clear Data
+          </button>
+          <button onClick={() => console.log(this.state)}>State</button>
+          <div id="plugins-carousel" />
+          <button onClick={() => this.colorPicker("hero")}>
+            Change Hero Text Color
+          </button>
+        </div>
       </div>
     );
   }

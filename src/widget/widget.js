@@ -145,6 +145,7 @@ class Widget extends Component {
       enableMouseEvents: true
     });
   }
+  
 
   renderPlugins() {
     console.count("render");
