@@ -3,6 +3,12 @@ import React, { Component } from "react";
 let buildfire = window.buildfire;
 let lory = window.lory;
 
+/* 
+notes:
+fix issue where array outputted by getPluginInstance returns length[0] 
+
+*/
+
 class Widget extends Component {
   constructor(props) {
     super(props);
@@ -13,16 +19,7 @@ class Widget extends Component {
   }
 
   datastoreFetch() {
-    buildfire.datastore.search({}, "plugin", (err, result) => {
-      if (err) throw err;
-      this.setState({ plugins: [] });
-      let temp = this.state.plugins;
-      result.forEach(plugin => temp.push(plugin));
-      this.setState({
-        plugins: temp
-      });
-      this.renderPlugins();
-    });
+    this.getPlugins();
     buildfire.datastore.search({}, "img", (err, result) => {
       if (err) throw err;
       if (result.length === 0) return;
@@ -39,20 +36,52 @@ class Widget extends Component {
     });
   }
 
+  getPlugins() {
+    buildfire.datastore.search({}, "plugins", (err, result) => {
+      if (err) throw err;
+      console.warn(result);
+      this.setState({ plugins: [] });
+      console.log(typeof this.state.plugins);
+      let plugins = this.state.plugins;
+      plugins = result[0].data.plugins;
+      let temp = [];
+      let test = ["hi", "world"];
+      console.log(test);
+      console.log(typeof temp);
+      plugins.forEach(plugin => {
+        console.log(plugin);
+        buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
+          if (err) throw err;
+          temp.push(inst);
+        });
+      });
+      console.dir(temp);
+      console.log(temp[0]);
+      // result.forEach(plugin => {
+      //   console.log(plugin);
+      //   // 
+      // });
+      this.setState({
+        plugins: plugins
+      });
+      this.renderPlugins();
+    });
+  }
+
   datastoreListener() {
     buildfire.datastore.onUpdate(snapshot => {
       console.log("update return:", snapshot);
-      if (snapshot.tag === "plugin") {
-        if (!snapshot.data) {
-          this.datastoreFetch();
-          return;
-        }
-        let temp = this.state.plugins;
-        temp.push(snapshot);
-        this.setState({
-          plugins: temp
-        });
-        this.renderPlugins();
+      if (snapshot.status === "updated") {
+        // if (!snapshot.data) {
+          this.getPlugins();
+          // return;
+        // }
+        // let temp = this.state.plugins;
+        // temp.push(snapshot);
+        // this.setState({
+        //   plugins: temp
+        // });
+        // this.renderPlugins();
       } else if (snapshot.tag === "img") {
         buildfire.datastore.search({}, "img", (err, result) => {
           if (err) throw err;
@@ -70,7 +99,7 @@ class Widget extends Component {
       } else if (snapshot.tag === "heroColor") {
         buildfire.datastore.search({}, "heroColor", (err, result) => {
           if (err) throw err;
-          let hero = document.querySelector("#hero > h1");
+          let hero = document.querySelector("#hero");
           hero.setAttribute("style", `${result[0].data.color.colorCSS}`);
         });
       } else {
@@ -135,7 +164,7 @@ class Widget extends Component {
     setTimeout(() => {
       let dot_tabs = simple_dots.querySelector(".js_dots").childNodes;
       for (let i = 0; i < dot_tabs.length; i++) {
-        dot_tabs[i].innerHTML = this.state.plugins[i].data.title;
+        dot_tabs[i].innerHTML = this.state.plugins[i].title;
       }
     }, 1);
 
@@ -188,13 +217,13 @@ class Widget extends Component {
       slide.setAttribute("id", `plugin${index}`);
       slide.setAttribute(
         "style",
-        `background-image: url("${plugin.data.iconUrl}`
+        `background-image: url("${plugin.iconUrl}`
       );
       slide.onclick = e => {
         let index = document.getElementById(e.target.id).getAttribute("index");
 
-        let target = this.state.plugins[index].data;
-
+        let target = this.state.plugins[index];
+        console.log(target);
         let pluginData = {
           pluginId: target.pluginTypeId,
           instanceId: target.instanceId,
