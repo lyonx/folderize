@@ -4,310 +4,442 @@ let buildfire = window.buildfire;
 let tinymce = window.tinymce;
 
 class Content extends Component {
-   constructor(props) {
-      super(props);
-      this.handleChange = this.handleChange.bind(this);
-      this.logData = this.logData.bind(this);
-      this.addImg = this.addImg.bind(this);
-      this.state = {
-         plugins: null,
-         text: "",
-         img: ""
-      };
-   }
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.logData = this.logData.bind(this);
+    this.addImg = this.addImg.bind(this);
+    this.state = {
+      plugins: null,
+      text: "",
+      img: ""
+    };
+  }
 
-   syncData() {
-      console.warn("sync");
-      buildfire.datastore.get("master", (err, response) => {
-         if (err) throw err;
-         console.log(response);
-         if (!response.id) {
-            buildfire.datastore.insert(this.state, "master", true, (err, status) => {
-               if (err) {
-                  console.log("insert err");
-                  throw err;
-               }
-               console.log(status);
-            });
-         } else if (this.state.plugins === null) {
-            this.setState({
-               plugins: response.data.plugins,
-               text: response.data.text,
-               img: response.data.img
-            });
-         } else {
-            buildfire.datastore.update(response.id, this.state, "master", (err, status) => {
-               if (err) throw err;
-               console.log(status.data, this.state);
-               console.log(status.data.text === this.state.text);
-               console.log(status.data.plugins === this.state.plugins);
+  // syncData() {
+  //   console.warn("sync");
+  //   buildfire.datastore.get("master", (err, response) => {
+  //     if (err) throw err;
+  //     if (!response.id) {
+  //       buildfire.datastore.insert(
+  //         this.state,
+  //         "master",
+  //         true,
+  //         (err, status) => {
+  //           if (err) {
+  //             console.log("insert err");
+  //             throw err;
+  //           }
+  //         }
+  //       );
+  //     } else if (this.state.plugins === null) {
+  //       this.setState({
+  //         plugins: response.data.plugins,
+  //         text: response.data.text,
+  //         img: response.data.img
+  //       });
+  //     } else {
+  //       buildfire.datastore.update(
+  //         response.id,
+  //         this.state,
+  //         "master",
+  //         (err, status) => {
+  //           if (err) throw err;
+  //         }
+  //       );
+  //     }
+  //   });
+  // }
 
-               console.log(status.data.img === this.state.img && status.data.text === this.state.text && status.data.plugins === this.state.plugins);
+  addPlugin(instance) {
+    buildfire.datastore.insert(instance, "plugin", (err, res) => {
+      if (err) throw err;
+    });
+  }
 
-               if (status.data === this.state) {
-                  this.setState({
-                     plugins: status.data.plugins,
-                     text: status.data.text,
-                     img: status.data.img
-                  });
-               }
-            });
-         }
+  prepPlugins(plugins) {
+    console.log(plugins);
+    let temp = [];
+    plugins.forEach(plugin => {
+      buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
+        if (err) throw err;
+        this.addPlugin(inst);
       });
-   }
+    });
+    // });
+  }
 
-   addPlugin(instance) {
-      buildfire.datastore.insert(instance, "plugin", (err, res) => {
-         if (err) throw err;
+  clearData() {
+    buildfire.datastore.search({}, "text", (err, res) => {
+      if (err) throw err;
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "text", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
       });
-   }
-
-   datastoreListener() {
-      buildfire.datastore.onUpdate(snapshot => {
-         console.info("update return: ", snapshot);
+    });
+    buildfire.datastore.search({}, "plugins", (err, res) => {
+      if (err) throw err;
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "plugins", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
       });
-   }
+    });
+    buildfire.datastore.search({}, "img", (err, res) => {
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "img", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
+      });
+    });
+    buildfire.datastore.search({}, "master", (err, res) => {
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "master", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
+      });
+    });
+  }
 
-   prepPlugins(plugins) {
-      console.log(plugins);
-      let temp = [];
-      plugins.forEach(plugin => {
-         buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
+  logData() {
+    buildfire.datastore.search({}, "img", (err, res) => {
+      if (err) throw err;
+      console.log("text", res);
+    });
+    buildfire.datastore.search({}, "text", (err, res) => {
+      if (err) throw err;
+      console.log("text", res);
+    });
+  }
+
+  addImg() {
+    buildfire.imageLib.showDialog({}, (err, result) => {
+      if (err) throw err;
+      buildfire.datastore.get("img", (err, response) => {
+        if (err) throw err;
+        console.log(response);
+        if (!response.id) {
+          buildfire.datastore.insert(
+            { img: result.selectedFiles[0] },
+            "img",
+            true,
+            (err, status) => {
+              if (err) {
+                console.log("insert err");
+                throw err;
+              }
+              console.log(status);
+            }
+          );
+        } else {
+          buildfire.datastore.update(
+            response.id,
+            { img: result.selectedFiles[0] },
+            "img",
+            (err, status) => {
+              if (err) throw err;
+              console.log(status);
+            }
+          );
+        }
+      });
+      // this.setState({ img: result.selectedFiles[0] });
+    });
+  }
+
+  colorPicker(target) {
+    switch (target) {
+      case "hero": {
+        buildfire.colorLib.showDialog(
+          { colorType: "solid" },
+          { hideGradient: true },
+          (err, res) => {
             if (err) throw err;
-            this.addPlugin(inst);
-         });
-      });
-      // });
-   }
-
-   clearData() {
-      buildfire.datastore.search({}, "text", (err, res) => {
-         if (err) throw err;
-         res.forEach(instance => {
-            buildfire.datastore.delete(instance.id, "text", (err, result) => {
-               if (err) throw err;
-               console.log(result);
-            });
-         });
-      });
-      buildfire.datastore.search({}, "plugins", (err, res) => {
-         if (err) throw err;
-         res.forEach(instance => {
-            buildfire.datastore.delete(instance.id, "plugins", (err, result) => {
-               if (err) throw err;
-               console.log(result);
-            });
-         });
-      });
-      buildfire.datastore.search({}, "img", (err, res) => {
-         res.forEach(instance => {
-            buildfire.datastore.delete(instance.id, "img", (err, result) => {
-               if (err) throw err;
-               console.log(result);
-            });
-         });
-      });
-      buildfire.datastore.search({}, "heroColor", (err, res) => {
-         res.forEach(instance => {
-            buildfire.datastore.delete(instance.id, "heroColor", (err, result) => {
-               if (err) throw err;
-               console.log(result);
-            });
-         });
-      });
-   }
-
-   logData() {
-
-      buildfire.datastore.search({}, "master", (err, res) => {
-         if (err) throw err;
-         console.log("text", res);
-      });
-
-      // buildfire.datastore.search({}, "text", (err, res) => {
-      //    if (err) throw err;
-      //    console.log("text", res);
-      // });
-      // buildfire.datastore.search({}, "img", (err, res) => {
-      //    if (err) throw err;
-      //    console.log("img", res);
-      // });
-      // buildfire.datastore.search({}, "plugins", (err, res) => {
-      //    if (err) throw err;
-      //    console.log("plugins: ", res);
-      // });
-      // buildfire.datastore.search({}, "heroColor", (err, res) => {
-      //   if (err) throw err;
-      //   console.log("color", res);
-      // });
-      // buildfire.datastore.search({}, (err, res) => {
-      //   if (err) throw err;
-      //   console.log("all", res);
-      // });
-   }
-
-   addImg() {
-      buildfire.imageLib.showDialog({}, (err, result) => {
-         if (err) throw err;
-
-         this.setState({ img: result.selectedFiles[0] });
-      });
-   }
-
-   colorPicker(target) {
-      switch (target) {
-         case "hero": {
-            buildfire.colorLib.showDialog(
-               { colorType: "solid" },
-               { hideGradient: true },
-               (err, res) => {
-                  if (err) throw err;
-               },
-               (err, data) => {
-                  if (err) throw err;
-                  if (data.colorType === "solid") {
-                     buildfire.datastore.search({}, "heroColor", (err, res) => {
-                        if (err) throw err;
-                        if (res[0]) {
-                           buildfire.datastore.delete(
-                              res[0].id,
-                              "heroColor",
-                              (err, status) => {
-                                 if (err) throw err;
-                                 console.log(status);
-                              }
-                           );
-                        }
-                        buildfire.datastore.insert(
-                           { color: data.solid },
-                           "heroColor",
-                           (err, res) => {
-                              if (err) throw err;
-                           }
-                        );
-                     });
+          },
+          (err, data) => {
+            if (err) throw err;
+            if (data.colorType === "solid") {
+              buildfire.datastore.search({}, "heroColor", (err, res) => {
+                if (err) throw err;
+                if (res[0]) {
+                  buildfire.datastore.delete(
+                    res[0].id,
+                    "heroColor",
+                    (err, status) => {
+                      if (err) throw err;
+                      console.log(status);
+                    }
+                  );
+                }
+                buildfire.datastore.insert(
+                  { color: data.solid },
+                  "heroColor",
+                  (err, res) => {
+                    if (err) throw err;
                   }
-               }
-            );
-         }
+                );
+              });
+            }
+          }
+        );
       }
-   }
+    }
+  }
 
-   mceInit() {
-      tinymce.init({
-         selector: "textarea",
-         init_instance_callback: editor => {
-            editor.on("Change", e => {
-               let text = tinymce.activeEditor.getContent();
-               this.setState({ text: text });
-               // buildfire.datastore.search({}, "text", (err, res) => {
-               //    if (err) throw err;
-               //    console.log(res);
-               //    if (res[0]) {
-               //       buildfire.datastore.delete(res[0].id, "text", (err, status) => {
-               //          if (err) throw err;
-               //          console.log(status);
-               //       });
-               //    }
-               //    buildfire.datastore.insert({ text }, "text", (err, res) => {
-               //       if (err) throw err;
-               //    });
-               // });
-            });
-         }
-      });
-   }
-
-   initSortable() {
-      let plugins = new buildfire.components.pluginInstance.sortableList(
-         "#plugins",
-         [],
-         { showIcon: true, confirmDeleteItem: false },
-         undefined,
-         undefined,
-         { itemEditable: true, navigationCallback: () => console.log("nav cb") }
-      );
-
-      buildfire.datastore.get("master", (err, response) => {
-         if (err) throw err;
-         console.log(response);
-         plugins.loadItems(response.data.plugins, null);
-      });
-
-      plugins.loadItems(this.state.plugins, null);
-
-      plugins.onAddItems = () => {
-         this.setState({ plugins: plugins.items });
-      };
-
-      plugins.onDeleteItem = () => {
-         this.setState({ plugins: plugins.items });
-      };
-
-      plugins.onOrderChange = () => {
-         this.setState({ plugins: plugins.items });
-      };
-   }
-
-   toggleHero(checked) {
-      if (checked) {
-         let intro = document.getElementById("intro");
-         intro.setAttribute("style", "display: initial");
-      } else if (!checked) {
-         let intro = document.getElementById("intro");
-         intro.setAttribute("style", "display: none");
+  mceInit() {
+    tinymce.init({
+      selector: "textarea",
+      init_instance_callback: editor => {
+        editor.on("Change", e => {
+          let text = tinymce.activeEditor.getContent();
+          this.setState({ text: text });
+        });
       }
-   }
+    });
+  }
 
-   handleChange(event) {
-      this.setState({ text: event.target.value });
-   }
+  initSortable() {
+    let plugins = new buildfire.components.pluginInstance.sortableList(
+      "#plugins",
+      [],
+      { showIcon: true, confirmDeleteItem: false },
+      undefined,
+      undefined,
+      { itemEditable: true, navigationCallback: () => console.log("nav cb") }
+    );
 
-   componentDidMount() {
-      this.syncData();
-      this.datastoreListener();
-      this.initSortable();
-      this.mceInit();
-   }
+    buildfire.datastore.get("plugins", (err, response) => {
+      if (err) throw err;
+      console.log(response);
+      plugins.loadItems(response.data.plugins);
+      if (!response.id) {
+        buildfire.datastore.insert(
+          { plugins: plugins.items },
+          "plugins",
+          true,
+          (err, status) => {
+            if (err) {
+              console.log("insert err");
+              throw err;
+            }
+            console.log(status);
+          }
+        );
+      }
+    });
 
-   componentDidUpdate() {
-      setTimeout(() => {
-      this.syncData();
+    plugins.loadItems(plugins.items, null);
+
+    plugins.onAddItems = () => {
+      buildfire.datastore.get("plugins", (err, response) => {
+        if (err) throw err;
+        console.log(response);
+        if (!response.id) {
+          buildfire.datastore.insert(
+            { plugins: plugins.items },
+            "plugins",
+            true,
+            (err, status) => {
+              if (err) {
+                console.log("insert err");
+                throw err;
+              }
+              console.log(status);
+            }
+          );
+        } else {
+          buildfire.datastore.update(
+            response.id,
+            { plugins: plugins.items },
+            "plugins",
+            (err, status) => {
+              if (err) throw err;
+              console.log(status);
+            }
+          );
+        }
       });
-   }
+    };
 
-   render() {
-      return (
-         <div>
-            <input type="text" value={this.state.text} onChange={this.handleChange}></input>
-            <textarea name="content" />
-            <label className="switch">
-               <input
-                  type="checkbox"
-                  onInput={(e) => this.toggleHero(e.target.checked)}
-               />
-               <span className="slider round" />
-            </label>
-            <div>
-               <ol id="plugins" />
-               <button className="btn btn-default" onClick={this.addImg}>
-                  Add Image
+    plugins.onDeleteItem = () => {
+      buildfire.datastore.get("plugins", (err, response) => {
+        if (err) throw err;
+        console.log(response);
+        if (!response.id) {
+          buildfire.datastore.insert(
+            { plugins: plugins.items },
+            "plugins",
+            true,
+            (err, status) => {
+              if (err) {
+                console.log("insert err");
+                throw err;
+              }
+              console.log(status);
+            }
+          );
+        } else {
+          buildfire.datastore.update(
+            response.id,
+            { plugins: plugins.items },
+            "plugins",
+            (err, status) => {
+              if (err) throw err;
+              console.log(status);
+            }
+          );
+        }
+      });
+    };
+
+    plugins.onOrderChange = () => {
+      buildfire.datastore.get("plugins", (err, response) => {
+        if (err) throw err;
+        console.log(response);
+        if (!response.id) {
+          buildfire.datastore.insert(
+            { plugins: plugins.items },
+            "plugins",
+            true,
+            (err, status) => {
+              if (err) {
+                console.log("insert err");
+                throw err;
+              }
+              console.log(status);
+            }
+          );
+        } else {
+          buildfire.datastore.update(
+            response.id,
+            { plugins: plugins.items },
+            "plugins",
+            (err, status) => {
+              if (err) throw err;
+              console.log(status);
+            }
+          );
+        }
+      });
+    };
+  }
+
+  toggleHero(checked) {
+    if (checked) {
+      let intro = document.getElementById("intro");
+      intro.setAttribute("style", "display: initial");
+    } else if (!checked) {
+      let intro = document.getElementById("intro");
+      intro.setAttribute("style", "display: none");
+    }
+  }
+
+  handleChange(event) {
+    // this.setState({ text: event.target.value });
+    buildfire.datastore.get("text", (err, response) => {
+      if (err) throw err;
+      console.log(response);
+      if (!response.id) {
+        buildfire.datastore.insert(
+          { text: event.target.value },
+          "text",
+          true,
+          (err, status) => {
+            if (err) {
+              console.log("insert err");
+              throw err;
+            }
+            console.log(status);
+          }
+        );
+      } else {
+        buildfire.datastore.update(
+          response.id,
+          { text: event.target.value },
+          "text",
+          (err, status) => {
+            if (err) throw err;
+            console.log(status);
+          }
+        );
+      }
+    });
+  }
+
+  textInit() {
+    buildfire.datastore.get("text", (err, response) => {
+      if (err) throw err;
+      console.log(response);
+      document.getElementById("text").value = response.data.text;
+      if (!response.id) {
+        buildfire.datastore.insert(
+          { text: event.target.value },
+          "text",
+          true,
+          (err, status) => {
+            if (err) {
+              console.log("insert err");
+              throw err;
+            }
+            console.log(status);
+          }
+        );
+      }
+    });
+  }
+
+  componentDidMount() {
+    this.textInit();
+    this.initSortable();
+    this.mceInit();
+  }
+
+  componentDidUpdate() {
+    // this.syncData();
+  }
+
+  render() {
+    return (
+      <div>
+        <input
+          type="text"
+          // value={this.state.text}
+          onChange={this.handleChange}
+          id="text"
+        />
+        <textarea name="content" />
+        <label className="switch">
+          <input
+            type="checkbox"
+            onInput={e => this.toggleHero(e.target.checked)}
+          />
+          <span className="slider round" />
+        </label>
+        <div>
+          <ol id="plugins" />
+          <button className="btn btn-default" onClick={this.addImg}>
+            Add Image
           </button>
-               <button className="btn btn-default" onClick={this.logData}>
-                  Log Data
+          <button className="btn btn-default" onClick={this.logData}>
+            Log Data
           </button>
-               <button className="btn btn-default" onClick={this.clearData}>
-                  Clear Data
+          <button className="btn btn-default" onClick={this.clearData}>
+            Clear Data
           </button>
-               <button onClick={() => console.log(this.state)}>State</button>
-               <div id="plugins-carousel" />
-               <button onClick={() => this.colorPicker("hero")}>
-                  Change Hero Text Color
+          <button onClick={() => console.log(this.state)}>State</button>
+          <div id="plugins-carousel" />
+          <button onClick={() => this.colorPicker("hero")}>
+            Change Hero Text Color
           </button>
-            </div>
-         </div>
-      );
-   }
+        </div>
+      </div>
+    );
+  }
 }
 
 export default Content;
