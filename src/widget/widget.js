@@ -1,13 +1,7 @@
 import React, { Component } from "react";
-// import Slides from "./components/Slides/slides.js";
 let buildfire = window.buildfire;
 let lory = window.lory;
 
-/* 
-notes:
-fix issue where array outputted by getPluginInstance returns length[0] 
-on text change plugins re fetch and render
-*/
 
 class Widget extends Component {
   constructor(props) {
@@ -19,33 +13,33 @@ class Widget extends Component {
   }
 
   datastoreFetch() {
-    this.getPlugins();
-    buildfire.datastore.search({}, "img", (err, result) => {
-      if (err) throw err;
-      if (result.length === 0) return;
-      document
-        .getElementById("intro")
-        .setAttribute("style", `background: url("${result[0].data[0]}");`);
-    });
-    buildfire.datastore.search({}, "text", (err, result) => {
-      if (err) throw err;
-      if (!result[0]) return;
-      let hero = document.getElementById("hero");
-      hero.innerHTML = "";
-      hero.innerHTML = result[0].data.text;
-    });
+     buildfire.datastore.get("master", (err, response) => {
+        if (err) throw err;
+      console.log(response);
+      this.getPlugins(response.data.plugins);
+      this.renderText(response.data.text);
+      this.renderImg(response.data.img);
+      this.setState({
+         plugins: response.data.plugins,
+         text: response.data.text,
+         img: response.data.img
+      });
+     });
   }
 
-  getPlugins() {
-    buildfire.datastore.search({}, "plugins", (err, result) => {
-      if (err) throw err;
+  getPlugins(result) {
+
+      console.warn(this.state.plugins);
       console.warn(result);
-      if (result.length === 0) return;
-      this.setState({ plugins: [] });
-      let plugins = this.state.plugins;
-      plugins = result[0].data.plugins;
+      if (this.state.plugins === result) {
+         console.log("render prevented");
+         debugger;
+         return;
+      }
+
+      let plugins = result;
       let temp = new Array(plugins.length);
-      console.log(typeof temp);
+      console.log(result);
       plugins.forEach(plugin => {
         buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
           if (err) throw err;
@@ -61,51 +55,37 @@ class Widget extends Component {
           }
         });
       });
-    });
+  }
+
+  renderText(text) {
+     
+     if (text === this.state.text) {
+        console.log("renderText prevented");
+        return;
+     }
+     let hero = document.getElementById("hero");
+      hero.innerHTML = "";
+      hero.innerHTML = text;
+  }
+
+  renderImg(img) {
+          if (img === this.state.img) {
+        console.log("renderImg prevented");
+        return;
+     }
+      document
+          .getElementById("intro")
+          .setAttribute("style", `background: url("${img}")`);
   }
 
   datastoreListener() {
-    buildfire.datastore.onUpdate(snapshot => {
-      console.log("update return:", snapshot);
-      if (snapshot.status === "updated") {
-        this.getPlugins();
-      } else if (snapshot.tag === "plugins") {
-        let plugins = this.state.plugins;
-        plugins = snapshot.data.plugins;
-        let temp = [];
-        plugins.forEach(plugin => {
-          buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
-            if (err) throw err;
-            let currentIndex = plugins.indexOf(plugin);
-            temp[currentIndex] = inst;
-            console.log(temp);
-            this.setState({
-              plugins: temp
-            });
-            console.log(temp.includes(undefined));
-            if (!temp.includes(undefined)) {
-              this.renderPlugins();
-            }
-          });
-        });
-      } else if (snapshot.tag === "img") {
-        document
-          .getElementById("intro")
-          .setAttribute("style", `background: url("${snapshot.data[0]}")`);
-      } else if (snapshot.tag === "text") {
-        if(!snapshot.data) return console.log("exception caught");
-        let hero = document.getElementById("hero");
-        hero.innerHTML = "";
-        hero.innerHTML = snapshot.data.text;
-      } else if (snapshot.tag === "heroColor") {
-        buildfire.datastore.search({}, "heroColor", (err, result) => {
-          if (err) throw err;
-          let hero = document.querySelector("#hero");
-          hero.setAttribute("style", `${result[0].data.color.colorCSS}`);
-        });
-      } else {
-        return;
-      }
+     console.log("listener active");
+    buildfire.datastore.onUpdate(response => {
+      console.log("update return:", response);
+      this.getPlugins(response.data.plugins);
+      // this.renderText(response.data.text);
+            this.renderImg(response.data.img);
+            this.setState({ text: response.data.text });
     });
   }
 
@@ -282,7 +262,9 @@ class Widget extends Component {
     return (
       <div id="container">
         <div id="intro">
-          <div id="hero" />
+          <h1 id="hero">
+          {this.state.text}
+          </h1>
         </div>
         <div className="slider js_simple_dots simple" />
       </div>
