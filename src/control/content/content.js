@@ -6,7 +6,6 @@ let tinymce = window.tinymce;
 class Content extends Component {
   constructor(props) {
     super(props);
-    this.handleChange = this.handleChange.bind(this);
     this.logData = this.logData.bind(this);
     this.addImg = this.addImg.bind(this);
     this.state = {
@@ -15,41 +14,6 @@ class Content extends Component {
       img: ""
     };
   }
-
-  // syncData() {
-  //   console.warn("sync");
-  //   buildfire.datastore.get("master", (err, response) => {
-  //     if (err) throw err;
-  //     if (!response.id) {
-  //       buildfire.datastore.insert(
-  //         this.state,
-  //         "master",
-  //         true,
-  //         (err, status) => {
-  //           if (err) {
-  //             console.log("insert err");
-  //             throw err;
-  //           }
-  //         }
-  //       );
-  //     } else if (this.state.plugins === null) {
-  //       this.setState({
-  //         plugins: response.data.plugins,
-  //         text: response.data.text,
-  //         img: response.data.img
-  //       });
-  //     } else {
-  //       buildfire.datastore.update(
-  //         response.id,
-  //         this.state,
-  //         "master",
-  //         (err, status) => {
-  //           if (err) throw err;
-  //         }
-  //       );
-  //     }
-  //   });
-  // }
 
   addPlugin(instance) {
     buildfire.datastore.insert(instance, "plugin", (err, res) => {
@@ -148,7 +112,6 @@ class Content extends Component {
           );
         }
       });
-      // this.setState({ img: result.selectedFiles[0] });
     });
   }
 
@@ -194,10 +157,63 @@ class Content extends Component {
   mceInit() {
     tinymce.init({
       selector: "textarea",
-      init_instance_callback: editor => {
-        editor.on("Change", e => {
+      setup: (editor) => {
+        editor.on("init", () => {
+          console.log("init");
           let text = tinymce.activeEditor.getContent();
-          this.setState({ text: text });
+          buildfire.datastore.get("text", (err, response) => {
+            if (err) throw err;
+            console.log(response);
+            if (!response.id) {
+              buildfire.datastore.insert(
+                { text: text },
+                "text",
+                true,
+                (err, status) => {
+                  if (err) {
+                    console.log("insert err");
+                    throw err;
+                  }
+                  console.log(status);
+                }
+              );
+            } else {
+              tinymce.activeEditor.insertContent(response.data.text);
+            }
+          });
+        });
+      },
+      init_instance_callback: editor => {
+        editor.on("NodeChange", e => {
+          let text = tinymce.activeEditor.getContent();
+          buildfire.datastore.get("text", (err, response) => {
+            if (err) throw err;
+            console.log(response);
+            if (!response.id) {
+              buildfire.datastore.insert(
+                { text: text },
+                "text",
+                true,
+                (err, status) => {
+                  if (err) {
+                    console.log("insert err");
+                    throw err;
+                  }
+                  console.log(status);
+                }
+              );
+            } else {
+              buildfire.datastore.update(
+                response.id,
+                { text: text },
+                "text",
+                (err, status) => {
+                  if (err) throw err;
+                  console.log(status);
+                }
+              );
+            }
+          });
         });
       }
     });
@@ -339,62 +355,7 @@ class Content extends Component {
     }
   }
 
-  handleChange(event) {
-    // this.setState({ text: event.target.value });
-    buildfire.datastore.get("text", (err, response) => {
-      if (err) throw err;
-      console.log(response);
-      if (!response.id) {
-        buildfire.datastore.insert(
-          { text: event.target.value },
-          "text",
-          true,
-          (err, status) => {
-            if (err) {
-              console.log("insert err");
-              throw err;
-            }
-            console.log(status);
-          }
-        );
-      } else {
-        buildfire.datastore.update(
-          response.id,
-          { text: event.target.value },
-          "text",
-          (err, status) => {
-            if (err) throw err;
-            console.log(status);
-          }
-        );
-      }
-    });
-  }
-
-  textInit() {
-    buildfire.datastore.get("text", (err, response) => {
-      if (err) throw err;
-      console.log(response);
-      document.getElementById("text").value = response.data.text;
-      if (!response.id) {
-        buildfire.datastore.insert(
-          { text: event.target.value },
-          "text",
-          true,
-          (err, status) => {
-            if (err) {
-              console.log("insert err");
-              throw err;
-            }
-            console.log(status);
-          }
-        );
-      }
-    });
-  }
-
   componentDidMount() {
-    this.textInit();
     this.initSortable();
     this.mceInit();
   }
@@ -406,12 +367,6 @@ class Content extends Component {
   render() {
     return (
       <div>
-        <input
-          type="text"
-          // value={this.state.text}
-          onChange={this.handleChange}
-          id="text"
-        />
         <textarea name="content" />
         <label className="switch">
           <input

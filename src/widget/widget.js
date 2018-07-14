@@ -232,7 +232,7 @@ class Widget extends Component {
       img.onclick = e => {
         let index = document.getElementById(e.target.id).getAttribute("index");
 
-        let target = this.state.plugins[index];
+        let target = plugins[index];
         let pluginData = {
           pluginId: target.pluginTypeId,
           instanceId: target.instanceId,
@@ -265,7 +265,7 @@ class Widget extends Component {
     return (
       <div id="container">
         <div id="intro">
-          <h1 id="hero">{this.state.text}</h1>
+          <div id="hero">{this.state.text}</div>
         </div>
         <div className="slider js_simple_dots simple" />
       </div>
