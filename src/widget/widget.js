@@ -6,7 +6,7 @@ let lory = window.lory;
 /* 
 notes:
 fix issue where array outputted by getPluginInstance returns length[0] 
-
+on text change plugins re fetch and render
 */
 
 class Widget extends Component {
@@ -40,31 +40,27 @@ class Widget extends Component {
     buildfire.datastore.search({}, "plugins", (err, result) => {
       if (err) throw err;
       console.warn(result);
+      if (result.length === 0) return;
       this.setState({ plugins: [] });
-      console.log(typeof this.state.plugins);
       let plugins = this.state.plugins;
       plugins = result[0].data.plugins;
-      let temp = [];
-      let test = ["hi", "world"];
-      console.log(test);
+      let temp = new Array(plugins.length);
       console.log(typeof temp);
       plugins.forEach(plugin => {
-        console.log(plugin);
         buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
           if (err) throw err;
-          temp.push(inst);
+          let currentIndex = plugins.indexOf(plugin);
+          temp[currentIndex] = inst;
+          console.log(temp);
+          this.setState({
+            plugins: temp
+          });
+          console.log(temp.includes(undefined));
+          if (!temp.includes(undefined)) {
+            this.renderPlugins();
+          }
         });
       });
-      console.dir(temp);
-      console.log(temp[0]);
-      // result.forEach(plugin => {
-      //   console.log(plugin);
-      //   // 
-      // });
-      this.setState({
-        plugins: plugins
-      });
-      this.renderPlugins();
     });
   }
 
@@ -72,30 +68,35 @@ class Widget extends Component {
     buildfire.datastore.onUpdate(snapshot => {
       console.log("update return:", snapshot);
       if (snapshot.status === "updated") {
-        // if (!snapshot.data) {
-          this.getPlugins();
-          // return;
-        // }
-        // let temp = this.state.plugins;
-        // temp.push(snapshot);
-        // this.setState({
-        //   plugins: temp
-        // });
-        // this.renderPlugins();
+        this.getPlugins();
+      } else if (snapshot.tag === "plugins") {
+        let plugins = this.state.plugins;
+        plugins = snapshot.data.plugins;
+        let temp = [];
+        plugins.forEach(plugin => {
+          buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
+            if (err) throw err;
+            let currentIndex = plugins.indexOf(plugin);
+            temp[currentIndex] = inst;
+            console.log(temp);
+            this.setState({
+              plugins: temp
+            });
+            console.log(temp.includes(undefined));
+            if (!temp.includes(undefined)) {
+              this.renderPlugins();
+            }
+          });
+        });
       } else if (snapshot.tag === "img") {
-        buildfire.datastore.search({}, "img", (err, result) => {
-          if (err) throw err;
-          document
-            .getElementById("intro")
-            .setAttribute("style", `background: url("${result[0].data[0]}")`);
-        });
+        document
+          .getElementById("intro")
+          .setAttribute("style", `background: url("${snapshot.data[0]}")`);
       } else if (snapshot.tag === "text") {
-        buildfire.datastore.search({}, "text", (err, result) => {
-          if (err) throw err;
-          let hero = document.getElementById("hero");
-          hero.innerHTML = "";
-          hero.innerHTML = result[0].data.text;
-        });
+        if(!snapshot.data) return console.log("exception caught");
+        let hero = document.getElementById("hero");
+        hero.innerHTML = "";
+        hero.innerHTML = snapshot.data.text;
       } else if (snapshot.tag === "heroColor") {
         buildfire.datastore.search({}, "heroColor", (err, result) => {
           if (err) throw err;
@@ -213,13 +214,38 @@ class Widget extends Component {
       // PLUGIN SLIDE
       let slide = document.createElement("li");
       slide.classList.add("js_slide");
-      slide.setAttribute("index", index);
-      slide.setAttribute("id", `plugin${index}`);
-      slide.setAttribute(
-        "style",
-        `background-image: url("${plugin.iconUrl}`
-      );
-      slide.onclick = e => {
+      // slide.setAttribute("index", index);
+      // slide.setAttribute("id", `plugin${index}`);
+      // CONTAINER
+      let container = document.createElement("div");
+      container.classList.add("container-fluid");
+      // ROW
+      let row = document.createElement("div");
+      row.classList.add("row");
+      // COL
+      let col = document.createElement("div");
+      col.classList.add("col-md-12");
+      col.classList.add("slide-col");
+      // WELL
+      let well = document.createElement("div");
+      well.classList.add("well");
+      // THUMBNAIL
+      let thumb = document.createElement("div");
+      thumb.classList.add("thumbnail");
+      // IMG
+      let img = document.createElement("img");
+      // CONTENT ASSEMBLY
+      slide.appendChild(container);
+      container.appendChild(row);
+      row.appendChild(col);
+      col.appendChild(well);
+      well.appendChild(thumb);
+      thumb.appendChild(img);
+      img.setAttribute("index", index);
+      img.setAttribute("id", `plugin${index}`);
+      img.classList.add("slide-img");
+      img.setAttribute("src", plugin.iconUrl);
+      img.onclick = e => {
         let index = document.getElementById(e.target.id).getAttribute("index");
 
         let target = this.state.plugins[index];

@@ -37,14 +37,15 @@ class Content extends Component {
   }
 
   clearData() {
-    // buildfire.datastore.search({}, "text", (err, res) => {
-    //   res.forEach(instance => {
-    //     buildfire.datastore.delete(instance.id, "text", (err, result) => {
-    //       if (err) throw err;
-    //       console.log(result);
-    //     });
-    //   });
-    // });
+    buildfire.datastore.search({}, "text", (err, res) => {
+      if (err) throw err;
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "text", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
+      });
+    });
     buildfire.datastore.search({}, "plugins", (err, res) => {
       if (err) throw err;
       res.forEach(instance => {
@@ -54,41 +55,45 @@ class Content extends Component {
         });
       });
     });
-    // buildfire.datastore.search({}, "img", (err, res) => {
-    //   res.forEach(instance => {
-    //     buildfire.datastore.delete(instance.id, "img", (err, result) => {
-    //       if (err) throw err;
-    //       console.log(result);
-    //     });
-    //   });
-    // });
-    // buildfire.datastore.search({}, "heroColor", (err, res) => {
-    //   res.forEach(instance => {
-    //     buildfire.datastore.delete(instance.id, "heroColor", (err, result) => {
-    //       if (err) throw err;
-    //       console.log(result);
-    //     });
-    //   });
-    // });
+    buildfire.datastore.search({}, "img", (err, res) => {
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "img", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
+      });
+    });
+    buildfire.datastore.search({}, "heroColor", (err, res) => {
+      res.forEach(instance => {
+        buildfire.datastore.delete(instance.id, "heroColor", (err, result) => {
+          if (err) throw err;
+          console.log(result);
+        });
+      });
+    });
   }
 
   logData() {
+    buildfire.datastore.search({}, "text", (err, res) => {
+      if (err) throw err;
+      console.log("text", res);
+    });
     buildfire.datastore.search({}, "img", (err, res) => {
       if (err) throw err;
-      console.log(res);
+      console.log("img", res);
     });
     buildfire.datastore.search({}, "plugins", (err, res) => {
       if (err) throw err;
-      console.log(res);
+      console.log("plugins: ", res);
     });
-    buildfire.datastore.search({}, "heroColor", (err, res) => {
-      if (err) throw err;
-      console.log(res);
-    });
-    buildfire.datastore.search({}, (err, res) => {
-      if (err) throw err;
-      console.log(res);
-    });
+    // buildfire.datastore.search({}, "heroColor", (err, res) => {
+    //   if (err) throw err;
+    //   console.log("color", res);
+    // });
+    // buildfire.datastore.search({}, (err, res) => {
+    //   if (err) throw err;
+    //   console.log("all", res);
+    // });
   }
 
   addImg() {
@@ -153,22 +158,19 @@ class Content extends Component {
       init_instance_callback: editor => {
         editor.on("Change", e => {
           let text = tinymce.activeEditor.getContent();
-          buildfire.datastore.searchAndUpdate(
-            {},
-            { text },
-            "text",
-            (err, res) => {
-              if (err) throw err;
-              if (res[0]) {
-                buildfire.datastore.delete(res[0].id, "text", (err, status) => {
-                  if (err) throw err;
-                });
-              }
-              buildfire.datastore.insert({ text }, "text", (err, res) => {
+          buildfire.datastore.search({}, "text", (err, res) => {
+            if (err) throw err;
+            console.log(res);
+            if (res[0]) {
+              buildfire.datastore.delete(res[0].id, "text", (err, status) => {
                 if (err) throw err;
+                console.log(status);
               });
             }
-          );
+            buildfire.datastore.insert({ text }, "text", (err, res) => {
+              if (err) throw err;
+            });
+          });
         });
       }
     });
@@ -184,16 +186,17 @@ class Content extends Component {
       { itemEditable: true, navigationCallback: () => console.log("nav cb") }
     );
 
-    buildfire.datastore.search({}, "plugins", (err, result) => {
+    buildfire.datastore.get("plugins", (err, result) => {
       if (err) throw err;
       console.log(result);
-      plugins.loadItems(result[0].data.plugins, null);
+      if (result.length === 0) return;
+      plugins.loadItems(result.data.plugins, null);
     });
 
     plugins.onAddItems = () => {
       console.log(plugins.items);
-      buildfire.datastore.searchAndUpdate(
-        {},
+      buildfire.datastore.save(
+        // {},
         { plugins: plugins.items },
         "plugins",
         (err, res) => {
@@ -205,8 +208,8 @@ class Content extends Component {
 
     plugins.onDeleteItem = () => {
       console.log(plugins);
-      buildfire.datastore.searchAndUpdate(
-        {},
+      buildfire.datastore.save(
+        // {},
         { plugins: plugins.items },
         "plugins",
         (err, res) => {
@@ -217,8 +220,8 @@ class Content extends Component {
     };
 
     plugins.onOrderChange = () => {
-      buildfire.datastore.searchAndUpdate(
-        {},
+      buildfire.datastore.save(
+        // {},
         { plugins: plugins.items },
         "plugins",
         (err, res) => {
@@ -227,6 +230,16 @@ class Content extends Component {
         }
       );
     };
+  }
+
+  toggleHero(checked) {
+    if (checked) {
+      let intro = document.getElementById("intro");
+      intro.setAttribute("style", "display: initial");
+    } else if (!checked) {
+      let intro = document.getElementById("intro");
+      intro.setAttribute("style", "display: none");
+    }
   }
 
   componentDidMount() {
@@ -239,6 +252,13 @@ class Content extends Component {
     return (
       <div>
         <textarea name="content" />
+        <label className="switch">
+          <input
+            type="checkbox"
+            onInput={(e) => this.toggleHero(e.target.checked)}
+          />
+          <span className="slider round" />
+        </label>
         <div>
           <ol id="plugins" />
           <button className="btn btn-default" onClick={this.addImg}>
