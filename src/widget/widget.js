@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-// import Slides from "./components/Slides/slides.js";
 let buildfire = window.buildfire;
 let lory = window.lory;
 
@@ -13,70 +12,85 @@ class Widget extends Component {
   }
 
   datastoreFetch() {
-    buildfire.datastore.search({}, "plugin", (err, result) => {
+    buildfire.datastore.get("img", (err, response) => {
       if (err) throw err;
-      this.setState({plugins: []});
-      let temp = this.state.plugins;
-      result.forEach(plugin => temp.push(plugin));
-      this.setState({
-        plugins: temp
+      this.renderImg(response.data.img);
+    });
+    buildfire.datastore.get("plugins", (err, response) => {
+      if (err) throw err;
+    this.getPlugins(response.data.plugins);
+    });
+    buildfire.datastore.get("text", (err, response) => {
+      if (err) throw err;
+      this.renderText(response.data.text);
+    });
+
+
+    // this.renderText(response.data.text);
+  }
+
+  getPlugins(result) {
+    console.warn(this.state.plugins);
+    console.warn(result);
+
+    
+    if (this.state.plugins === result) {
+      console.log("render prevented");
+      return;
+    }
+
+    let plugins = result;
+    let temp = new Array(plugins.length);
+    plugins.forEach(plugin => {
+      buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
+        if (err) throw err;
+        let currentIndex = plugins.indexOf(plugin);
+        temp[currentIndex] = inst;
+        // this.setState({
+        //   plugins: temp
+        // });
+        if (!temp.includes(undefined)) {
+          this.renderPlugins(temp);
+        }
       });
-      this.renderPlugins();
-    });
-    buildfire.datastore.search({}, "img", (err, result) => {
-      if (err) throw err;
-      if (result.length === 0) return;
-      document
-        .getElementById("intro")
-        .setAttribute("style", `background: url("${result[0].data[0]}");`);
-    });
-    buildfire.datastore.search({}, "text", (err, result) => {
-      if (err) throw err;
-      if (!result[0]) return;
-      let hero = document.getElementById("hero");
-      hero.innerHTML = "";
-      hero.innerHTML = result[0].data.text;
     });
   }
 
+  renderText(text) {
+    if (text === this.state.text) {
+      console.log("renderText prevented");
+      return;
+    }
+    let hero = document.getElementById("hero");
+    hero.innerHTML = "";
+    hero.innerHTML = text;
+  }
+
+  renderImg(img) {
+    if (img === this.state.img) {
+      console.log("renderImg prevented");
+      return;
+    }
+    document
+      .getElementById("intro")
+      .setAttribute("style", `background: url("${img}")`);
+  }
+
   datastoreListener() {
-    buildfire.datastore.onUpdate(snapshot => {
-      console.log("update return:", snapshot);
-      if (snapshot.tag === "plugin") {
-        if (!snapshot.data) 
-        {
-          this.datastoreFetch();
-          return;
-        }
-        let temp = this.state.plugins;
-        temp.push(snapshot);
-        this.setState({
-          plugins: temp
-        });
-        this.renderPlugins();
-      } else if (snapshot.tag === "img") {
-        buildfire.datastore.search({}, "img", (err, result) => {
-          if (err) throw err;
-          document
-            .getElementById("intro")
-            .setAttribute("style", `background: url("${result[0].data[0]}")`);
-        });
-      } else if (snapshot.tag === "text") {
-        buildfire.datastore.search({}, "text", (err, result) => {
-          if (err) throw err;
-          let hero = document.getElementById("hero");
-          hero.innerHTML = "";
-          hero.innerHTML = result[0].data.text;
-        });
-      } else if (snapshot.tag === "heroColor") {
-        buildfire.datastore.search({}, "heroColor", (err, result) => {
-          if (err) throw err;
-          let hero = document.querySelector("#hero > h1");
-          hero.setAttribute("style", `${result[0].data.color.colorCSS}`);
-        });
-      } else {
-        return;
+    console.log("listener active");
+    buildfire.datastore.onUpdate(response => {
+      console.log("update return:", response);
+      switch (response.tag) {
+        case "img": this.renderImg(response.data.img);
+        break;
+        case "plugins": this.getPlugins(response.data.plugins);
+        break;
+        case "text": this.renderText(response.data.text);
+        break;
       }
+      // this.getPlugins(response.data.plugins);
+      // this.renderImg(response.data.img);
+      // this.setState({ text: response.data.text });
     });
   }
 
@@ -89,9 +103,9 @@ class Widget extends Component {
     });
   }
 
-  loryFormat() {
+  loryFormat(plugins) {
     let simple_dots = document.querySelector(".js_simple_dots");
-    let dot_count = this.state.plugins.length;
+    let dot_count = plugins.length;
     let dot_container = simple_dots.querySelector(".js_dots");
 
     let dot_list_item = document.createElement("li");
@@ -136,7 +150,7 @@ class Widget extends Component {
     setTimeout(() => {
       let dot_tabs = simple_dots.querySelector(".js_dots").childNodes;
       for (let i = 0; i < dot_tabs.length; i++) {
-        dot_tabs[i].innerHTML = this.state.plugins[i].data.title;
+        dot_tabs[i].innerHTML = plugins[i].title;
       }
     }, 1);
 
@@ -146,10 +160,9 @@ class Widget extends Component {
     });
   }
 
-  renderPlugins() {
+  renderPlugins(plugins) {
     console.count("render");
-    let plugins = this.state.plugins;
-    console.table(plugins);
+    // let plugins = this.state.plugins;
     if (plugins.length <= 0) {
       return;
     }
@@ -185,17 +198,41 @@ class Widget extends Component {
       // PLUGIN SLIDE
       let slide = document.createElement("li");
       slide.classList.add("js_slide");
-      slide.setAttribute("index", index);
-      slide.setAttribute("id", `plugin${index}`);
-      slide.setAttribute(
-        "style",
-        `background-image: url("${plugin.data.iconUrl}`
-      );
-      slide.onclick = e => {
+      // slide.setAttribute("index", index);
+      // slide.setAttribute("id", `plugin${index}`);
+      // CONTAINER
+      let container = document.createElement("div");
+      container.classList.add("container-fluid");
+      // ROW
+      let row = document.createElement("div");
+      row.classList.add("row");
+      // COL
+      let col = document.createElement("div");
+      col.classList.add("col-md-12");
+      col.classList.add("slide-col");
+      // WELL
+      let well = document.createElement("div");
+      well.classList.add("well");
+      // THUMBNAIL
+      let thumb = document.createElement("div");
+      thumb.classList.add("thumbnail");
+      // IMG
+      let img = document.createElement("img");
+      // CONTENT ASSEMBLY
+      slide.appendChild(container);
+      container.appendChild(row);
+      row.appendChild(col);
+      col.appendChild(well);
+      well.appendChild(thumb);
+      thumb.appendChild(img);
+      img.setAttribute("index", index);
+      img.setAttribute("id", `plugin${index}`);
+      img.classList.add("slide-img");
+      img.setAttribute("src", plugin.iconUrl);
+      img.onclick = e => {
         let index = document.getElementById(e.target.id).getAttribute("index");
 
-        let target = this.state.plugins[index].data;
-
+        let target = plugins[index];
         let pluginData = {
           pluginId: target.pluginTypeId,
           instanceId: target.instanceId,
@@ -216,7 +253,7 @@ class Widget extends Component {
     slider.appendChild(frame);
     div.appendChild(slider);
 
-    this.loryFormat();
+    this.loryFormat(plugins);
   }
 
   componentDidMount() {
@@ -228,7 +265,7 @@ class Widget extends Component {
     return (
       <div id="container">
         <div id="intro">
-          <div id="hero" />
+          <div id="hero">{this.state.text}</div>
         </div>
         <div className="slider js_simple_dots simple" />
       </div>
