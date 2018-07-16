@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 let buildfire = window.buildfire;
 let lory = window.lory;
+let db = buildfire.datastore;
 
 class Widget extends Component {
   constructor(props) {
@@ -9,89 +10,6 @@ class Widget extends Component {
       plugins: [],
       slideIndex: 0
     };
-  }
-
-  datastoreFetch() {
-    buildfire.datastore.get("img", (err, response) => {
-      if (err) throw err;
-      this.renderImg(response.data.img);
-    });
-    buildfire.datastore.get("plugins", (err, response) => {
-      if (err) throw err;
-    this.getPlugins(response.data.plugins);
-    });
-    buildfire.datastore.get("text", (err, response) => {
-      if (err) throw err;
-      this.renderText(response.data.text);
-    });
-
-
-    // this.renderText(response.data.text);
-  }
-
-  getPlugins(result) {
-    console.warn(this.state.plugins);
-    console.warn(result);
-
-    
-    if (this.state.plugins === result) {
-      console.log("render prevented");
-      return;
-    }
-
-    let plugins = result;
-    let temp = new Array(plugins.length);
-    plugins.forEach(plugin => {
-      buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
-        if (err) throw err;
-        let currentIndex = plugins.indexOf(plugin);
-        temp[currentIndex] = inst;
-        // this.setState({
-        //   plugins: temp
-        // });
-        if (!temp.includes(undefined)) {
-          this.renderPlugins(temp);
-        }
-      });
-    });
-  }
-
-  renderText(text) {
-    if (text === this.state.text) {
-      console.log("renderText prevented");
-      return;
-    }
-    let hero = document.getElementById("hero");
-    hero.innerHTML = "";
-    hero.innerHTML = text;
-  }
-
-  renderImg(img) {
-    if (img === this.state.img) {
-      console.log("renderImg prevented");
-      return;
-    }
-    document
-      .getElementById("intro")
-      .setAttribute("style", `background: url("${img}")`);
-  }
-
-  datastoreListener() {
-    console.log("listener active");
-    buildfire.datastore.onUpdate(response => {
-      console.log("update return:", response);
-      switch (response.tag) {
-        case "img": this.renderImg(response.data.img);
-        break;
-        case "plugins": this.getPlugins(response.data.plugins);
-        break;
-        case "text": this.renderText(response.data.text);
-        break;
-      }
-      // this.getPlugins(response.data.plugins);
-      // this.renderImg(response.data.img);
-      // this.setState({ text: response.data.text });
-    });
   }
 
   loryInit() {
@@ -160,12 +78,8 @@ class Widget extends Component {
     });
   }
 
-  renderPlugins(plugins) {
-    console.count("render");
-    // let plugins = this.state.plugins;
-    if (plugins.length <= 0) {
-      return;
-    }
+  renderPages() {
+    let pages = this.state.pages;
     // QUERY SELECTORS
     let div = document.getElementById("container");
 
@@ -192,14 +106,13 @@ class Widget extends Component {
     let slides = document.createElement("div");
     slides.classList.add("slides");
     slides.classList.add("js_slides");
-    if (plugins.length === 0) return;
-    plugins.forEach(plugin => {
-      let index = plugins.indexOf(plugin);
+    if (pages.length === 0) return;
+
+    pages.forEach(page => {
+      console.log(page);
       // PLUGIN SLIDE
       let slide = document.createElement("li");
       slide.classList.add("js_slide");
-      // slide.setAttribute("index", index);
-      // slide.setAttribute("id", `plugin${index}`);
       // CONTAINER
       let container = document.createElement("div");
       container.classList.add("container-fluid");
@@ -213,35 +126,50 @@ class Widget extends Component {
       // WELL
       let well = document.createElement("div");
       well.classList.add("well");
-      // THUMBNAIL
-      let thumb = document.createElement("div");
-      thumb.classList.add("thumbnail");
-      // IMG
-      let img = document.createElement("img");
+      // CONTENT
+      let cont = document.createElement("div");
+      // cont.classList.add("");
+      // ROW
+      let content = document.createElement("div");
+      content.classList.add("row");
+      // HEADER
+      let header = document.createElement("div");
+      header.classList.add("col-md-12");
+      header.innerHTML = `
+        <div class="page-header">
+          <h1>${page.header}</h1>
+        </div>
+      `;
+      // DESCRIPTION
+      let desc = document.createElement("div");
+      desc.classList.add("col-md-12");
+
+      desc.innerHTML = `
+          <p>${page.desc}</p>
+        `;
+
       // CONTENT ASSEMBLY
       slide.appendChild(container);
       container.appendChild(row);
       row.appendChild(col);
       col.appendChild(well);
-      well.appendChild(thumb);
-      thumb.appendChild(img);
-      img.setAttribute("index", index);
-      img.setAttribute("id", `plugin${index}`);
-      img.classList.add("slide-img");
-      img.setAttribute("src", plugin.iconUrl);
-      img.onclick = e => {
-        let index = document.getElementById(e.target.id).getAttribute("index");
+      content.appendChild(header);
+      content.appendChild(desc);
 
-        let target = plugins[index];
-        let pluginData = {
-          pluginId: target.pluginTypeId,
-          instanceId: target.instanceId,
-          folderName: target._buildfire.pluginType.result[0].folderName,
-          title: target.title
-        };
-
-        buildfire.navigation.navigateTo(pluginData);
-      };
+      let plugins = page.plugins;
+      if (plugins) {
+        plugins.forEach(plugin => {
+          let div = document.createElement("div");
+          div.innerHTML = `
+                <img src="${plugin.iconUrl}" style="display: inherit; alt="...">
+          `;
+          content.appendChild(div);
+        });
+      }
+      cont.appendChild(content);
+      well.appendChild(cont);
+      // well.appendChild(pluginsDiv);
+      // thumb.appendChild(img);
       slides.appendChild(slide);
       // dot_navs.appendChild(dot);
     });
@@ -253,12 +181,54 @@ class Widget extends Component {
     slider.appendChild(frame);
     div.appendChild(slider);
 
-    this.loryFormat(plugins);
+    this.loryFormat(pages);
+  }
+
+  listener() {
+    db.onUpdate(snapshot => {
+      console.log(snapshot);
+      switch (snapshot.tag) {
+        case "pages": {
+          this.setState({ pages: snapshot.data.pages });
+          break;
+        }
+        default:
+          return;
+      }
+    });
+  }
+
+  fetch() {
+    db.get("pages", (err, response) => {
+      if (err) throw err;
+      console.log(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        this.setState({
+          pages: [
+            {
+              title: "new page",
+              header: "new page",
+              desc: "edit this page in the control"
+            }
+          ]
+        });
+      } else {
+        this.setState({ pages: response.data.pages });
+      }
+    });
+  }
+
+  componentDidUpdate() {
+    console.log(this.state);
+    this.renderPages();
   }
 
   componentDidMount() {
-    this.datastoreFetch();
-    this.datastoreListener();
+    this.fetch();
+    this.listener();
+    // this.datastoreFetch();
+    // this.datastoreListener();
   }
 
   render() {
