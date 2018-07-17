@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Page from "./components/Pages/Page";
 let buildfire = window.buildfire;
 let lory = window.lory;
 let db = buildfire.datastore;
@@ -6,38 +7,39 @@ let db = buildfire.datastore;
 class Widget extends Component {
   constructor(props) {
     super(props);
+    this.renderPages = this.renderPages.bind(this);
     this.state = {
+      pages: [],
       plugins: [],
       slideIndex: 0
     };
   }
 
-  loryInit() {
-    document.addEventListener("DOMContentLoaded", function() {
-      let simple = document.querySelector(".js_simple");
-      lory(simple, {
-        infinite: 1
-      });
-    });
-  }
+  loryFormat() {
+    console.count("formatter");
 
-  loryFormat(plugins) {
+    let pages = this.state.pages;
+    if (pages.length === 0) return;
     let simple_dots = document.querySelector(".js_simple_dots");
-    let dot_count = plugins.length;
+    let dot_count = pages.length;
     let dot_container = simple_dots.querySelector(".js_dots");
-
     let dot_list_item = document.createElement("li");
 
-    function handleDotEvent(e) {
+    const handleDotEvent = e => {
       if (e.type === "before.lory.init") {
+        if (pages.length != this.state.pages.length) return;
         for (let i = 0, len = dot_count; i < len; i++) {
           let clone = dot_list_item.cloneNode();
+          if (dot_container.childNodes.length >= pages.length) return;
+          // console.log(pages[i],  pages[0]);
           dot_container.appendChild(clone);
+          console.count("dot container");
         }
         dot_container.childNodes[0].classList.add("active");
       }
       if (e.type === "after.lory.init") {
         for (let i = 0, len = dot_count; i < len; i++) {
+          if (!dot_container.childNodes[i]) return;
           dot_container.childNodes[i].addEventListener("click", function(e) {
             dot_navigation_slider.slideTo(
               Array.prototype.indexOf.call(dot_container.childNodes, e.target)
@@ -59,7 +61,7 @@ class Widget extends Component {
         }
         dot_container.childNodes[0].classList.add("active");
       }
-    }
+    };
     simple_dots.addEventListener("before.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.slide", handleDotEvent);
@@ -68,7 +70,8 @@ class Widget extends Component {
     setTimeout(() => {
       let dot_tabs = simple_dots.querySelector(".js_dots").childNodes;
       for (let i = 0; i < dot_tabs.length; i++) {
-        dot_tabs[i].innerHTML = plugins[i].title;
+        if (!this.state.pages[i]) return;
+        dot_tabs[i].innerHTML = this.state.pages[i].title;
       }
     }, 1);
 
@@ -79,109 +82,35 @@ class Widget extends Component {
   }
 
   renderPages() {
-    let pages = this.state.pages;
-    // QUERY SELECTORS
-    let div = document.getElementById("container");
+    let pages = [];
 
-    // MAIN FRAMEWORK
-    let slider = document.querySelector(".js_simple_dots");
-    slider.innerHTML = "";
-    let dot_container = document.createElement("ul");
-    dot_container.classList.add("js_dots");
-    dot_container.classList.add("dots");
-    dot_container.setAttribute("id", "dot-nav");
-    slider.appendChild(dot_container);
+    // console.log(this.state.pages);
 
-    let preFrame = document.querySelector(".js_frame");
-    let frame;
-    if (preFrame) {
-      preFrame.innerHTML = "";
-      frame = preFrame;
-    } else {
-      frame = document.createElement("div");
-      frame.classList.add("frame");
-      frame.classList.add("js_frame");
+    if (document.querySelector(".js_slides")) {
+      document.querySelector(".js_slides").innerHTML = "";
+      // console.log("cleared slides");
     }
 
-    let slides = document.createElement("div");
-    slides.classList.add("slides");
-    slides.classList.add("js_slides");
-    if (pages.length === 0) return;
-
-    pages.forEach(page => {
-      console.log(page);
-      // PLUGIN SLIDE
-      let slide = document.createElement("li");
-      slide.classList.add("js_slide");
-      // CONTAINER
-      let container = document.createElement("div");
-      container.classList.add("container-fluid");
-      // ROW
-      let row = document.createElement("div");
-      row.classList.add("row");
-      // COL
-      let col = document.createElement("div");
-      col.classList.add("col-md-12");
-      col.classList.add("slide-col");
-      // WELL
-      let well = document.createElement("div");
-      well.classList.add("well");
-      // CONTENT
-      let cont = document.createElement("div");
-      // cont.classList.add("");
-      // ROW
-      let content = document.createElement("div");
-      content.classList.add("row");
-      // HEADER
-      let header = document.createElement("div");
-      header.classList.add("col-md-12");
-      header.innerHTML = `
-        <div class="page-header">
-          <h1>${page.header}</h1>
-        </div>
-      `;
-      // DESCRIPTION
-      let desc = document.createElement("div");
-      desc.classList.add("col-md-12");
-
-      desc.innerHTML = `
-          <p>${page.desc}</p>
-        `;
-
-      // CONTENT ASSEMBLY
-      slide.appendChild(container);
-      container.appendChild(row);
-      row.appendChild(col);
-      col.appendChild(well);
-      content.appendChild(header);
-      content.appendChild(desc);
-
-      let plugins = page.plugins;
-      if (plugins) {
-        plugins.forEach(plugin => {
-          let div = document.createElement("div");
-          div.innerHTML = `
-                <img src="${plugin.iconUrl}" style="display: inherit; alt="...">
-          `;
-          content.appendChild(div);
-        });
+    if (document.querySelector(".js_dots")) {
+      let dots = document.querySelector(".js_dots");
+      // console.log(dots.childElementCount, this.state.pages.length);
+      if (dots.childElementCount > this.state.pages.length) {
+        while (dots.childElementCount > 0) {
+          dots.removeChild(dots.firstChild);
+        }
+        // console.log(dots);
       }
-      cont.appendChild(content);
-      well.appendChild(cont);
-      // well.appendChild(pluginsDiv);
-      // thumb.appendChild(img);
-      slides.appendChild(slide);
-      // dot_navs.appendChild(dot);
+      // debugger
+      // console.log("cleared", dots);
+    }
+
+    if (this.state.pages.length === 0) return;
+    this.state.pages.forEach(page => {
+      pages.push(<Page data={page} />);
     });
 
-    // DOT NAVS
-
-    // assembly
-    frame.appendChild(slides);
-    slider.appendChild(frame);
-    div.appendChild(slider);
-
-    this.loryFormat(pages);
+    setTimeout(() => this.loryFormat(), 100);
+    return pages;
   }
 
   listener() {
@@ -201,7 +130,7 @@ class Widget extends Component {
   fetch() {
     db.get("pages", (err, response) => {
       if (err) throw err;
-      console.log(response);
+      // console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -220,15 +149,14 @@ class Widget extends Component {
   }
 
   componentDidUpdate() {
-    console.log(this.state);
-    this.renderPages();
+    // console.log(this.state);
+    // this.loryFormat();
+    // this.renderPages();
   }
 
   componentDidMount() {
     this.fetch();
     this.listener();
-    // this.datastoreFetch();
-    // this.datastoreListener();
   }
 
   render() {
@@ -237,7 +165,12 @@ class Widget extends Component {
         <div id="intro">
           <div id="hero">{this.state.text}</div>
         </div>
-        <div className="slider js_simple_dots simple" />
+        <div className="slider js_simple_dots simple">
+          <ul className="dots js_dots" id="dot-nav" />
+          <div className="frame js_frame">
+            <ul className="slides js_slides">{this.renderPages()}</ul>
+          </div>
+        </div>
       </div>
     );
   }

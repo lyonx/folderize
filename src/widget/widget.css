@@ -10,7 +10,7 @@
                   * (optional) wrapper width, specifies width of the slider frame.
                   */
   width: 100vw;
-
+  height: 75vh;
   position: relative;
   font-size: 24px;
   overflow: hidden;
@@ -51,6 +51,10 @@ li {
 .next svg,
 .prev svg {
   width: 25px;
+}
+
+#container {
+  height: 100vh;
 }
 
 .js_slide {
@@ -141,18 +145,40 @@ ul {
 
 .container-fluid {
   height: 100%;
+  /* padding-left: 0px !important; */
+  /* padding-right: 0px !important; */
 }
 
 .thumbnail {
-  width: 90%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* flex: 1; */
+  height: 50px;
+  width: 50px;
+  background-size: contain !important;
+  margin-bottom: 0px !important;
+  /* position: absolute; */
+  /* top: 50%; */
+  /* left: 50%; */
+  /* transform: translate(-50%, -50%); */
 }
 
 .header {
   margin-bottom: 5px;
+}
+
+.page-content {
+  background: #eef0f0;
+}
+
+.plugin-panel {
+  /* display: flex; */
+}
+
+/* .plugin-content {
+  flex: 5;
+} */
+
+.list-group-item {
+  display: flex;
 }
 
 h1,
@@ -163,3 +189,7 @@ h5,
 h6 {
   margin: 0px !important;
 }
+
+/* p {
+  white-space: pre-line; */
+/* } */

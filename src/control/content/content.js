@@ -60,7 +60,7 @@ class Content extends Component {
     console.log(this.state);
     db.get("pages", (err, response) => {
       if (err) throw err;
-      // console.log(response);
+      console.log(response);
       if (!response.id) {
         return;
       } else {
