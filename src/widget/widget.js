@@ -130,7 +130,7 @@ class Widget extends Component {
   fetch() {
     db.get("pages", (err, response) => {
       if (err) throw err;
-      // console.log(response);
+      console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -138,7 +138,8 @@ class Widget extends Component {
             {
               title: "new page",
               header: "new page",
-              desc: "edit this page in the control"
+              desc: "edit this page in the control",
+              plugins: []
             }
           ]
         });
@@ -165,11 +166,13 @@ class Widget extends Component {
         <div id="intro">
           <div id="hero">{this.state.text}</div>
         </div>
-        <div className="slider js_simple_dots simple">
-          <ul className="dots js_dots" id="dot-nav" />
-          <div className="frame js_frame">
-            <ul className="slides js_slides">{this.renderPages()}</ul>
-          </div>
+         <div className="slider js_simple_dots simple">
+         <ul className="dots js_dots" id="dot-nav" />
+            <div className="frame js_frame">
+         <div id="sandbox">
+               <ul className="slides js_slides">{this.renderPages()}</ul>
+         </div>
+            </div>
         </div>
       </div>
     );
