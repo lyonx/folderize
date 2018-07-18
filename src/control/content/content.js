@@ -13,6 +13,7 @@ class Content extends Component {
     this.addImg = this.addImg.bind(this);
     this.updatePage = this.updatePage.bind(this);
     this.renderPages = this.renderPages.bind(this);
+    this.reorderPages = this.reorderPages.bind(this);
     this.state = {
       pages: [],
       text: "",
@@ -25,15 +26,23 @@ class Content extends Component {
     // Control looks in db for any pages
     db.get("pages", (err, response) => {
       if (err) throw err;
-    //   console.log(response);
+      //   console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
           pages: [
             {
               title: "new page",
-              header: "new page",
-              desc: "edit this page in the control",
+              // header: "new page",
+              // desc: "edit this page in the control",
+              nodes: [
+                {
+                  type: "header",
+                  data: {
+                    text: "new page"
+                  }
+                }
+              ],
               plugins: [],
               images: []
             }
@@ -45,8 +54,16 @@ class Content extends Component {
             pages: [
               {
                 title: "New Page",
-                header: "Example Header",
-                desc: "Edit this page in the control",
+                // header: "Example Header",
+                // desc: "Edit this page in the control",
+                nodes: [
+                  {
+                    type: "header",
+                    data: {
+                      text: "new page"
+                    }
+                  }
+                ],
                 plugins: [],
                 images: []
               }
@@ -59,7 +76,7 @@ class Content extends Component {
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-    //   console.log(response);
+      //   console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -78,11 +95,11 @@ class Content extends Component {
     // console.log(this.state);
     db.get("pages", (err, response) => {
       if (err) throw err;
-    //   console.log(response);
+      //   console.log(response);
       if (!response.id) {
         db.insert({ pages: this.state.pages }, "pages", true, (err, status) => {
           if (err) throw err;
-        //   console.log(status);
+          //   console.log(status);
         });
         return;
       } else {
@@ -102,11 +119,11 @@ class Content extends Component {
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-    //   console.log(response);
+      //   console.log(response);
       if (!response.id) {
         db.insert({ image: this.state.image }, "image", true, (err, status) => {
           if (err) throw err;
-        //   console.log(status);
+          //   console.log(status);
         });
         return;
       } else {
@@ -119,7 +136,7 @@ class Content extends Component {
             if (err) {
               throw err;
             }
-            console.log(status);
+            // console.log(status);
           }
         );
       }
@@ -129,25 +146,54 @@ class Content extends Component {
   renderPages() {
     let pages = [];
     this.state.pages.map(page => {
+      console.warn(this.state.pages.indexOf(page));
       pages.push(
         <Page
-          key={this.state.pages.indexOf(page)}
+          index={this.state.pages.indexOf(page)}
           updatePage={this.updatePage}
           deletePage={this.deletePage}
           data={page}
+          reorderPages={this.reorderPages}
         />
       );
     });
     return pages;
   }
 
+  reorderPages(index, dir) {
+    let pages = this.state.pages;
+    console.log(pages, index, dir);
+    // let target = pages[index];
+
+    if (dir === 1) {
+      let temp = pages[index - 1];
+      if (!temp) return;
+      pages[index - 1] = pages[index];
+      pages[index] = temp;
+      this.setState({ pages });
+    } else {
+      let temp = pages[index + 1];
+      if (!temp) return;
+      pages[index + 1] = pages[index];
+      pages[index] = temp;
+      this.setState({ pages });
+    }
+    this.render();
+  }
+
   addPage() {
     let newPage = {
       title: "New Page",
-      header: "Example Header",
-      desc: "Edit this page in the control",
       plugins: [],
-      images: []
+      images: [],
+      nodes: [
+        {
+          type: "header",
+          data: {
+            text: "new page"
+          }
+        }
+      ]
     };
     let pages = this.state.pages;
     pages.push(newPage);

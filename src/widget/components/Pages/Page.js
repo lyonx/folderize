@@ -38,24 +38,81 @@ class Page extends Component {
     return images;
   }
 
+  pluginNav(node) {
+    console.log(node);
+    buildfire.navigation.navigateTo({
+      pluginId: node.pluginTypeId,
+      instanceId: node.instanceId,
+      folderName: null,
+      title: node.title
+    });
+  }
+
+  renderNodes() {
+    // console.log(this.props.data.nodes);
+    let nodes = [];
+    this.props.data.nodes.forEach(node => {
+      if (!node) return;
+      switch (node.type) {
+        case "header": {
+          nodes.push(
+            <div className="col-sm-12">
+              <div className="page-header">
+                <h1>{node.data.text}</h1>
+              </div>
+              <hr />
+            </div>
+          );
+          break;
+        }
+        case "desc": {
+          nodes.push(
+            <div className="col-sm-12">
+              <p className="description">{node.data.text}</p>
+            </div>
+          );
+          break;
+        }
+        case "image": {
+          nodes.push(
+            <div className="col-sm-12">
+              <div className="image-wrap">
+                <div
+                  className="images"
+                  style={`background: url(${node.data.src})`}
+                />
+              </div>
+            </div>
+          );
+          break;
+        }
+        case "plugin": {
+          nodes.push(
+            <div className="col-sm-12">
+              <div className="plugin" onClick={e => this.pluginNav(node)}>
+                <div
+                  className="plugin-thumbnail"
+                  style={`background: url("${node.data.iconUrl}")`}
+                  alt="..."
+                >
+                  <h3 className="plugin-title">{node.data.title}</h3>
+                </div>
+              </div>
+            </div>
+          );
+          break;
+        }
+        default:
+          return;
+      }
+    });
+    return nodes;
+  }
   render() {
     return (
       <li className="js_slide">
         <div className="container-fluid page-content">
-          <div className="row">
-            <div className="col-sm-12">
-              <div className="page-header">
-                <h1>{this.props.data.header}</h1>
-              </div>
-            </div>
-            <div className="col-sm-12">
-              <p>{this.props.data.desc}</p>
-            </div>
-            <div className="col-sm-12">{this.renderImages()}</div>
-            <ul className="list-group">
-              <div className="col-sm-12">{this.renderPlugins()}</div>
-            </ul>
-          </div>
+          <div className="row">{this.renderNodes()}</div>
         </div>
       </li>
     );

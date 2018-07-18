@@ -110,13 +110,13 @@ class Widget extends Component {
     });
     
     // setTimeout(() => this.loryFormat(), 1000);
-    console.warn(pages);
+    // console.warn(pages);
     return pages;
   }
 
   listener() {
     db.onUpdate(snapshot => {
-      console.log(snapshot);
+      // console.log(snapshot);
       switch (snapshot.tag) {
         case "pages": {
           this.setState({ pages: snapshot.data.pages });

@@ -62,6 +62,7 @@ li {
 }
 
 .js_slide {
+  overflow-y: scroll;
   flex: 1;
   min-width: 100vw;
   height: 74.54vh;
@@ -144,6 +145,10 @@ ul {
   padding: 0px !important;
 }
 
+.description{
+margin-bottom: 20px;
+}
+
 .row {
   height: 100%;
 }
@@ -154,16 +159,12 @@ ul {
   /* padding-right: 0px !important; */
 }
 
-.thumbnail {
-  /* flex: 1; */
-  height: 50px;
-  width: 50px;
-  background-size: contain !important;
-  margin-bottom: 0px !important;
-  /* position: absolute; */
-  /* top: 50%; */
-  /* left: 50%; */
-  /* transform: translate(-50%, -50%); */
+.plugin-thumbnail {
+  background-size: cover !important;
+  width: 200px;
+  margin: auto;
+  border-radius: 10px;
+  height: 200px;
 }
 
 .header {
@@ -210,4 +211,19 @@ h6 {
   /* margin-top: 15px; */
   margin-left: -15px;
   margin-right: -15px;
+}
+
+body {
+  overflow-y: hidden !important;
+}
+
+.plugin-title {
+  position: relative;
+  top: 75%;
+  border-radius: 10px;
+  color: #eef0f0;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  background: #00000093
 }
