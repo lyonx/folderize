@@ -16,7 +16,7 @@ class Widget extends Component {
   }
 
   loryFormat() {
-    console.count("formatter");
+    // console.count("formatter");
 
     let pages = this.state.pages;
     if (pages.length === 0) return;
@@ -33,7 +33,7 @@ class Widget extends Component {
           if (dot_container.childNodes.length >= pages.length) return;
           // console.log(pages[i],  pages[0]);
           dot_container.appendChild(clone);
-          console.count("dot container");
+          // console.count("dot container");
         }
         dot_container.childNodes[0].classList.add("active");
       }
@@ -83,7 +83,7 @@ class Widget extends Component {
 
   renderPages() {
     let pages = [];
-
+    console.count("render");
     // console.log(this.state.pages);
 
     if (document.querySelector(".js_slides")) {
@@ -108,8 +108,9 @@ class Widget extends Component {
     this.state.pages.forEach(page => {
       pages.push(<Page data={page} />);
     });
-
-    setTimeout(() => this.loryFormat(), 100);
+    
+    // setTimeout(() => this.loryFormat(), 1000);
+    console.warn(pages);
     return pages;
   }
 
@@ -121,6 +122,10 @@ class Widget extends Component {
           this.setState({ pages: snapshot.data.pages });
           break;
         }
+        case "image": {
+          this.setState({ image: snapshot.data.image });
+          break;
+        }
         default:
           return;
       }
@@ -130,7 +135,7 @@ class Widget extends Component {
   fetch() {
     db.get("pages", (err, response) => {
       if (err) throw err;
-      console.log(response);
+      // console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -147,12 +152,21 @@ class Widget extends Component {
         this.setState({ pages: response.data.pages });
       }
     });
+    db.get("image", (err, response) => {
+      if (err) throw err;
+      // console.log(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        return;
+      } else {
+        this.setState({ image: response.data.image });
+      }
+    });
   }
 
   componentDidUpdate() {
-    // console.log(this.state);
-    // this.loryFormat();
-    // this.renderPages();
+    // console.count("update");
+    this.loryFormat();
   }
 
   componentDidMount() {
@@ -163,16 +177,16 @@ class Widget extends Component {
   render() {
     return (
       <div id="container">
-        <div id="intro">
+        <div id="intro" style={`background: url(${this.state.image})`}>
           <div id="hero">{this.state.text}</div>
         </div>
-         <div className="slider js_simple_dots simple">
-         <ul className="dots js_dots" id="dot-nav" />
-            <div className="frame js_frame">
-         <div id="sandbox">
-               <ul className="slides js_slides">{this.renderPages()}</ul>
-         </div>
+        <div className="slider js_simple_dots simple">
+          <ul className="dots js_dots" id="dot-nav" />
+          <div className="frame js_frame">
+            <div id="sandbox">
+              <ul className="slides js_slides">{this.renderPages()}</ul>
             </div>
+          </div>
         </div>
       </div>
     );

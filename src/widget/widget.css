@@ -58,7 +58,7 @@ li {
 }
 
 .slides {
-   display: flex;
+  display: flex;
 }
 
 .js_slide {
@@ -80,13 +80,13 @@ ul {
 
 @keyframes test {
   from {
-  margin-top: 0px;
+    margin-top: 0px;
   }
   to {
-  font-size: 36px;   
-  background: #eef0f0;
-  flex: 1.5;
-  margin-top: -10px;
+    font-size: 36px;
+    background: #eef0f0;
+    flex: 1.5;
+    margin-top: -10px;
   }
 }
 
@@ -96,10 +96,9 @@ ul {
   flex: 1;
   font-size: 24px;
   animation-name: test;
-  animation-duration: .25s;
+  animation-duration: 0.25s;
   animation-fill-mode: forwards;
   /* margin-top: 0px; */
-
 }
 
 #dot-nav > li {
@@ -171,7 +170,8 @@ ul {
   margin-bottom: 5px;
 }
 
-.body {
+.body,
+.row {
   background: #eef0f0;
 }
 .page-content {
@@ -200,9 +200,14 @@ h6 {
 }
 
 .images {
-   height: 200px;
+  height: 200px;
+  width: 100vw;
+  background-size: cover !important;
 }
 
 .image-wrap {
-   padding: 15px;
+  /* border-bottom: 1px solid #000000; */
+  /* margin-top: 15px; */
+  margin-left: -15px;
+  margin-right: -15px;
 }
