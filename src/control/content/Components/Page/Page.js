@@ -44,14 +44,6 @@ class Page extends Component {
     // this.state.plugins
     plugins.onAddItems = () => {
       let nodes = this.state.nodes;
-      // let pluginNodes = this.state.nodes.filter(node => {
-      //   return node.type === "plugin";
-      // });
-      // let items = plugins.items;
-      // pluginNodes.forEach(node => {
-      //   console.log(nodes.indexOf(node));
-      // });
-      // console.log(nodes);
       nodes.push({
         type: "plugin",
         data: plugins.items[plugins.items.length - 1]

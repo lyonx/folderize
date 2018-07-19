@@ -94,9 +94,8 @@ class Page extends Component {
                   className="plugin-thumbnail"
                   style={`background: url("${node.data.iconUrl}")`}
                   alt="..."
-                >
-                  <h3 className="plugin-title">{node.data.title}</h3>
-                </div>
+                />
+                <h3 className="plugin-title">{node.data.title}</h3>
               </div>
             </div>
           );
@@ -110,7 +109,7 @@ class Page extends Component {
   }
   render() {
     return (
-      <li className="js_slide">
+      <li className="js_slide" >
         <div className="container-fluid page-content">
           <div className="row">{this.renderNodes()}</div>
         </div>

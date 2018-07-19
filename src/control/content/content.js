@@ -12,6 +12,7 @@ class Content extends Component {
     this.deletePage = this.deletePage.bind(this);
     this.addImg = this.addImg.bind(this);
     this.updatePage = this.updatePage.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.renderPages = this.renderPages.bind(this);
     this.reorderPages = this.reorderPages.bind(this);
     this.state = {
@@ -83,16 +84,26 @@ class Content extends Component {
           image:
             "https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8"
         });
-      }
-      {
+      } else {
         this.setState({ image: response.data.image });
+      }
+    });
+    db.get("text", (err, response) => {
+      if (err) throw err;
+        console.warn(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        this.setState({
+          text: ""
+        });
+      } else {
+        this.setState({ text: response.data.text });
       }
     });
   }
 
   syncState() {
     // when a state change is detected,
-    // console.log(this.state);
     db.get("pages", (err, response) => {
       if (err) throw err;
       //   console.log(response);
@@ -141,6 +152,37 @@ class Content extends Component {
         );
       }
     });
+    db.get("text", (err, response) => {
+      if (err) throw err;
+      //   console.log(response);
+      if (!response.id) {
+        db.insert({ text: "" }, "text", true, (err, status) => {
+          if (err) throw err;
+          //   console.log(status);
+        });
+        return;
+      } else {
+        // insert pages into db
+        db.update(
+          response.id,
+          { text: this.state.text },
+          "text",
+          (err, status) => {
+            if (err) {
+              throw err;
+            }
+            // console.log(status);
+          }
+        );
+      }
+    });
+  }
+
+  handleChange(event) {
+    console.log("handlechange");
+    const target = event.target;
+    const name = target.name;
+    this.setState({ [name]: event.target.value });
   }
 
   renderPages() {
@@ -248,6 +290,18 @@ class Content extends Component {
                 <button className="btn btn-primary" onClick={this.addImg}>
                   Add an Image
                 </button>
+                <form>
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="text"
+                      aria-describedby="sizing-addon2"
+                      value={this.state.text}
+                      onChange={this.handleChange}
+                    />
+                  </div>
+                </form>
               </div>
             </div>
           </div>

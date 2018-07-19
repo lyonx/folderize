@@ -108,7 +108,7 @@ class Widget extends Component {
     this.state.pages.forEach(page => {
       pages.push(<Page data={page} />);
     });
-    
+
     // setTimeout(() => this.loryFormat(), 1000);
     // console.warn(pages);
     return pages;
@@ -116,7 +116,6 @@ class Widget extends Component {
 
   listener() {
     db.onUpdate(snapshot => {
-      // console.log(snapshot);
       switch (snapshot.tag) {
         case "pages": {
           this.setState({ pages: snapshot.data.pages });
@@ -124,6 +123,10 @@ class Widget extends Component {
         }
         case "image": {
           this.setState({ image: snapshot.data.image });
+          break;
+        }
+        case "text": {
+          this.setState({ text: snapshot.data.text });
           break;
         }
         default:
@@ -162,16 +165,48 @@ class Widget extends Component {
         this.setState({ image: response.data.image });
       }
     });
+    db.get("text", (err, response) => {
+      if (err) throw err;
+      // console.log(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        return;
+      } else {
+        this.setState({ text: response.data.text });
+      }
+    });
   }
 
   componentDidUpdate() {
-    // console.count("update");
+    console.count("update");
     this.loryFormat();
   }
 
   componentDidMount() {
+    this.sticky();
     this.fetch();
     this.listener();
+  }
+
+  sticky() {
+    var navbar = document.getElementById("dot-nav");
+    var sticky = navbar.offsetTop;
+    let stick = () => {
+      console.log(sticky, window.pageYOffset);
+      if (window.pageYOffset >= sticky) {
+        navbar.classList.add("sticky");
+      } else {
+        navbar.classList.remove("sticky");
+      }
+    };
+    // document.getElementsByTagName("body")[0].onscroll = e => console.log(e);
+    document
+      .getElementsByTagName("body")[0]
+      .addEventListener("scroll", () => stick());
+    // document.getElementsByClassName("js_slide")[1].onscroll = e => console.log(e);
+    // console.log( document.getElementById("container").onscroll);
+
+    //
   }
 
   render() {
