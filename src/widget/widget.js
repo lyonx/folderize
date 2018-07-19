@@ -1,125 +1,45 @@
 import React, { Component } from "react";
+import Page from "./components/Pages/Page";
 let buildfire = window.buildfire;
 let lory = window.lory;
+let db = buildfire.datastore;
 
 class Widget extends Component {
   constructor(props) {
     super(props);
+    this.renderPages = this.renderPages.bind(this);
     this.state = {
+      pages: [],
       plugins: [],
       slideIndex: 0
     };
   }
 
-  datastoreFetch() {
-    buildfire.datastore.get("img", (err, response) => {
-      if (err) throw err;
-      this.renderImg(response.data.img);
-    });
-    buildfire.datastore.get("plugins", (err, response) => {
-      if (err) throw err;
-    this.getPlugins(response.data.plugins);
-    });
-    buildfire.datastore.get("text", (err, response) => {
-      if (err) throw err;
-      this.renderText(response.data.text);
-    });
+  loryFormat() {
+    // console.count("formatter");
 
-
-    // this.renderText(response.data.text);
-  }
-
-  getPlugins(result) {
-    console.warn(this.state.plugins);
-    console.warn(result);
-
-    
-    if (this.state.plugins === result) {
-      console.log("render prevented");
-      return;
-    }
-
-    let plugins = result;
-    let temp = new Array(plugins.length);
-    plugins.forEach(plugin => {
-      buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
-        if (err) throw err;
-        let currentIndex = plugins.indexOf(plugin);
-        temp[currentIndex] = inst;
-        // this.setState({
-        //   plugins: temp
-        // });
-        if (!temp.includes(undefined)) {
-          this.renderPlugins(temp);
-        }
-      });
-    });
-  }
-
-  renderText(text) {
-    if (text === this.state.text) {
-      console.log("renderText prevented");
-      return;
-    }
-    let hero = document.getElementById("hero");
-    hero.innerHTML = "";
-    hero.innerHTML = text;
-  }
-
-  renderImg(img) {
-    if (img === this.state.img) {
-      console.log("renderImg prevented");
-      return;
-    }
-    document
-      .getElementById("intro")
-      .setAttribute("style", `background: url("${img}")`);
-  }
-
-  datastoreListener() {
-    console.log("listener active");
-    buildfire.datastore.onUpdate(response => {
-      console.log("update return:", response);
-      switch (response.tag) {
-        case "img": this.renderImg(response.data.img);
-        break;
-        case "plugins": this.getPlugins(response.data.plugins);
-        break;
-        case "text": this.renderText(response.data.text);
-        break;
-      }
-      // this.getPlugins(response.data.plugins);
-      // this.renderImg(response.data.img);
-      // this.setState({ text: response.data.text });
-    });
-  }
-
-  loryInit() {
-    document.addEventListener("DOMContentLoaded", function() {
-      let simple = document.querySelector(".js_simple");
-      lory(simple, {
-        infinite: 1
-      });
-    });
-  }
-
-  loryFormat(plugins) {
+    let pages = this.state.pages;
+    if (pages.length === 0) return;
     let simple_dots = document.querySelector(".js_simple_dots");
-    let dot_count = plugins.length;
+    let dot_count = pages.length;
     let dot_container = simple_dots.querySelector(".js_dots");
-
     let dot_list_item = document.createElement("li");
 
-    function handleDotEvent(e) {
+    const handleDotEvent = e => {
       if (e.type === "before.lory.init") {
+        if (pages.length != this.state.pages.length) return;
         for (let i = 0, len = dot_count; i < len; i++) {
           let clone = dot_list_item.cloneNode();
+          if (dot_container.childNodes.length >= pages.length) return;
+          // console.log(pages[i],  pages[0]);
           dot_container.appendChild(clone);
+          // console.count("dot container");
         }
         dot_container.childNodes[0].classList.add("active");
       }
       if (e.type === "after.lory.init") {
         for (let i = 0, len = dot_count; i < len; i++) {
+          if (!dot_container.childNodes[i]) return;
           dot_container.childNodes[i].addEventListener("click", function(e) {
             dot_navigation_slider.slideTo(
               Array.prototype.indexOf.call(dot_container.childNodes, e.target)
@@ -141,7 +61,7 @@ class Widget extends Component {
         }
         dot_container.childNodes[0].classList.add("active");
       }
-    }
+    };
     simple_dots.addEventListener("before.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.slide", handleDotEvent);
@@ -150,7 +70,8 @@ class Widget extends Component {
     setTimeout(() => {
       let dot_tabs = simple_dots.querySelector(".js_dots").childNodes;
       for (let i = 0; i < dot_tabs.length; i++) {
-        dot_tabs[i].innerHTML = plugins[i].title;
+        if (!this.state.pages[i]) return;
+        dot_tabs[i].innerHTML = this.state.pages[i].title;
       }
     }, 1);
 
@@ -160,114 +81,113 @@ class Widget extends Component {
     });
   }
 
-  renderPlugins(plugins) {
+  renderPages() {
+    let pages = [];
     console.count("render");
-    // let plugins = this.state.plugins;
-    if (plugins.length <= 0) {
-      return;
-    }
-    // QUERY SELECTORS
-    let div = document.getElementById("container");
+    // console.log(this.state.pages);
 
-    // MAIN FRAMEWORK
-    let slider = document.querySelector(".js_simple_dots");
-    slider.innerHTML = "";
-    let dot_container = document.createElement("ul");
-    dot_container.classList.add("js_dots");
-    dot_container.classList.add("dots");
-    dot_container.setAttribute("id", "dot-nav");
-    slider.appendChild(dot_container);
-
-    let preFrame = document.querySelector(".js_frame");
-    let frame;
-    if (preFrame) {
-      preFrame.innerHTML = "";
-      frame = preFrame;
-    } else {
-      frame = document.createElement("div");
-      frame.classList.add("frame");
-      frame.classList.add("js_frame");
+    if (document.querySelector(".js_slides")) {
+      document.querySelector(".js_slides").innerHTML = "";
+      // console.log("cleared slides");
     }
 
-    let slides = document.createElement("div");
-    slides.classList.add("slides");
-    slides.classList.add("js_slides");
-    if (plugins.length === 0) return;
-    plugins.forEach(plugin => {
-      let index = plugins.indexOf(plugin);
-      // PLUGIN SLIDE
-      let slide = document.createElement("li");
-      slide.classList.add("js_slide");
-      // slide.setAttribute("index", index);
-      // slide.setAttribute("id", `plugin${index}`);
-      // CONTAINER
-      let container = document.createElement("div");
-      container.classList.add("container-fluid");
-      // ROW
-      let row = document.createElement("div");
-      row.classList.add("row");
-      // COL
-      let col = document.createElement("div");
-      col.classList.add("col-md-12");
-      col.classList.add("slide-col");
-      // WELL
-      let well = document.createElement("div");
-      well.classList.add("well");
-      // THUMBNAIL
-      let thumb = document.createElement("div");
-      thumb.classList.add("thumbnail");
-      // IMG
-      let img = document.createElement("img");
-      // CONTENT ASSEMBLY
-      slide.appendChild(container);
-      container.appendChild(row);
-      row.appendChild(col);
-      col.appendChild(well);
-      well.appendChild(thumb);
-      thumb.appendChild(img);
-      img.setAttribute("index", index);
-      img.setAttribute("id", `plugin${index}`);
-      img.classList.add("slide-img");
-      img.setAttribute("src", plugin.iconUrl);
-      img.onclick = e => {
-        let index = document.getElementById(e.target.id).getAttribute("index");
+    if (document.querySelector(".js_dots")) {
+      let dots = document.querySelector(".js_dots");
+      // console.log(dots.childElementCount, this.state.pages.length);
+      if (dots.childElementCount > this.state.pages.length) {
+        while (dots.childElementCount > 0) {
+          dots.removeChild(dots.firstChild);
+        }
+        // console.log(dots);
+      }
+      // debugger
+      // console.log("cleared", dots);
+    }
 
-        let target = plugins[index];
-        let pluginData = {
-          pluginId: target.pluginTypeId,
-          instanceId: target.instanceId,
-          folderName: target._buildfire.pluginType.result[0].folderName,
-          title: target.title
-        };
-
-        buildfire.navigation.navigateTo(pluginData);
-      };
-      slides.appendChild(slide);
-      // dot_navs.appendChild(dot);
+    if (this.state.pages.length === 0) return;
+    this.state.pages.forEach(page => {
+      pages.push(<Page data={page} />);
     });
+    
+    // setTimeout(() => this.loryFormat(), 1000);
+    // console.warn(pages);
+    return pages;
+  }
 
-    // DOT NAVS
+  listener() {
+    db.onUpdate(snapshot => {
+      // console.log(snapshot);
+      switch (snapshot.tag) {
+        case "pages": {
+          this.setState({ pages: snapshot.data.pages });
+          break;
+        }
+        case "image": {
+          this.setState({ image: snapshot.data.image });
+          break;
+        }
+        default:
+          return;
+      }
+    });
+  }
 
-    // assembly
-    frame.appendChild(slides);
-    slider.appendChild(frame);
-    div.appendChild(slider);
+  fetch() {
+    db.get("pages", (err, response) => {
+      if (err) throw err;
+      // console.log(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        this.setState({
+          pages: [
+            {
+              title: "new page",
+              header: "new page",
+              desc: "edit this page in the control",
+              plugins: []
+            }
+          ]
+        });
+      } else {
+        this.setState({ pages: response.data.pages });
+      }
+    });
+    db.get("image", (err, response) => {
+      if (err) throw err;
+      // console.log(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        return;
+      } else {
+        this.setState({ image: response.data.image });
+      }
+    });
+  }
 
-    this.loryFormat(plugins);
+  componentDidUpdate() {
+    // console.count("update");
+    this.loryFormat();
   }
 
   componentDidMount() {
-    this.datastoreFetch();
-    this.datastoreListener();
+    this.fetch();
+    this.listener();
   }
 
   render() {
     return (
       <div id="container">
-        <div id="intro">
+        <div id="intro" style={`background: url(${this.state.image})`}>
           <div id="hero">{this.state.text}</div>
         </div>
-        <div className="slider js_simple_dots simple" />
+        <div className="slider js_simple_dots simple">
+          <ul className="dots js_dots" id="dot-nav" />
+          <div className="frame js_frame">
+            <div id="sandbox">
+              <ul className="slides js_slides">{this.renderPages()}</ul>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

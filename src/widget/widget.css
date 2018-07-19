@@ -10,11 +10,11 @@
                   * (optional) wrapper width, specifies width of the slider frame.
                   */
   width: 100vw;
-
+  height: 75vh;
   position: relative;
   font-size: 24px;
-  overflow: hidden;
-  white-space: nowrap;
+  /* overflow: hidden; */
+  /* white-space: nowrap; */
 }
 
 .slides {
@@ -53,9 +53,20 @@ li {
   width: 25px;
 }
 
+#container {
+  height: 100vh;
+}
+
+.slides {
+  display: flex;
+}
+
 .js_slide {
+  overflow-y: scroll;
+  flex: 1;
+  min-width: 100vw;
   height: 74.54vh;
-  background: #333333;
+  /* background: #333333; */
   background-size: cover;
   background-position: center;
 }
@@ -70,13 +81,13 @@ ul {
 
 @keyframes test {
   from {
-  margin-top: 0px;
+    margin-top: 0px;
   }
   to {
-  font-size: 36px;   
-  background: #eef0f0;
-  flex: 1.5;
-  margin-top: -10px;
+    font-size: 36px;
+    background: #eef0f0;
+    flex: 1.5;
+    margin-top: -10px;
   }
 }
 
@@ -86,10 +97,9 @@ ul {
   flex: 1;
   font-size: 24px;
   animation-name: test;
-  animation-duration: .25s;
+  animation-duration: 0.25s;
   animation-fill-mode: forwards;
   /* margin-top: 0px; */
-
 }
 
 #dot-nav > li {
@@ -135,20 +145,50 @@ ul {
   padding: 0px !important;
 }
 
+.description{
+margin-bottom: 20px;
+}
+
 .row {
   height: 100%;
 }
 
 .container-fluid {
   height: 100%;
+  /* padding-left: 0px !important; */
+  /* padding-right: 0px !important; */
 }
 
-.thumbnail {
-  width: 90%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.plugin-thumbnail {
+  background-size: cover !important;
+  width: 200px;
+  margin: auto;
+  border-radius: 10px;
+  height: 200px;
+}
+
+.header {
+  margin-bottom: 5px;
+}
+
+.body,
+.row {
+  background: #eef0f0;
+}
+.page-content {
+  height: 100vh;
+}
+
+.plugin-panel {
+  /* display: flex; */
+}
+
+/* .plugin-content {
+  flex: 5;
+} */
+
+.list-group-item {
+  display: flex;
 }
 
 h1,
@@ -158,4 +198,32 @@ h4,
 h5,
 h6 {
   margin: 0px !important;
+}
+
+.images {
+  height: 200px;
+  width: 100vw;
+  background-size: cover !important;
+}
+
+.image-wrap {
+  /* border-bottom: 1px solid #000000; */
+  /* margin-top: 15px; */
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+body {
+  overflow-y: hidden !important;
+}
+
+.plugin-title {
+  position: relative;
+  top: 75%;
+  border-radius: 10px;
+  color: #eef0f0;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  background: #00000093
 }

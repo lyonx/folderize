@@ -1,4 +1,4 @@
-# BuildFire React Plugin Template
+# Uses the BuildFire React Plugin Template
 The following template uses Webpack, React, and Babel in order to provide many features out of the box
 
 - React/JSX
@@ -14,11 +14,8 @@ Be sure to have the latest [BuildFire CLI](https://github.com/BuildFire/sdk-cli)
     $ buildfire create
 
     # Once inside the SDK's folder
-    $ buildfire init react <pluginName>
-
-## Usage
-Be sure to be on the SDK's folder while running the following commands
-
-`$ buildfire run <pluginName>` - Start the plugin viewer on the selected `pluginName`.
-
-`$ buildfire build <pluginName>` - Build the selected `pluginName`
+    $ cd plugins
+    $ git clone https://github.com/lyonx/folderize.git
+    $ cd Folderize
+    $ npm install
+    $ npm start

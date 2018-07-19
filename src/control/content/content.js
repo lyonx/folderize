@@ -1,396 +1,257 @@
 import React, { Component } from "react";
+import Page from "./Components/Page";
 
 let buildfire = window.buildfire;
 let tinymce = window.tinymce;
+let db = buildfire.datastore;
 
 class Content extends Component {
   constructor(props) {
     super(props);
-    this.logData = this.logData.bind(this);
+    this.addPage = this.addPage.bind(this);
+    this.deletePage = this.deletePage.bind(this);
     this.addImg = this.addImg.bind(this);
+    this.updatePage = this.updatePage.bind(this);
+    this.renderPages = this.renderPages.bind(this);
+    this.reorderPages = this.reorderPages.bind(this);
     this.state = {
-      plugins: null,
+      pages: [],
       text: "",
-      img: ""
+      image:
+        "https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8"
     };
   }
 
-  addPlugin(instance) {
-    buildfire.datastore.insert(instance, "plugin", (err, res) => {
+  fetch() {
+    // Control looks in db for any pages
+    db.get("pages", (err, response) => {
       if (err) throw err;
+      //   console.log(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        this.setState({
+          pages: [
+            {
+              title: "new page",
+              // header: "new page",
+              // desc: "edit this page in the control",
+              nodes: [
+                {
+                  type: "header",
+                  data: {
+                    text: "new page"
+                  }
+                }
+              ],
+              plugins: [],
+              images: []
+            }
+          ]
+        });
+      } else {
+        if (response.data.pages.length === 0) {
+          this.setState({
+            pages: [
+              {
+                title: "New Page",
+                // header: "Example Header",
+                // desc: "Edit this page in the control",
+                nodes: [
+                  {
+                    type: "header",
+                    data: {
+                      text: "new page"
+                    }
+                  }
+                ],
+                plugins: [],
+                images: []
+              }
+            ]
+          });
+        } else {
+          this.setState({ pages: response.data.pages });
+        }
+      }
+    });
+    db.get("image", (err, response) => {
+      if (err) throw err;
+      //   console.log(response);
+      // if none are present, insert a default page
+      if (!response.id) {
+        this.setState({
+          image:
+            "https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8"
+        });
+      }
+      {
+        this.setState({ image: response.data.image });
+      }
     });
   }
 
-  prepPlugins(plugins) {
-    console.log(plugins);
-    let temp = [];
-    plugins.forEach(plugin => {
-      buildfire.pluginInstance.get(plugin.instanceId, (err, inst) => {
-        if (err) throw err;
-        this.addPlugin(inst);
-      });
+  syncState() {
+    // when a state change is detected,
+    // console.log(this.state);
+    db.get("pages", (err, response) => {
+      if (err) throw err;
+      //   console.log(response);
+      if (!response.id) {
+        db.insert({ pages: this.state.pages }, "pages", true, (err, status) => {
+          if (err) throw err;
+          //   console.log(status);
+        });
+        return;
+      } else {
+        // insert pages into db
+        db.update(
+          response.id,
+          { pages: this.state.pages },
+          "pages",
+          (err, status) => {
+            if (err) {
+              throw err;
+            }
+            // console.log(status);
+          }
+        );
+      }
     });
-    // });
+    db.get("image", (err, response) => {
+      if (err) throw err;
+      //   console.log(response);
+      if (!response.id) {
+        db.insert({ image: this.state.image }, "image", true, (err, status) => {
+          if (err) throw err;
+          //   console.log(status);
+        });
+        return;
+      } else {
+        // insert pages into db
+        db.update(
+          response.id,
+          { image: this.state.image },
+          "image",
+          (err, status) => {
+            if (err) {
+              throw err;
+            }
+            // console.log(status);
+          }
+        );
+      }
+    });
   }
 
-  clearData() {
-    buildfire.datastore.search({}, "text", (err, res) => {
-      if (err) throw err;
-      res.forEach(instance => {
-        buildfire.datastore.delete(instance.id, "text", (err, result) => {
-          if (err) throw err;
-          console.log(result);
-        });
-      });
+  renderPages() {
+    let pages = [];
+    this.state.pages.map(page => {
+      console.warn(this.state.pages.indexOf(page));
+      pages.push(
+        <Page
+          index={this.state.pages.indexOf(page)}
+          updatePage={this.updatePage}
+          deletePage={this.deletePage}
+          data={page}
+          reorderPages={this.reorderPages}
+        />
+      );
     });
-    buildfire.datastore.search({}, "plugins", (err, res) => {
-      if (err) throw err;
-      res.forEach(instance => {
-        buildfire.datastore.delete(instance.id, "plugins", (err, result) => {
-          if (err) throw err;
-          console.log(result);
-        });
-      });
-    });
-    buildfire.datastore.search({}, "img", (err, res) => {
-      res.forEach(instance => {
-        buildfire.datastore.delete(instance.id, "img", (err, result) => {
-          if (err) throw err;
-          console.log(result);
-        });
-      });
-    });
-    buildfire.datastore.search({}, "master", (err, res) => {
-      res.forEach(instance => {
-        buildfire.datastore.delete(instance.id, "master", (err, result) => {
-          if (err) throw err;
-          console.log(result);
-        });
-      });
-    });
+    return pages;
   }
 
-  logData() {
-    buildfire.datastore.search({}, "img", (err, res) => {
-      if (err) throw err;
-      console.log("text", res);
-    });
-    buildfire.datastore.search({}, "text", (err, res) => {
-      if (err) throw err;
-      console.log("text", res);
-    });
+  reorderPages(index, dir) {
+    let pages = this.state.pages;
+    console.log(pages, index, dir);
+    // let target = pages[index];
+
+    if (dir === 1) {
+      let temp = pages[index - 1];
+      if (!temp) return;
+      pages[index - 1] = pages[index];
+      pages[index] = temp;
+      this.setState({ pages });
+    } else {
+      let temp = pages[index + 1];
+      if (!temp) return;
+      pages[index + 1] = pages[index];
+      pages[index] = temp;
+      this.setState({ pages });
+    }
+    this.render();
+  }
+
+  addPage() {
+    let newPage = {
+      title: "New Page",
+      plugins: [],
+      images: [],
+      nodes: [
+        {
+          type: "header",
+          data: {
+            text: "new page"
+          }
+        }
+      ]
+    };
+    let pages = this.state.pages;
+    pages.push(newPage);
+    this.setState({ pages: pages });
   }
 
   addImg() {
     buildfire.imageLib.showDialog({}, (err, result) => {
       if (err) throw err;
-      buildfire.datastore.get("img", (err, response) => {
-        if (err) throw err;
-        console.log(response);
-        if (!response.id) {
-          buildfire.datastore.insert(
-            { img: result.selectedFiles[0] },
-            "img",
-            true,
-            (err, status) => {
-              if (err) {
-                console.log("insert err");
-                throw err;
-              }
-              console.log(status);
-            }
-          );
-        } else {
-          buildfire.datastore.update(
-            response.id,
-            { img: result.selectedFiles[0] },
-            "img",
-            (err, status) => {
-              if (err) throw err;
-              console.log(status);
-            }
-          );
-        }
-      });
+      this.setState({ image: result.selectedFiles[0] });
     });
   }
 
-  colorPicker(target) {
-    switch (target) {
-      case "hero": {
-        buildfire.colorLib.showDialog(
-          { colorType: "solid" },
-          { hideGradient: true },
-          (err, res) => {
-            if (err) throw err;
-          },
-          (err, data) => {
-            if (err) throw err;
-            if (data.colorType === "solid") {
-              buildfire.datastore.search({}, "heroColor", (err, res) => {
-                if (err) throw err;
-                if (res[0]) {
-                  buildfire.datastore.delete(
-                    res[0].id,
-                    "heroColor",
-                    (err, status) => {
-                      if (err) throw err;
-                      console.log(status);
-                    }
-                  );
-                }
-                buildfire.datastore.insert(
-                  { color: data.solid },
-                  "heroColor",
-                  (err, res) => {
-                    if (err) throw err;
-                  }
-                );
-              });
-            }
-          }
-        );
-      }
-    }
+  deletePage(index) {
+    let pages = this.state.pages;
+    pages.splice(index, 1);
+    this.setState({ pages: pages });
   }
 
-  mceInit() {
-    tinymce.init({
-      selector: "textarea",
-      setup: (editor) => {
-        editor.on("init", () => {
-          console.log("init");
-          let text = tinymce.activeEditor.getContent();
-          buildfire.datastore.get("text", (err, response) => {
-            if (err) throw err;
-            console.log(response);
-            if (!response.id) {
-              buildfire.datastore.insert(
-                { text: text },
-                "text",
-                true,
-                (err, status) => {
-                  if (err) {
-                    console.log("insert err");
-                    throw err;
-                  }
-                  console.log(status);
-                }
-              );
-            } else {
-              tinymce.activeEditor.insertContent(response.data.text);
-            }
-          });
-        });
-      },
-      init_instance_callback: editor => {
-        editor.on("NodeChange", e => {
-          let text = tinymce.activeEditor.getContent();
-          buildfire.datastore.get("text", (err, response) => {
-            if (err) throw err;
-            console.log(response);
-            if (!response.id) {
-              buildfire.datastore.insert(
-                { text: text },
-                "text",
-                true,
-                (err, status) => {
-                  if (err) {
-                    console.log("insert err");
-                    throw err;
-                  }
-                  console.log(status);
-                }
-              );
-            } else {
-              buildfire.datastore.update(
-                response.id,
-                { text: text },
-                "text",
-                (err, status) => {
-                  if (err) throw err;
-                  console.log(status);
-                }
-              );
-            }
-          });
-        });
-      }
-    });
-  }
-
-  initSortable() {
-    let plugins = new buildfire.components.pluginInstance.sortableList(
-      "#plugins",
-      [],
-      { showIcon: true, confirmDeleteItem: false },
-      undefined,
-      undefined,
-      { itemEditable: true, navigationCallback: () => console.log("nav cb") }
-    );
-
-    buildfire.datastore.get("plugins", (err, response) => {
-      if (err) throw err;
-      console.log(response);
-      plugins.loadItems(response.data.plugins);
-      if (!response.id) {
-        buildfire.datastore.insert(
-          { plugins: plugins.items },
-          "plugins",
-          true,
-          (err, status) => {
-            if (err) {
-              console.log("insert err");
-              throw err;
-            }
-            console.log(status);
-          }
-        );
-      }
-    });
-
-    plugins.loadItems(plugins.items, null);
-
-    plugins.onAddItems = () => {
-      buildfire.datastore.get("plugins", (err, response) => {
-        if (err) throw err;
-        console.log(response);
-        if (!response.id) {
-          buildfire.datastore.insert(
-            { plugins: plugins.items },
-            "plugins",
-            true,
-            (err, status) => {
-              if (err) {
-                console.log("insert err");
-                throw err;
-              }
-              console.log(status);
-            }
-          );
-        } else {
-          buildfire.datastore.update(
-            response.id,
-            { plugins: plugins.items },
-            "plugins",
-            (err, status) => {
-              if (err) throw err;
-              console.log(status);
-            }
-          );
-        }
-      });
-    };
-
-    plugins.onDeleteItem = () => {
-      buildfire.datastore.get("plugins", (err, response) => {
-        if (err) throw err;
-        console.log(response);
-        if (!response.id) {
-          buildfire.datastore.insert(
-            { plugins: plugins.items },
-            "plugins",
-            true,
-            (err, status) => {
-              if (err) {
-                console.log("insert err");
-                throw err;
-              }
-              console.log(status);
-            }
-          );
-        } else {
-          buildfire.datastore.update(
-            response.id,
-            { plugins: plugins.items },
-            "plugins",
-            (err, status) => {
-              if (err) throw err;
-              console.log(status);
-            }
-          );
-        }
-      });
-    };
-
-    plugins.onOrderChange = () => {
-      buildfire.datastore.get("plugins", (err, response) => {
-        if (err) throw err;
-        console.log(response);
-        if (!response.id) {
-          buildfire.datastore.insert(
-            { plugins: plugins.items },
-            "plugins",
-            true,
-            (err, status) => {
-              if (err) {
-                console.log("insert err");
-                throw err;
-              }
-              console.log(status);
-            }
-          );
-        } else {
-          buildfire.datastore.update(
-            response.id,
-            { plugins: plugins.items },
-            "plugins",
-            (err, status) => {
-              if (err) throw err;
-              console.log(status);
-            }
-          );
-        }
-      });
-    };
-  }
-
-  toggleHero(checked) {
-    if (checked) {
-      let intro = document.getElementById("intro");
-      intro.setAttribute("style", "display: initial");
-    } else if (!checked) {
-      let intro = document.getElementById("intro");
-      intro.setAttribute("style", "display: none");
-    }
+  updatePage(index, page) {
+    // console.log(index, page);
+    let pages = this.state.pages;
+    // console.log(pages);
+    pages[index] = page;
+    this.setState({ pages: pages });
   }
 
   componentDidMount() {
-    this.initSortable();
-    this.mceInit();
+    // Control looks in db for any pages
+    this.fetch();
+    // this.initSortable();
+    // this.mceInit();
   }
 
   componentDidUpdate() {
-    // this.syncData();
+    this.syncState();
   }
 
   render() {
     return (
-      <div>
-        <textarea name="content" />
-        <label className="switch">
-          <input
-            type="checkbox"
-            onInput={e => this.toggleHero(e.target.checked)}
-          />
-          <span className="slider round" />
-        </label>
-        <div>
-          <ol id="plugins" />
-          <button className="btn btn-default" onClick={this.addImg}>
-            Add Image
-          </button>
-          <button className="btn btn-default" onClick={this.logData}>
-            Log Data
-          </button>
-          <button className="btn btn-default" onClick={this.clearData}>
-            Clear Data
-          </button>
-          <button onClick={() => console.log(this.state)}>State</button>
-          <div id="plugins-carousel" />
-          <button onClick={() => this.colorPicker("hero")}>
-            Change Hero Text Color
-          </button>
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="panel panel-default">
+              <div className="panel-heading">
+                <h3 className="panel-title">Add Page</h3>
+              </div>
+              <div className="panel-body">
+                <button className="btn btn-primary" onClick={this.addPage}>
+                  Add a Page
+                </button>
+                <button className="btn btn-primary" onClick={this.addImg}>
+                  Add an Image
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-12">{this.renderPages()}</div>
         </div>
       </div>
     );
