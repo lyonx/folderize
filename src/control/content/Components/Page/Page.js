@@ -89,12 +89,6 @@ class Page extends Component {
     buildfire.imageLib.showDialog({}, (err, result) => {
       if (err) throw err;
       this.handleNodeChange(result.selectedFiles[0], index, "src");
-      // let images = this.state.images;
-      // result.selectedFiles.forEach(image => {
-      //   images.push(image);
-      // });
-      // this.setState({ images });
-      // this.update();
     });
   }
 
@@ -107,7 +101,6 @@ class Page extends Component {
 
   renderImages() {
     let images = [];
-    // console.log(this.props.data.images);
     this.props.data.images.forEach(image => {
       images.push(
         <ul className="list-group">

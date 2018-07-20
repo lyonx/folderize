@@ -10,7 +10,6 @@
                   * (optional) wrapper width, specifies width of the slider frame.
                   */
   width: 100vw;
-  height: 75vh;
   position: relative;
   font-size: 24px;
   /* overflow: hidden; */
@@ -54,7 +53,8 @@ li {
 }
 
 #container {
-  height: 140vh;
+  /* height: 140vh; */
+  overflow-x: hidden !important;
   overflow-y: hidden !important;
 }
 
@@ -184,7 +184,7 @@ ul {
   background: #eef0f0;
 }
 .page-content {
-  height: 100vh;
+  /* height: 85vh; */
 }
 
 /* .plugin-panel { */
@@ -197,6 +197,22 @@ ul {
 
 .list-group-item {
   display: flex;
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+::-webkit-scrollbar {
+  width: 0px;  /* remove scrollbar space */
+  background: transparent;  /* optional: just make scrollbar invisible */
+}
+
+.sticky + .js_dots {
+  padding-top: 60px;
 }
 
 h1,

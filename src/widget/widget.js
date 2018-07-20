@@ -51,9 +51,8 @@ class Widget extends Component {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
           dot_container.childNodes[i].classList.remove("active");
         }
-        dot_container.childNodes[e.detail.currentSlide - 1].classList.add(
-          "active"
-        );
+        // console.log(dot_container.childNodes[e.detail.currentSlide - 1]);
+        dot_container.childNodes[e.detail.currentSlide].classList.add("active");
       }
       if (e.type === "on.lory.resize") {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
@@ -76,7 +75,7 @@ class Widget extends Component {
     }, 1);
 
     let dot_navigation_slider = lory(simple_dots, {
-      infinite: 1,
+      infinite: 0,
       enableMouseEvents: true
     });
   }
@@ -84,33 +83,22 @@ class Widget extends Component {
   renderPages() {
     let pages = [];
     console.count("render");
-    // console.log(this.state.pages);
-
     if (document.querySelector(".js_slides")) {
       document.querySelector(".js_slides").innerHTML = "";
-      // console.log("cleared slides");
     }
 
     if (document.querySelector(".js_dots")) {
       let dots = document.querySelector(".js_dots");
-      // console.log(dots.childElementCount, this.state.pages.length);
       if (dots.childElementCount > this.state.pages.length) {
         while (dots.childElementCount > 0) {
           dots.removeChild(dots.firstChild);
         }
-        // console.log(dots);
       }
-      // debugger
-      // console.log("cleared", dots);
     }
-
     if (this.state.pages.length === 0) return;
     this.state.pages.forEach(page => {
       pages.push(<Page data={page} />);
     });
-
-    // setTimeout(() => this.loryFormat(), 1000);
-    // console.warn(pages);
     return pages;
   }
 
@@ -189,24 +177,32 @@ class Widget extends Component {
   }
 
   sticky() {
-    var navbar = document.getElementById("dot-nav");
-    var sticky = navbar.offsetTop;
-    let stick = () => {
-      console.log(sticky, window.pageYOffset);
-      if (window.pageYOffset >= sticky) {
-        navbar.classList.add("sticky");
-      } else {
-        navbar.classList.remove("sticky");
-      }
-    };
-    // document.getElementsByTagName("body")[0].onscroll = e => console.log(e);
-    document
-      .getElementsByTagName("body")[0]
-      .addEventListener("scroll", () => stick());
-    // document.getElementsByClassName("js_slide")[1].onscroll = e => console.log(e);
-    // console.log( document.getElementById("container").onscroll);
+    window.onload = () => {
+      let navbar = document.getElementById("dot-nav");
+      let sticky = navbar.offsetTop;
+      let frame = document.getElementsByClassName("js_frame")[0]
+      
+      let stick = () => {
+        console.log(sticky, document.getElementsByTagName("body")[0].scrollTop);
+        if (sticky <= document.getElementsByTagName("body")[0].scrollTop) {
+          // console.error(navbar);
+          navbar.classList.add("sticky");
+          frame.setAttribute("style", "padding-top: 10vh");
+        } else {
+          // console.log("false");
+          navbar.classList.remove("sticky");
+          frame.setAttribute("style", "padding-top: 0vh");
 
-    //
+        }
+      };
+      // document.getElementsByTagName("body")[0].onscroll = e => console.log(e);
+      document
+        .getElementsByTagName("body")[0]
+        .addEventListener("scroll", () => stick());
+      document.getElementsByClassName("js_slide")[1].onscroll = e =>
+        console.log(e);
+      // console.log( document.getElementById("container").onscroll);
+    };
   }
 
   render() {
