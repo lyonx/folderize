@@ -27,7 +27,6 @@ class Content extends Component {
     // Control looks in db for any pages
     db.get("pages", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -77,7 +76,6 @@ class Content extends Component {
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -90,7 +88,6 @@ class Content extends Component {
     });
     db.get("text", (err, response) => {
       if (err) throw err;
-        console.warn(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -106,11 +103,9 @@ class Content extends Component {
     // when a state change is detected,
     db.get("pages", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       if (!response.id) {
         db.insert({ pages: this.state.pages }, "pages", true, (err, status) => {
           if (err) throw err;
-          //   console.log(status);
         });
         return;
       } else {
@@ -123,18 +118,15 @@ class Content extends Component {
             if (err) {
               throw err;
             }
-            // console.log(status);
           }
         );
       }
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       if (!response.id) {
         db.insert({ image: this.state.image }, "image", true, (err, status) => {
           if (err) throw err;
-          //   console.log(status);
         });
         return;
       } else {
@@ -147,18 +139,15 @@ class Content extends Component {
             if (err) {
               throw err;
             }
-            // console.log(status);
           }
         );
       }
     });
     db.get("text", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       if (!response.id) {
         db.insert({ text: "" }, "text", true, (err, status) => {
           if (err) throw err;
-          //   console.log(status);
         });
         return;
       } else {
@@ -171,7 +160,6 @@ class Content extends Component {
             if (err) {
               throw err;
             }
-            // console.log(status);
           }
         );
       }
@@ -179,7 +167,6 @@ class Content extends Component {
   }
 
   handleChange(event) {
-    console.log("handlechange");
     const target = event.target;
     const name = target.name;
     this.setState({ [name]: event.target.value });
@@ -188,7 +175,6 @@ class Content extends Component {
   renderPages() {
     let pages = [];
     this.state.pages.map(page => {
-      console.warn(this.state.pages.indexOf(page));
       pages.push(
         <Page
           index={this.state.pages.indexOf(page)}
@@ -204,7 +190,6 @@ class Content extends Component {
 
   reorderPages(index, dir) {
     let pages = this.state.pages;
-    console.log(pages, index, dir);
     // let target = pages[index];
 
     if (dir === 1) {
@@ -256,9 +241,7 @@ class Content extends Component {
   }
 
   updatePage(index, page) {
-    // console.log(index, page);
     let pages = this.state.pages;
-    // console.log(pages);
     pages[index] = page;
     this.setState({ pages: pages });
   }
@@ -281,16 +264,13 @@ class Content extends Component {
           <div className="col-md-12">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Add Page</h3>
+                <h3 className="panel-title">Plugin Configuration</h3>
               </div>
               <div className="panel-body">
                 <button className="btn btn-primary" onClick={this.addPage}>
                   Add a Page
                 </button>
-                <button className="btn btn-primary" onClick={this.addImg}>
-                  Add an Image
-                </button>
-                <form>
+                {/* <form>
                   <div className="input-group">
                     <input
                       type="text"
@@ -301,7 +281,7 @@ class Content extends Component {
                       onChange={this.handleChange}
                     />
                   </div>
-                </form>
+                </form> */}
               </div>
             </div>
           </div>

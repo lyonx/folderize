@@ -40,18 +40,27 @@ class Page extends Component {
       return node.type === "plugin";
     });
     console.log(pluginNodes);
-    // plugins.loadItems(pluginNodes, null);
-    // this.state.plugins
+    // plugins.loadItems()
+
     plugins.onAddItems = () => {
+      let items = plugins.items;
+      // this.getPluginInfo(items);
       let nodes = this.state.nodes;
-      nodes.push({
-        type: "plugin",
-        data: plugins.items[plugins.items.length - 1]
-      });
-      this.setState({
-        nodes: nodes
-      });
-      // this.update();
+      buildfire.pluginInstance.get(
+        items[items.length - 1].instanceId,
+        (err, inst) => {
+          if (err) throw err;
+          nodes.push({
+            type: "plugin",
+            data: inst
+          });
+          this.setState({
+            nodes: nodes
+          });
+          this.togglePluginModal(this.props.index, "hide");
+          this.update();
+        }
+      );
     };
     plugins.onDeleteItem = () => {
       this.setState({
@@ -72,12 +81,8 @@ class Page extends Component {
   }
 
   update() {
-    console.log(this.props.index);
     this.updatePage(this.props.index, {
       title: this.state.title,
-      // plugins: this.state.plugins,
-      // header: this.state.header,
-      // desc: this.state.desc,
       images: this.state.images,
       nodes: this.state.nodes
     });
@@ -85,7 +90,6 @@ class Page extends Component {
 
   addImg(index) {
     let target = this.props.data.nodes[index];
-    console.log(target);
     buildfire.imageLib.showDialog({}, (err, result) => {
       if (err) throw err;
       this.handleNodeChange(result.selectedFiles[0], index, "src");
@@ -131,18 +135,55 @@ class Page extends Component {
 
   renderNodes() {
     let nodes = [];
-    // console.log(this.props.data.nodes);
     this.props.data.nodes.forEach(node => {
-      // console.warn(node);
       if (!node) return;
+      let index = this.props.data.nodes.indexOf(node);
       switch (node.type) {
         case "header": {
           nodes.push(
             <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">Header</h3>
+              <div className="panel-heading tab">
+                <h3 className="panel-title tab-title">Header</h3>
+                <div className="toggle-group">
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 1)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-up"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 0)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    id={`page${this.props.index}node${index}`}
+                    index={`${index}`}
+                    page={`${this.props.index}`}
+                    onClick={e => this.toggle(e, "node")}
+                  >
+                    <span
+                      id={`node${index}`}
+                      index={`${index}`}
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
               </div>
-              <div className="panel-body">
+              <div
+                className="panel-body panel-hide"
+                data-toggle="hide"
+                id={`page${this.props.index}nodepanel${index}`}
+              >
                 <div className="input-group">
                   <input
                     type="text"
@@ -160,23 +201,7 @@ class Page extends Component {
                   />
                 </div>
                 <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 0)
-                  }
-                >
-                  Move Down
-                </button>
-                <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 1)
-                  }
-                >
-                  Move Up
-                </button>
-                <button
-                  className="btn btn-deafult"
+                  className="btn btn-danger"
                   onClick={e =>
                     this.handleNodeChange(
                       e,
@@ -195,10 +220,47 @@ class Page extends Component {
         case "desc": {
           nodes.push(
             <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">Description</h3>
+              <div className="panel-heading tab">
+                <h3 className="panel-title tab-title">Description</h3>
+                <div className="toggle-group">
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 1)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-up"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 0)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    id={`node${index}`}
+                    index={`${index}`}
+                    onClick={e => this.toggle(e, "node")}
+                  >
+                    <span
+                      id={`node${index}`}
+                      index={`${index}`}
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
               </div>
-              <div className="panel-body">
+              <div
+                className="panel-body panel-hide"
+                data-toggle="hide"
+                id={`page${this.props.index}nodepanel${index}`}
+              >
                 <div className="input-group">
                   <input
                     type="text"
@@ -216,23 +278,7 @@ class Page extends Component {
                   />
                 </div>
                 <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 0)
-                  }
-                >
-                  Move Down
-                </button>
-                <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 1)
-                  }
-                >
-                  Move Up
-                </button>
-                <button
-                  className="btn btn-deafult"
+                  className="btn btn-danger"
                   onClick={e =>
                     this.handleNodeChange(
                       e,
@@ -251,10 +297,47 @@ class Page extends Component {
         case "image": {
           nodes.push(
             <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">Image</h3>
+              <div className="panel-heading tab">
+                <h3 className="panel-title tab-title">Image</h3>
+                <div className="toggle-group">
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 1)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-up"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 0)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    id={`node${index}`}
+                    index={`${index}`}
+                    onClick={e => this.toggle(e, "node")}
+                  >
+                    <span
+                      id={`node${index}`}
+                      index={`${index}`}
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
               </div>
-              <div className="panel-body">
+              <div
+                className="panel-body panel-hide"
+                data-toggle="hide"
+                id={`page${this.props.index}nodepanel${index}`}
+              >
                 <button
                   className="btn btn-deafult"
                   onClick={() =>
@@ -297,47 +380,63 @@ class Page extends Component {
           break;
         }
         case "plugin": {
+          console.log(node);
+          if (!node.data) return;
           nodes.push(
             <div className="panel panel-default">
-              <div className="panel-heading">
-                <h3 className="panel-title">Plugin</h3>
+              <div className="panel-heading tab">
+                <h3 className="panel-title tab-title">Plugin</h3>
+                <div className="toggle-group">
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 1)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-up"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    onClick={e => this.reorderNodes(index, 0)}
+                  >
+                    <span
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    className="btn btn-deafult tab-toggle"
+                    id={`node${index}`}
+                    index={`${index}`}
+                    onClick={e => this.toggle(e, "node")}
+                  >
+                    <span
+                      id={`node${index}`}
+                      index={`${index}`}
+                      className="glyphicon glyphicon-chevron-down"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
               </div>
-              <div className="panel-body">
+              <div
+                className="panel-body panel-hide"
+                id={`page${this.props.index}nodepanel${index}`}
+                data-toggle="hide"
+              >
                 <div className="plugin">
                   <div
                     className="plugin-thumbnail"
                     style={`background: url("${node.data.iconUrl}")`}
                     alt="..."
                   />
-                  <h2 className="plugin-title">{node.data.title}</h2>
+                  <h3 className="plugin-title">{node.data.title}</h3>
                 </div>
-                <button onClick={e => this.pluginNav(node)}>Go</button>
                 <hr />
                 <button
                   className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 0)
-                  }
-                >
-                  Move Down
-                </button>
-                <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 1)
-                  }
-                >
-                  Move Up
-                </button>
-                <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.handleNodeChange(
-                      e,
-                      this.props.data.nodes.indexOf(node),
-                      "delete"
-                    )
-                  }
+                  onClick={e => this.handleNodeChange(e, index, "delete")}
                 >
                   Remove
                 </button>
@@ -354,7 +453,6 @@ class Page extends Component {
   }
 
   handleNodeChange(event, index, attr) {
-    console.log(event, index, attr);
     let nodes = this.props.data.nodes;
     let node = this.props.data.nodes[index];
     switch (attr) {
@@ -362,10 +460,10 @@ class Page extends Component {
         node.data.text = event.target.value;
         nodes[index] = node;
         this.setState({ nodes });
+        this.update();
         break;
       }
       case "src": {
-        console.log(node.data.src, event);
         node.data.src = event;
         nodes[index] = node;
         this.setState({ nodes });
@@ -425,15 +523,11 @@ class Page extends Component {
 
   reorderNodes(index, dir) {
     let nodes = this.props.data.nodes;
-    console.log(nodes, index, dir);
-    // let target = nodes[index];
-
     if (dir === 1) {
       let temp = nodes[index - 1];
       if (!temp) return;
       nodes[index - 1] = nodes[index];
       nodes[index] = temp;
-      console.log(nodes);
       this.setState({ nodes });
       this.update();
     } else {
@@ -447,17 +541,36 @@ class Page extends Component {
   }
 
   handleChange(event) {
-    console.log("handlechange");
     const target = event.target;
     const name = target.name;
     this.setState({ [name]: event.target.value });
+    console.log(event);
+    if (event.type === "input") {
+      this.update();
+    }
+    // this.update();
   }
 
-  toggle(e) {
-    let panel = document.getElementById(
-      `panel${document.getElementById(e.target.id).getAttribute("index")}`
+  toggle(e, type) {
+    console.log(e, type);
+    console.log(
+      `page${this.props.index}nodepanel${document
+        .getElementById(e.target.id)
+        .getAttribute("index")}`
     );
-    // console.log(panel.getAttribute("data-toggle"));
+    let panel;
+    if (type === "node") {
+      panel = document.getElementById(
+        `page${this.props.index}nodepanel${document
+          .getElementById(e.target.id)
+          .getAttribute("index")}`
+      );
+    } else {
+      panel = document.getElementById(
+        `panel${document.getElementById(e.target.id).getAttribute("index")}`
+      );
+    }
+    console.log(panel);
     switch (panel.getAttribute("data-toggle")) {
       case "show":
         panel.classList.remove("panel-show");
@@ -472,10 +585,27 @@ class Page extends Component {
       default:
         break;
     }
+    if (e.target.innerHTML === "Edit") {
+      e.target.innerHTML = "Hide";
+    } else if (e.target.innerHTML === "Hide") {
+      e.target.innerHTML = "Edit";
+    }
+  }
+
+  togglePluginModal(index, toggle) {
+    console.log(toggle);
+    if (toggle === "show") {
+      document
+        .getElementById(`plugins${index}`)
+        .classList.replace("panel-hide", "panel-show");
+    } else {
+      document
+        .getElementById(`plugins${index}`)
+        .classList.replace("panel-show", "panel-hide");
+    }
   }
 
   componentDidMount() {
-    // console.table(this.props);
     this.setState({
       title: this.props.data.title,
       nodes: this.props.data.nodes
@@ -483,9 +613,7 @@ class Page extends Component {
     this.initSortable();
   }
 
-  componentDidUpdate() {
-    console.log(this.state);
-  }
+  componentDidUpdate() {}
 
   render() {
     return (
@@ -524,14 +652,9 @@ class Page extends Component {
             <div className="container">
               <div className="row">
                 <div className="col-sm-12">
-                  <div id={`plugins${this.props.index}`} />
-                </div>
-              </div>
-
-              <div className="row">
-                <div className="col-sm-12">
                   <form>
                     <div className="input-group">
+                      <h4>Edit Page Title</h4>
                       <input
                         type="text"
                         className="form-control"
@@ -544,40 +667,126 @@ class Page extends Component {
                   </form>
                 </div>
                 <div className="col-sm-12">
-                  <button
-                    className="btn btn-default"
-                    onClick={() => this.addNode("header")}
+                  <div className="page-header">
+                    <div className="btn-group">
+                      <button
+                        type="button"
+                        className="btn btn-default dropdown-toggle"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        id={`dropdown${this.props.index}`}
+                        index={this.props.index}
+                        onClick={e => {
+                          let index = document
+                            .getElementById(e.target.id)
+                            .getAttribute("index");
+                          console.log(index);
+                          let menu = document.getElementById(`menu${index}`);
+                          console.log(menu);
+                          let toggle = menu.getAttribute("data-toggle");
+                          if (toggle === "show") {
+                            menu.classList.replace("panel-show", "panel-hide");
+                            menu.setAttribute("data-toggle", "hide");
+                          } else {
+                            menu.classList.replace("panel-hide", "panel-show");
+                            // menu.classList.add("show");
+                            menu.setAttribute("data-toggle", "show");
+                          }
+                        }}
+                      >
+                        Add Nodes
+                        <span className="caret" style="pointer-events: none;" />
+                      </button>
+                      <ul
+                        className="dropdown-menu panel-hide"
+                        data-toggle="hide"
+                        id={`menu${this.props.index}`}
+                      >
+                        <li>
+                          <a
+                            onClick={e => {
+                              this.addNode("header");
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .classList.replace("panel-show", "panel-hide");
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .setAttribute("data-toggle", "hide");
+                            }}
+                          >
+                            Add Header
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            onClick={() => {
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .classList.replace("panel-show", "panel-hide");
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .setAttribute("data-toggle", "hide");
+                              this.addNode("desc");
+                            }}
+                          >
+                            Add Description
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            onClick={() => {
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .classList.replace("panel-show", "panel-hide");
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .setAttribute("data-toggle", "hide");
+                              this.addNode("image");
+                            }}
+                          >
+                            Add Image
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            onClick={() => {
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .classList.replace("panel-show", "panel-hide");
+                              document
+                                .getElementById(`menu${this.props.index}`)
+                                .setAttribute("data-toggle", "hide");
+                              this.togglePluginModal(this.props.index, "show");
+                            }}
+                          >
+                            Add Plugin
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-sm-12">
+                  <div
+                    className="plugins panel-hide"
+                    id={`plugins${this.props.index}`}
                   >
-                    Add Header
-                  </button>
-                  <button
-                    className="btn btn-default"
-                    onClick={() => this.addNode("desc")}
-                  >
-                    Add Description
-                  </button>
-                  <button
-                    className="btn btn-default"
-                    onClick={() => this.addNode("image")}
-                  >
-                    Add Image
-                  </button>
+                    <button
+                      className="btm btn-danger"
+                      style="position: relative; left: 10em; top: 10em;"
+                      onClick={() => {
+                        this.togglePluginModal(this.props.index, "hide");
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
                 <div className="col-sm-12">{this.renderNodes()}</div>
                 <div className="col-sm-12">{this.renderImages()}</div>
                 <div className="col-sm-12">
-                  <div id={`plugins${this.key}`} />
-                  <button className="btn btn-primary" onClick={this.delete}>
+                  <button className="btn btn-danger" onClick={this.delete}>
                     Delete Page
-                  </button>
-                  <button className="btn btn-primary" onClick={this.update}>
-                    Update
-                  </button>
-                  <button className="btn btn-primary" onClick={this.addImg}>
-                    Add Image
-                  </button>
-                  <button className="btn btn-primary" onClick={this.addImg}>
-                    Add Plugin
                   </button>
                 </div>
               </div>

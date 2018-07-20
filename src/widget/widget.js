@@ -16,8 +16,6 @@ class Widget extends Component {
   }
 
   loryFormat() {
-    // console.count("formatter");
-
     let pages = this.state.pages;
     if (pages.length === 0) return;
     let simple_dots = document.querySelector(".js_simple_dots");
@@ -31,11 +29,9 @@ class Widget extends Component {
         for (let i = 0, len = dot_count; i < len; i++) {
           let clone = dot_list_item.cloneNode();
           if (dot_container.childNodes.length >= pages.length) return;
-          // console.log(pages[i],  pages[0]);
           dot_container.appendChild(clone);
-          // console.count("dot container");
         }
-        dot_container.childNodes[0].classList.add("active");
+        dot_container.childNodes[0].classList.add("backgroundColorTheme");
       }
       if (e.type === "after.lory.init") {
         for (let i = 0, len = dot_count; i < len; i++) {
@@ -49,16 +45,15 @@ class Widget extends Component {
       }
       if (e.type === "after.lory.slide") {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
-          dot_container.childNodes[i].classList.remove("active");
+          dot_container.childNodes[i].classList.remove("backgroundColorTheme");
         }
-        // console.log(dot_container.childNodes[e.detail.currentSlide - 1]);
-        dot_container.childNodes[e.detail.currentSlide].classList.add("active");
+        dot_container.childNodes[e.detail.currentSlide].classList.add("backgroundColorTheme");
       }
       if (e.type === "on.lory.resize") {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
-          dot_container.childNodes[i].classList.remove("active");
+          dot_container.childNodes[i].classList.remove("backgroundColorTheme");
         }
-        dot_container.childNodes[0].classList.add("active");
+        dot_container.childNodes[0].classList.add("backgroundColorTheme");
       }
     };
     simple_dots.addEventListener("before.lory.init", handleDotEvent);
@@ -82,7 +77,6 @@ class Widget extends Component {
 
   renderPages() {
     let pages = [];
-    console.count("render");
     if (document.querySelector(".js_slides")) {
       document.querySelector(".js_slides").innerHTML = "";
     }
@@ -126,7 +120,6 @@ class Widget extends Component {
   fetch() {
     db.get("pages", (err, response) => {
       if (err) throw err;
-      // console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -145,7 +138,6 @@ class Widget extends Component {
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-      // console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         return;
@@ -155,7 +147,6 @@ class Widget extends Component {
     });
     db.get("text", (err, response) => {
       if (err) throw err;
-      // console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         return;
@@ -166,53 +157,19 @@ class Widget extends Component {
   }
 
   componentDidUpdate() {
-    console.count("update");
     this.loryFormat();
   }
 
   componentDidMount() {
-    this.sticky();
     this.fetch();
     this.listener();
   }
 
-  sticky() {
-    window.onload = () => {
-      let navbar = document.getElementById("dot-nav");
-      let sticky = navbar.offsetTop;
-      let frame = document.getElementsByClassName("js_frame")[0]
-      
-      let stick = () => {
-        console.log(sticky, document.getElementsByTagName("body")[0].scrollTop);
-        if (sticky <= document.getElementsByTagName("body")[0].scrollTop) {
-          // console.error(navbar);
-          navbar.classList.add("sticky");
-          frame.setAttribute("style", "padding-top: 10vh");
-        } else {
-          // console.log("false");
-          navbar.classList.remove("sticky");
-          frame.setAttribute("style", "padding-top: 0vh");
-
-        }
-      };
-      // document.getElementsByTagName("body")[0].onscroll = e => console.log(e);
-      document
-        .getElementsByTagName("body")[0]
-        .addEventListener("scroll", () => stick());
-      document.getElementsByClassName("js_slide")[1].onscroll = e =>
-        console.log(e);
-      // console.log( document.getElementById("container").onscroll);
-    };
-  }
-
   render() {
     return (
-      <div id="container">
-        <div id="intro" style={`background: url(${this.state.image})`}>
-          <div id="hero">{this.state.text}</div>
-        </div>
+      <div id="container backgroundColorTheme">
         <div className="slider js_simple_dots simple">
-          <ul className="dots js_dots" id="dot-nav" />
+          <ul className="dots js_dots sticky defaultBackgroundTheme" id="dot-nav" />
           <div className="frame js_frame">
             <div id="sandbox">
               <ul className="slides js_slides">{this.renderPages()}</ul>

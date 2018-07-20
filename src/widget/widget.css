@@ -1,32 +1,33 @@
-/**
-             * (optional) define here the style definitions which should be applied on the slider container
-             * e.g. width including further controls like arrows etc.
-             */
-.slider {
-}
-
 .frame {
-  /**
-                  * (optional) wrapper width, specifies width of the slider frame.
-                  */
   width: 100vw;
   position: relative;
   font-size: 24px;
-  /* overflow: hidden; */
-  /* white-space: nowrap; */
+  padding-top: 10vh;
 }
 
 .slides {
   display: inline-block;
+  display: flex;
+}
+
+.js_slide {
+  /* background: #eef0f0; */
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  flex: 1;
+  height: 90vh;
+  min-width: 100vw;
+  background-size: cover;
+  background-position: center;
+}
+
+.slide-img {
+  width: 100%;
 }
 
 li {
   position: relative;
   display: inline-block;
-
-  /**
-                  * (optional) if the content inside the slide element has a defined size.
-                  */
   width: 100vw;
 }
 
@@ -53,32 +54,13 @@ li {
 }
 
 #container {
-  /* height: 140vh; */
   overflow-x: hidden !important;
   overflow-y: hidden !important;
 }
 
-.slides {
-  display: flex;
-}
-
-.js_slide {
-  background: #eef0f0;
-  overflow-y: scroll !important;
-  flex: 1;
-  min-width: 100vw;
-  /* height: 74.54vh; */
-  /* background: #333333; */
-  background-size: cover;
-  background-position: center;
-}
-
-.slide-img {
-  width: 100%;
-}
-
 ul {
   -webkit-padding-start: 0px;
+  margin-bottom: 0px;
 }
 
 @keyframes test {
@@ -86,23 +68,17 @@ ul {
     margin-top: 0px;
   }
   to {
-    /* font-size: 36px; */
-    background: #eef0f0;
-    flex: 1.5;
-    /* margin-top: -5px; */
-    /* margin-bottom: -5px; */
+
   }
 }
 
 #dot-nav > .active {
-  /* background: #eef0f0; */
-  color: black;
+  /* color: black; */
   flex: 1;
   font-size: 24px;
   animation-name: test;
   animation-duration: 0.25s;
   animation-fill-mode: forwards;
-  /* margin-top: 0px; */
 }
 
 #dot-nav > li {
@@ -110,8 +86,8 @@ ul {
   text-align: center;
   line-height: 10vh;
   font-size: 20px;
-  color: #ffffff;
-  background: #333333;
+  /* color: #ffffff; */
+  /* background: #333333; */
 }
 
 #dot-nav {
@@ -137,23 +113,14 @@ ul {
   color: white;
 }
 
-.well {
-  border: 0px !important;
-  border-radius: 0px !important;
-  /* border-top-right-radius: 0px !important; */
-  height: 100%;
-}
-
 .slide-col {
   height: 100% !important;
   padding: 0px !important;
 }
 
 .description {
-  /* margin-bottom: 15px; */
   padding-top: 15px;
   padding-bottom: 15px;
-  /* margin-top: 15px; */
 }
 
 .row {
@@ -162,8 +129,6 @@ ul {
 
 .container-fluid {
   height: 100%;
-  /* padding-left: 0px !important; */
-  /* padding-right: 0px !important; */
 }
 
 .plugin-thumbnail {
@@ -181,19 +146,8 @@ ul {
 
 .body,
 .row {
-  background: #eef0f0;
+  /* background: #eef0f0; */
 }
-.page-content {
-  /* height: 85vh; */
-}
-
-/* .plugin-panel { */
-  /* display: flex; */
-/* } */
-
-/* .plugin-content {
-  flex: 5;
-} */
 
 .list-group-item {
   display: flex;
@@ -206,9 +160,15 @@ ul {
   z-index: 100;
 }
 
-::-webkit-scrollbar {
-  width: 0px;  /* remove scrollbar space */
-  background: transparent;  /* optional: just make scrollbar invisible */
+/* ::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+} */
+
+@-moz-document url-prefix() {
+  .slide {
+    padding-right: 5px !important;
+  }
 }
 
 .sticky + .js_dots {
@@ -232,37 +192,34 @@ h6 {
 }
 
 .image-wrap {
-  /* border-bottom: 1px solid #000000; */
-  /* margin-top: 15px; */
   margin-left: -15px;
   margin-right: -15px;
 }
 
-/* body { */
-  /* overflow-y: hidden !important; */
-/* } */
-
 .plugin-title {
-  /* position: relative; */
-  /* top: 75%; */
-  /* border-radius: 10px; */
-  /* color: #eef0f0; */
   flex: 1;
   padding-left: 15px;
   height: 50px;
   line-height: 50px;
-  /* text-align: center; */
-  /* background: #00000093 */
+}
+
+.page-header {
+  margin-right: -15px;
+  margin-left: -15px;
+  width: 100vw;
+  padding-left: 15px; 
+  padding-right: 15px; 
 }
 
 .plugin {
   margin-top: -1px;
   margin-left: -15px;
   margin-right: -15px;
-  background: #eef0f0;
+  /* background: #eef0f0; */
   padding: 15px;
   border-top: 1px solid rgba(57, 52, 46, 0.25) !important;
   border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
   display: flex;
-  /* height: 50px; */
 }
+
+

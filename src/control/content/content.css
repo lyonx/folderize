@@ -70,8 +70,11 @@ input:checked + .slider:before {
 
 .plugin-thumbnail {
   background-size: cover !important;
-  width: 100px;
-  height: 100px;
+  max-width: 50px;
+  margin: auto;
+  flex: 1;
+  border-radius: 10px;
+  height: 50px;
 }
 
 .slider.round:before {
@@ -102,13 +105,42 @@ input:checked + .slider:before {
 .panel-hide {
   display: none;
 }
+
 .panel-show {
   display: block;
 }
-.plugin {
-  display: flex;
-}
 .plugin-title {
   flex: 1;
-  text-align: center
+  padding-left: 15px;
+  height: 50px;
+  line-height: 50px;
+}
+.plugins {
+  position: absolute;
+
+  z-index: 900;
+  background: rgb(255, 255, 255);
+  width: 95vw;
+  padding: 111px;
+  height: 105vw;
+  top: -200px;
+  left: -14px;
+}
+.plugin {
+  margin-top: -1px;
+  margin-left: -15px;
+  margin-right: -15px;
+  background: #eef0f0;
+  padding: 15px;
+  border-top: 1px solid rgba(57, 52, 46, 0.25) !important;
+  border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
+  display: flex;
+}
+
+.panel-title {
+  font-size: 18px;
+}
+
+.draggable-list-view {
+  display: none;
 }
