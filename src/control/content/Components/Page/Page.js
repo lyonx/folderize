@@ -170,12 +170,7 @@ class Page extends Component {
                     page={`${this.props.index}`}
                     onClick={e => this.toggle(e, "node")}
                   >
-                    <span
-                      id={`node${index}`}
-                      index={`${index}`}
-                      className="glyphicon glyphicon-chevron-down"
-                      aria-hidden="true"
-                    />
+                  Edit
                   </button>
                 </div>
               </div>
@@ -247,12 +242,7 @@ class Page extends Component {
                     index={`${index}`}
                     onClick={e => this.toggle(e, "node")}
                   >
-                    <span
-                      id={`node${index}`}
-                      index={`${index}`}
-                      className="glyphicon glyphicon-chevron-down"
-                      aria-hidden="true"
-                    />
+                    Edit
                   </button>
                 </div>
               </div>
@@ -324,12 +314,7 @@ class Page extends Component {
                     index={`${index}`}
                     onClick={e => this.toggle(e, "node")}
                   >
-                    <span
-                      id={`node${index}`}
-                      index={`${index}`}
-                      className="glyphicon glyphicon-chevron-down"
-                      aria-hidden="true"
-                    />
+                    Edit
                   </button>
                 </div>
               </div>
@@ -339,31 +324,7 @@ class Page extends Component {
                 id={`page${this.props.index}nodepanel${index}`}
               >
                 <button
-                  className="btn btn-deafult"
-                  onClick={() =>
-                    this.addImg(this.props.data.nodes.indexOf(node))
-                  }
-                >
-                  Change Image
-                </button>
-                <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 0)
-                  }
-                >
-                  Move Down
-                </button>
-                <button
-                  className="btn btn-deafult"
-                  onClick={e =>
-                    this.reorderNodes(this.props.data.nodes.indexOf(node), 1)
-                  }
-                >
-                  Move Up
-                </button>
-                <button
-                  className="btn btn-deafult"
+                  className="btn btn-danger"
                   onClick={e =>
                     this.handleNodeChange(
                       e,
@@ -373,6 +334,14 @@ class Page extends Component {
                   }
                 >
                   Remove
+                </button>
+                <button
+                  className="btn btn-success"
+                  onClick={() =>
+                    this.addImg(this.props.data.nodes.indexOf(node))
+                  }
+                >
+                  Change Image
                 </button>
               </div>
             </div>
@@ -411,12 +380,7 @@ class Page extends Component {
                     index={`${index}`}
                     onClick={e => this.toggle(e, "node")}
                   >
-                    <span
-                      id={`node${index}`}
-                      index={`${index}`}
-                      className="glyphicon glyphicon-chevron-down"
-                      aria-hidden="true"
-                    />
+                    Edit
                   </button>
                 </div>
               </div>
@@ -613,29 +577,31 @@ class Page extends Component {
     this.initSortable();
   }
 
-  componentDidUpdate() {}
+  componentDidUpdate() {
+    // console.log(this.state);
+  }
 
   render() {
     return (
       <div>
         <div className="panel panel-default">
           <div className="panel-heading tab">
-            <h3 className="panel-title tab-title">{this.state.title}</h3>
+            <h3 className="panel-title tab-title">{this.props.data.title}</h3>
             <div className="toggle-group">
               <button
-                className="btn btn-default tab-toggle"
+                className="btn tab-toggle"
                 onClick={e => this.reorderPages(this.props.index, 1)}
               >
                 Move Up
               </button>
               <button
-                className="btn btn-default tab-toggle"
+                className="btn tab-toggle"
                 onClick={e => this.reorderPages(this.props.index, 0)}
               >
                 Move Down
               </button>
               <button
-                className="btn btn-default tab-toggle"
+                className="btn tab-toggle"
                 id={`tab${this.props.index}`}
                 index={this.props.index}
                 onClick={e => this.toggle(e)}
@@ -689,7 +655,6 @@ class Page extends Component {
                             menu.setAttribute("data-toggle", "hide");
                           } else {
                             menu.classList.replace("panel-hide", "panel-show");
-                            // menu.classList.add("show");
                             menu.setAttribute("data-toggle", "show");
                           }
                         }}

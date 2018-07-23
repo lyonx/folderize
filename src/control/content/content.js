@@ -175,6 +175,7 @@ class Content extends Component {
   renderPages() {
     let pages = [];
     this.state.pages.map(page => {
+      console.log(page);
       pages.push(
         <Page
           index={this.state.pages.indexOf(page)}
@@ -254,10 +255,12 @@ class Content extends Component {
   }
 
   componentDidUpdate() {
+    console.log(this.state);
     this.syncState();
   }
 
   render() {
+    console.count("render");
     return (
       <div className="container-fluid">
         <div className="row">

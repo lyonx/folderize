@@ -8,6 +8,11 @@
 .slides {
   display: inline-block;
   display: flex;
+  padding-left: 0px;
+}
+
+.row {
+  padding-left: 0px;
 }
 
 .js_slide {
@@ -91,6 +96,7 @@ ul {
 }
 
 #dot-nav {
+  padding-left: 0px;
   display: flex;
   height: 10vh;
   margin: 0px;
@@ -165,11 +171,6 @@ ul {
   background: transparent;
 } */
 
-@-moz-document url-prefix() {
-  .slide {
-    padding-right: 5px !important;
-  }
-}
 
 .sticky + .js_dots {
   padding-top: 60px;
