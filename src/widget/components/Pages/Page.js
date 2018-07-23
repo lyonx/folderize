@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-
+// Widget Side Page
 class Page extends Component {
+
   renderPlugins() {
     let plugins = [];
-    // console.log(this.props);
     this.props.data.plugins.forEach(plugin => {
       plugins.push(
         <div className="panel panel-default">
@@ -15,9 +15,6 @@ class Page extends Component {
               className="thumbnail"
               style={`background: url(${plugin.iconUrl}`}
             />
-            {/* <div className="plugin-content">
-              There will be some content here.
-            </div> */}
           </div>
         </div>
       );
@@ -25,31 +22,16 @@ class Page extends Component {
     return plugins;
   }
 
-  renderImages() {
-    let images = [];
-    this.props.data.images.forEach(image => {
-      images.push(
-        <div className="image-wrap">
-          <div className="images" style={`background: url(${image})`} />
-        </div>
-      );
-    });
-    // console.log(images);
-    return images;
-  }
-
   pluginNav(node) {
-    console.log(node);
     buildfire.navigation.navigateTo({
-      pluginId: node.pluginTypeId,
-      instanceId: node.instanceId,
-      folderName: null,
-      title: node.title
+      pluginId: node.data.pluginTypeId,
+      instanceId: node.data.instanceId,
+      folderName: node.data._buildfire.pluginType.result[0].folderName,
+      title: node.data.title
     });
   }
 
   renderNodes() {
-    // console.log(this.props.data.nodes);
     let nodes = [];
     this.props.data.nodes.forEach(node => {
       if (!node) return;
@@ -60,7 +42,6 @@ class Page extends Component {
               <div className="page-header">
                 <h1>{node.data.text}</h1>
               </div>
-              <hr />
             </div>
           );
           break;
@@ -87,6 +68,7 @@ class Page extends Component {
           break;
         }
         case "plugin": {
+          if (!node.data) return;
           nodes.push(
             <div className="col-sm-12">
               <div className="plugin" onClick={e => this.pluginNav(node)}>
@@ -94,9 +76,8 @@ class Page extends Component {
                   className="plugin-thumbnail"
                   style={`background: url("${node.data.iconUrl}")`}
                   alt="..."
-                >
-                  <h3 className="plugin-title">{node.data.title}</h3>
-                </div>
+                />
+                <h3 className="plugin-title">{node.data.title}</h3>
               </div>
             </div>
           );
@@ -108,9 +89,10 @@ class Page extends Component {
     });
     return nodes;
   }
+
   render() {
     return (
-      <li className="js_slide">
+      <li className="js_slide" >
         <div className="container-fluid page-content">
           <div className="row">{this.renderNodes()}</div>
         </div>

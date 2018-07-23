@@ -1,33 +1,38 @@
-/**
-             * (optional) define here the style definitions which should be applied on the slider container
-             * e.g. width including further controls like arrows etc.
-             */
-.slider {
-}
-
 .frame {
-  /**
-                  * (optional) wrapper width, specifies width of the slider frame.
-                  */
   width: 100vw;
-  height: 75vh;
   position: relative;
   font-size: 24px;
-  /* overflow: hidden; */
-  /* white-space: nowrap; */
+  padding-top: 10vh;
 }
 
 .slides {
   display: inline-block;
+  display: flex;
+  padding-left: 0px;
+}
+
+.row {
+  padding-left: 0px;
+}
+
+.js_slide {
+  /* background: #eef0f0; */
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  flex: 1;
+  height: 90vh;
+  min-width: 100vw;
+  background-size: cover;
+  background-position: center;
+}
+
+.slide-img {
+  width: 100%;
 }
 
 li {
   position: relative;
   display: inline-block;
-
-  /**
-                  * (optional) if the content inside the slide element has a defined size.
-                  */
   width: 100vw;
 }
 
@@ -54,29 +59,13 @@ li {
 }
 
 #container {
-  height: 100vh;
-}
-
-.slides {
-  display: flex;
-}
-
-.js_slide {
-  overflow-y: scroll;
-  flex: 1;
-  min-width: 100vw;
-  height: 74.54vh;
-  /* background: #333333; */
-  background-size: cover;
-  background-position: center;
-}
-
-.slide-img {
-  width: 100%;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
 }
 
 ul {
   -webkit-padding-start: 0px;
+  margin-bottom: 0px;
 }
 
 @keyframes test {
@@ -84,22 +73,17 @@ ul {
     margin-top: 0px;
   }
   to {
-    font-size: 36px;
-    background: #eef0f0;
-    flex: 1.5;
-    margin-top: -10px;
+
   }
 }
 
 #dot-nav > .active {
-  /* background: #eef0f0; */
-  color: black;
+  /* color: black; */
   flex: 1;
   font-size: 24px;
   animation-name: test;
   animation-duration: 0.25s;
   animation-fill-mode: forwards;
-  /* margin-top: 0px; */
 }
 
 #dot-nav > li {
@@ -107,18 +91,19 @@ ul {
   text-align: center;
   line-height: 10vh;
   font-size: 20px;
-  color: #ffffff;
-  background: #333333;
+  /* color: #ffffff; */
+  /* background: #333333; */
 }
 
 #dot-nav {
+  padding-left: 0px;
   display: flex;
   height: 10vh;
   margin: 0px;
 }
 
 #intro {
-  height: 15vh;
+  height: 40vh;
   background-position: center !important;
   background-size: cover !important;
   position: relative;
@@ -129,15 +114,9 @@ ul {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  font-size: 40px;
   text-align: center;
   color: white;
-}
-
-.well {
-  border: 0px !important;
-  border-radius: 0px !important;
-  /* border-top-right-radius: 0px !important; */
-  height: 100%;
 }
 
 .slide-col {
@@ -145,8 +124,9 @@ ul {
   padding: 0px !important;
 }
 
-.description{
-margin-bottom: 20px;
+.description {
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .row {
@@ -155,16 +135,15 @@ margin-bottom: 20px;
 
 .container-fluid {
   height: 100%;
-  /* padding-left: 0px !important; */
-  /* padding-right: 0px !important; */
 }
 
 .plugin-thumbnail {
   background-size: cover !important;
-  width: 200px;
+  max-width: 50px;
   margin: auto;
+  flex: 1;
   border-radius: 10px;
-  height: 200px;
+  height: 50px;
 }
 
 .header {
@@ -173,22 +152,28 @@ margin-bottom: 20px;
 
 .body,
 .row {
-  background: #eef0f0;
+  /* background: #eef0f0; */
 }
-.page-content {
-  height: 100vh;
-}
-
-.plugin-panel {
-  /* display: flex; */
-}
-
-/* .plugin-content {
-  flex: 5;
-} */
 
 .list-group-item {
   display: flex;
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+/* ::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+} */
+
+
+.sticky + .js_dots {
+  padding-top: 60px;
 }
 
 h1,
@@ -202,28 +187,40 @@ h6 {
 
 .images {
   height: 200px;
+  margin-bottom: 15px;
   width: 100vw;
   background-size: cover !important;
 }
 
 .image-wrap {
-  /* border-bottom: 1px solid #000000; */
-  /* margin-top: 15px; */
   margin-left: -15px;
   margin-right: -15px;
 }
 
-body {
-  overflow-y: hidden !important;
-}
-
 .plugin-title {
-  position: relative;
-  top: 75%;
-  border-radius: 10px;
-  color: #eef0f0;
+  flex: 1;
+  padding-left: 15px;
   height: 50px;
   line-height: 50px;
-  text-align: center;
-  background: #00000093
 }
+
+.page-header {
+  margin-right: -15px;
+  margin-left: -15px;
+  width: 100vw;
+  padding-left: 15px; 
+  padding-right: 15px; 
+}
+
+.plugin {
+  margin-top: -1px;
+  margin-left: -15px;
+  margin-right: -15px;
+  /* background: #eef0f0; */
+  padding: 15px;
+  border-top: 1px solid rgba(57, 52, 46, 0.25) !important;
+  border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
+  display: flex;
+}
+
+

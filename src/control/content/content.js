@@ -12,6 +12,7 @@ class Content extends Component {
     this.deletePage = this.deletePage.bind(this);
     this.addImg = this.addImg.bind(this);
     this.updatePage = this.updatePage.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.renderPages = this.renderPages.bind(this);
     this.reorderPages = this.reorderPages.bind(this);
     this.state = {
@@ -26,7 +27,6 @@ class Content extends Component {
     // Control looks in db for any pages
     db.get("pages", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -76,30 +76,36 @@ class Content extends Component {
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
           image:
             "https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8"
         });
-      }
-      {
+      } else {
         this.setState({ image: response.data.image });
+      }
+    });
+    db.get("text", (err, response) => {
+      if (err) throw err;
+      // if none are present, insert a default page
+      if (!response.id) {
+        this.setState({
+          text: ""
+        });
+      } else {
+        this.setState({ text: response.data.text });
       }
     });
   }
 
   syncState() {
     // when a state change is detected,
-    // console.log(this.state);
     db.get("pages", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       if (!response.id) {
         db.insert({ pages: this.state.pages }, "pages", true, (err, status) => {
           if (err) throw err;
-          //   console.log(status);
         });
         return;
       } else {
@@ -112,18 +118,15 @@ class Content extends Component {
             if (err) {
               throw err;
             }
-            // console.log(status);
           }
         );
       }
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-      //   console.log(response);
       if (!response.id) {
         db.insert({ image: this.state.image }, "image", true, (err, status) => {
           if (err) throw err;
-          //   console.log(status);
         });
         return;
       } else {
@@ -136,17 +139,43 @@ class Content extends Component {
             if (err) {
               throw err;
             }
-            // console.log(status);
+          }
+        );
+      }
+    });
+    db.get("text", (err, response) => {
+      if (err) throw err;
+      if (!response.id) {
+        db.insert({ text: "" }, "text", true, (err, status) => {
+          if (err) throw err;
+        });
+        return;
+      } else {
+        // insert pages into db
+        db.update(
+          response.id,
+          { text: this.state.text },
+          "text",
+          (err, status) => {
+            if (err) {
+              throw err;
+            }
           }
         );
       }
     });
   }
 
+  handleChange(event) {
+    const target = event.target;
+    const name = target.name;
+    this.setState({ [name]: event.target.value });
+  }
+
   renderPages() {
     let pages = [];
     this.state.pages.map(page => {
-      console.warn(this.state.pages.indexOf(page));
+      console.log(page);
       pages.push(
         <Page
           index={this.state.pages.indexOf(page)}
@@ -162,7 +191,6 @@ class Content extends Component {
 
   reorderPages(index, dir) {
     let pages = this.state.pages;
-    console.log(pages, index, dir);
     // let target = pages[index];
 
     if (dir === 1) {
@@ -214,9 +242,7 @@ class Content extends Component {
   }
 
   updatePage(index, page) {
-    // console.log(index, page);
     let pages = this.state.pages;
-    // console.log(pages);
     pages[index] = page;
     this.setState({ pages: pages });
   }
@@ -229,25 +255,36 @@ class Content extends Component {
   }
 
   componentDidUpdate() {
+    console.log(this.state);
     this.syncState();
   }
 
   render() {
+    console.count("render");
     return (
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-12">
             <div className="panel panel-default">
               <div className="panel-heading">
-                <h3 className="panel-title">Add Page</h3>
+                <h3 className="panel-title">Plugin Configuration</h3>
               </div>
               <div className="panel-body">
                 <button className="btn btn-primary" onClick={this.addPage}>
                   Add a Page
                 </button>
-                <button className="btn btn-primary" onClick={this.addImg}>
-                  Add an Image
-                </button>
+                {/* <form>
+                  <div className="input-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="text"
+                      aria-describedby="sizing-addon2"
+                      value={this.state.text}
+                      onChange={this.handleChange}
+                    />
+                  </div>
+                </form> */}
               </div>
             </div>
           </div>

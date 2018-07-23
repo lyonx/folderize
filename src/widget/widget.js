@@ -16,8 +16,6 @@ class Widget extends Component {
   }
 
   loryFormat() {
-    // console.count("formatter");
-
     let pages = this.state.pages;
     if (pages.length === 0) return;
     let simple_dots = document.querySelector(".js_simple_dots");
@@ -31,11 +29,9 @@ class Widget extends Component {
         for (let i = 0, len = dot_count; i < len; i++) {
           let clone = dot_list_item.cloneNode();
           if (dot_container.childNodes.length >= pages.length) return;
-          // console.log(pages[i],  pages[0]);
           dot_container.appendChild(clone);
-          // console.count("dot container");
         }
-        dot_container.childNodes[0].classList.add("active");
+        dot_container.childNodes[0].classList.add("backgroundColorTheme");
       }
       if (e.type === "after.lory.init") {
         for (let i = 0, len = dot_count; i < len; i++) {
@@ -49,17 +45,15 @@ class Widget extends Component {
       }
       if (e.type === "after.lory.slide") {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
-          dot_container.childNodes[i].classList.remove("active");
+          dot_container.childNodes[i].classList.remove("backgroundColorTheme");
         }
-        dot_container.childNodes[e.detail.currentSlide - 1].classList.add(
-          "active"
-        );
+        dot_container.childNodes[e.detail.currentSlide].classList.add("backgroundColorTheme");
       }
       if (e.type === "on.lory.resize") {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
-          dot_container.childNodes[i].classList.remove("active");
+          dot_container.childNodes[i].classList.remove("backgroundColorTheme");
         }
-        dot_container.childNodes[0].classList.add("active");
+        dot_container.childNodes[0].classList.add("backgroundColorTheme");
       }
     };
     simple_dots.addEventListener("before.lory.init", handleDotEvent);
@@ -76,47 +70,34 @@ class Widget extends Component {
     }, 1);
 
     let dot_navigation_slider = lory(simple_dots, {
-      infinite: 1,
+      infinite: 0,
       enableMouseEvents: true
     });
   }
 
   renderPages() {
     let pages = [];
-    console.count("render");
-    // console.log(this.state.pages);
-
     if (document.querySelector(".js_slides")) {
       document.querySelector(".js_slides").innerHTML = "";
-      // console.log("cleared slides");
     }
 
     if (document.querySelector(".js_dots")) {
       let dots = document.querySelector(".js_dots");
-      // console.log(dots.childElementCount, this.state.pages.length);
       if (dots.childElementCount > this.state.pages.length) {
         while (dots.childElementCount > 0) {
           dots.removeChild(dots.firstChild);
         }
-        // console.log(dots);
       }
-      // debugger
-      // console.log("cleared", dots);
     }
-
     if (this.state.pages.length === 0) return;
     this.state.pages.forEach(page => {
       pages.push(<Page data={page} />);
     });
-    
-    // setTimeout(() => this.loryFormat(), 1000);
-    // console.warn(pages);
     return pages;
   }
 
   listener() {
     db.onUpdate(snapshot => {
-      // console.log(snapshot);
       switch (snapshot.tag) {
         case "pages": {
           this.setState({ pages: snapshot.data.pages });
@@ -124,6 +105,10 @@ class Widget extends Component {
         }
         case "image": {
           this.setState({ image: snapshot.data.image });
+          break;
+        }
+        case "text": {
+          this.setState({ text: snapshot.data.text });
           break;
         }
         default:
@@ -135,7 +120,6 @@ class Widget extends Component {
   fetch() {
     db.get("pages", (err, response) => {
       if (err) throw err;
-      // console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
@@ -154,7 +138,6 @@ class Widget extends Component {
     });
     db.get("image", (err, response) => {
       if (err) throw err;
-      // console.log(response);
       // if none are present, insert a default page
       if (!response.id) {
         return;
@@ -162,10 +145,18 @@ class Widget extends Component {
         this.setState({ image: response.data.image });
       }
     });
+    db.get("text", (err, response) => {
+      if (err) throw err;
+      // if none are present, insert a default page
+      if (!response.id) {
+        return;
+      } else {
+        this.setState({ text: response.data.text });
+      }
+    });
   }
 
   componentDidUpdate() {
-    // console.count("update");
     this.loryFormat();
   }
 
@@ -176,12 +167,9 @@ class Widget extends Component {
 
   render() {
     return (
-      <div id="container">
-        <div id="intro" style={`background: url(${this.state.image})`}>
-          <div id="hero">{this.state.text}</div>
-        </div>
+      <div id="container backgroundColorTheme">
         <div className="slider js_simple_dots simple">
-          <ul className="dots js_dots" id="dot-nav" />
+          <ul className="dots js_dots sticky defaultBackgroundTheme" id="dot-nav" />
           <div className="frame js_frame">
             <div id="sandbox">
               <ul className="slides js_slides">{this.renderPages()}</ul>
