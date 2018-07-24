@@ -16,6 +16,7 @@ class Widget extends Component {
   }
 
   loryFormat() {
+    console.count("format");
     let pages = this.state.pages;
     if (pages.length === 0) return;
     let simple_dots = document.querySelector(".js_simple_dots");
@@ -78,15 +79,12 @@ class Widget extends Component {
       enableMouseEvents: true,
       initialIndex: localStorage.getItem("currentSlide")
     });
-    () => {
-      console.log("slide");
-      // dot_navigation_slider.slideTo(localStorage.getItem("currentSlide"));
-    };
   }
 
   renderPages() {
     let pages = [];
     if (document.querySelector(".js_slides")) {
+      console.log("clear");
       document.querySelector(".js_slides").innerHTML = "";
     }
 
@@ -140,7 +138,6 @@ class Widget extends Component {
   }
 
   componentDidUpdate() {
-    console.log(this.state);
     this.loryFormat();
   }
 

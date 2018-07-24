@@ -12,7 +12,6 @@ class Page extends Component {
     this.update = this.update.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.removeImg = this.removeImg.bind(this);
-    this.renderImages = this.renderImages.bind(this);
     this.delete = this.delete.bind(this);
     this.addImg = this.addImg.bind(this);
     this.state = {
@@ -82,8 +81,10 @@ class Page extends Component {
   update() {
     this.updatePage(this.props.index, {
       title: this.state.title,
+      id: this.props.data.id,
       images: this.state.images,
-      nodes: this.state.nodes
+      nodes: this.state.nodes,
+      show: this.state.show
     });
   }
 
@@ -100,36 +101,6 @@ class Page extends Component {
     images.splice(index, 1);
     this.setState({ images: images });
     this.update();
-  }
-
-  renderImages() {
-    let images = [];
-    this.props.data.images.forEach(image => {
-      images.push(
-        <ul className="list-group">
-          <li className="list-group-item">
-            <div className="row">
-              <div className="col-xs-6 col-md-3">
-                <a href="#" className="thumbnail">
-                  <img src={image} alt="..." />
-                </a>
-              </div>
-              <div className="col-xs-6 col-md-3">
-                <button
-                  className="btn btn-default"
-                  onClick={() =>
-                    this.removeImg(this.props.data.images.indexOf(image))
-                  }
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          </li>
-        </ul>
-      );
-    });
-    return images;
   }
 
   renderNodes() {
@@ -530,11 +501,13 @@ class Page extends Component {
         panel.classList.remove("panel-show");
         panel.classList.add("panel-hide");
         panel.setAttribute("data-toggle", "hide");
+        this.setState({show: false});
         break;
       case "hide":
         panel.classList.remove("panel-hide");
         panel.classList.add("panel-show");
         panel.setAttribute("data-toggle", "show");
+        this.setState({show: true});
         break;
       default:
         break;
@@ -734,7 +707,6 @@ class Page extends Component {
                   </div>
                 </div>
                 <div className="col-sm-12">{this.renderNodes()}</div>
-                <div className="col-sm-12">{this.renderImages()}</div>
                 <div className="col-sm-12">
                   <button className="btn btn-danger" onClick={this.delete}>
                     Delete Page

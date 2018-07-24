@@ -31,8 +31,7 @@ class Content extends Component {
           pages: [
             {
               title: "new page",
-              // header: "new page",
-              // desc: "edit this page in the control",
+              id: Date.now(),
               nodes: [
                 {
                   type: "header",
@@ -40,9 +39,7 @@ class Content extends Component {
                     text: "new page"
                   }
                 }
-              ],
-              plugins: [],
-              images: []
+              ]
             }
           ]
         });
@@ -52,8 +49,7 @@ class Content extends Component {
             pages: [
               {
                 title: "New Page",
-                // header: "Example Header",
-                // desc: "Edit this page in the control",
+                id: Date.now(),
                 nodes: [
                   {
                     type: "header",
@@ -61,9 +57,7 @@ class Content extends Component {
                       text: "new page"
                     }
                   }
-                ],
-                plugins: [],
-                images: []
+                ]
               }
             ]
           });
@@ -89,48 +83,6 @@ class Content extends Component {
           response.id,
           { pages: this.state.pages },
           "pages",
-          (err, status) => {
-            if (err) {
-              throw err;
-            }
-          }
-        );
-      }
-    });
-    db.get("image", (err, response) => {
-      if (err) throw err;
-      if (!response.id) {
-        db.insert({ image: this.state.image }, "image", true, (err, status) => {
-          if (err) throw err;
-        });
-        return;
-      } else {
-        // insert pages into db
-        db.update(
-          response.id,
-          { image: this.state.image },
-          "image",
-          (err, status) => {
-            if (err) {
-              throw err;
-            }
-          }
-        );
-      }
-    });
-    db.get("text", (err, response) => {
-      if (err) throw err;
-      if (!response.id) {
-        db.insert({ text: "" }, "text", true, (err, status) => {
-          if (err) throw err;
-        });
-        return;
-      } else {
-        // insert pages into db
-        db.update(
-          response.id,
-          { text: this.state.text },
-          "text",
           (err, status) => {
             if (err) {
               throw err;
@@ -191,8 +143,7 @@ class Content extends Component {
   addPage() {
     let newPage = {
       title: "New Page",
-      plugins: [],
-      images: [],
+      id: Date.now(),
       nodes: [
         {
           type: "header",
@@ -235,6 +186,7 @@ class Content extends Component {
   }
 
   componentDidUpdate() {
+    console.log(this.state);
     this.syncState();
   }
 
