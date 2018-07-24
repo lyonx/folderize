@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import Widget from './Widget';
 
 const container = document.getElementById('mount');
-
+buildfire.spinner.show();
 function renderApp() {
   render(<Widget />, container);
 }

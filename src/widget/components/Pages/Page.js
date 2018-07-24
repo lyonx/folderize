@@ -33,6 +33,7 @@ class Page extends Component {
 
   renderNodes() {
     let nodes = [];
+    if (!this.props.data.nodes) return;
     this.props.data.nodes.forEach(node => {
       if (!node) return;
       switch (node.type) {
@@ -92,7 +93,7 @@ class Page extends Component {
 
   render() {
     return (
-      <li className="js_slide" >
+      <li className="js_slide" index={this.props.index}>
         <div className="container-fluid page-content">
           <div className="row">{this.renderNodes()}</div>
         </div>

@@ -11,7 +11,7 @@ class Widget extends Component {
     this.state = {
       pages: [],
       plugins: [],
-      slideIndex: 0
+      currentSlide: null
     };
   }
 
@@ -22,7 +22,7 @@ class Widget extends Component {
     let dot_count = pages.length;
     let dot_container = simple_dots.querySelector(".js_dots");
     let dot_list_item = document.createElement("li");
-
+    let currentSlide;
     const handleDotEvent = e => {
       if (e.type === "before.lory.init") {
         if (pages.length != this.state.pages.length) return;
@@ -47,7 +47,9 @@ class Widget extends Component {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
           dot_container.childNodes[i].classList.remove("backgroundColorTheme");
         }
-        dot_container.childNodes[e.detail.currentSlide].classList.add("backgroundColorTheme");
+        dot_container.childNodes[e.detail.currentSlide].classList.add(
+          "backgroundColorTheme"
+        );
       }
       if (e.type === "on.lory.resize") {
         for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
@@ -56,9 +58,14 @@ class Widget extends Component {
         dot_container.childNodes[0].classList.add("backgroundColorTheme");
       }
     };
+
     simple_dots.addEventListener("before.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.slide", handleDotEvent);
+    simple_dots.addEventListener("after.lory.slide", e => {
+      localStorage.setItem("currentSlide", e.detail.currentSlide);
+      console.log(localStorage.getItem("currentSlide"));
+    });
     simple_dots.addEventListener("on.lory.resize", handleDotEvent);
 
     setTimeout(() => {
@@ -73,7 +80,12 @@ class Widget extends Component {
       infinite: 0,
       enableMouseEvents: true
     });
+    () => {
+      console.log("slide");
+      dot_navigation_slider.slideTo(localStorage.getItem("currentSlide"));
+    };
   }
+  
 
   renderPages() {
     let pages = [];
@@ -91,7 +103,7 @@ class Widget extends Component {
     }
     if (this.state.pages.length === 0) return;
     this.state.pages.forEach(page => {
-      pages.push(<Page data={page} />);
+      pages.push(<Page index={this.state.pages.indexOf(page)} data={page} />);
     });
     return pages;
   }
@@ -157,6 +169,7 @@ class Widget extends Component {
   }
 
   componentDidUpdate() {
+    console.log(this.state);
     this.loryFormat();
   }
 
@@ -169,7 +182,10 @@ class Widget extends Component {
     return (
       <div id="container backgroundColorTheme">
         <div className="slider js_simple_dots simple">
-          <ul className="dots js_dots sticky defaultBackgroundTheme" id="dot-nav" />
+          <ul
+            className="dots js_dots sticky defaultBackgroundTheme titleBarTextAndIcons"
+            id="dot-nav"
+          />
           <div className="frame js_frame">
             <div id="sandbox">
               <ul className="slides js_slides">{this.renderPages()}</ul>

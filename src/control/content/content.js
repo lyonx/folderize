@@ -17,9 +17,7 @@ class Content extends Component {
     this.reorderPages = this.reorderPages.bind(this);
     this.state = {
       pages: [],
-      text: "",
-      image:
-        "https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8"
+      layout: 1
     };
   }
 
@@ -72,29 +70,6 @@ class Content extends Component {
         } else {
           this.setState({ pages: response.data.pages });
         }
-      }
-    });
-    db.get("image", (err, response) => {
-      if (err) throw err;
-      // if none are present, insert a default page
-      if (!response.id) {
-        this.setState({
-          image:
-            "https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8"
-        });
-      } else {
-        this.setState({ image: response.data.image });
-      }
-    });
-    db.get("text", (err, response) => {
-      if (err) throw err;
-      // if none are present, insert a default page
-      if (!response.id) {
-        this.setState({
-          text: ""
-        });
-      } else {
-        this.setState({ text: response.data.text });
       }
     });
   }
@@ -174,8 +149,11 @@ class Content extends Component {
 
   renderPages() {
     let pages = [];
+    // let nodeDiv = document.getElementById("nodeDiv");
+    // if (nodeDiv) {
+    //   nodeDiv.innerHTML = "";
+    // }
     this.state.pages.map(page => {
-      console.log(page);
       pages.push(
         <Page
           index={this.state.pages.indexOf(page)}
@@ -206,7 +184,8 @@ class Content extends Component {
       pages[index] = temp;
       this.setState({ pages });
     }
-    this.render();
+    // this.render();
+    // window.location.reload();
   }
 
   addPage() {
@@ -236,6 +215,7 @@ class Content extends Component {
   }
 
   deletePage(index) {
+    console.log(index);
     let pages = this.state.pages;
     pages.splice(index, 1);
     this.setState({ pages: pages });
@@ -255,7 +235,6 @@ class Content extends Component {
   }
 
   componentDidUpdate() {
-    console.log(this.state);
     this.syncState();
   }
 
@@ -288,7 +267,9 @@ class Content extends Component {
               </div>
             </div>
           </div>
-          <div className="col-md-12">{this.renderPages()}</div>
+          <div className="col-md-12" id="nodeDiv">
+            {this.renderPages()}
+          </div>
         </div>
       </div>
     );

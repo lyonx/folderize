@@ -39,7 +39,6 @@ class Page extends Component {
     let pluginNodes = this.state.nodes.filter(node => {
       return node.type === "plugin";
     });
-    console.log(pluginNodes);
     // plugins.loadItems()
 
     plugins.onAddItems = () => {
@@ -77,7 +76,7 @@ class Page extends Component {
   }
 
   delete() {
-    this.deletePage(this.key);
+    this.deletePage(this.props.index);
   }
 
   update() {
@@ -349,7 +348,6 @@ class Page extends Component {
           break;
         }
         case "plugin": {
-          console.log(node);
           if (!node.data) return;
           nodes.push(
             <div className="panel panel-default">
@@ -508,7 +506,6 @@ class Page extends Component {
     const target = event.target;
     const name = target.name;
     this.setState({ [name]: event.target.value });
-    console.log(event);
     if (event.type === "input") {
       this.update();
     }
@@ -516,12 +513,6 @@ class Page extends Component {
   }
 
   toggle(e, type) {
-    console.log(e, type);
-    console.log(
-      `page${this.props.index}nodepanel${document
-        .getElementById(e.target.id)
-        .getAttribute("index")}`
-    );
     let panel;
     if (type === "node") {
       panel = document.getElementById(
@@ -534,7 +525,6 @@ class Page extends Component {
         `panel${document.getElementById(e.target.id).getAttribute("index")}`
       );
     }
-    console.log(panel);
     switch (panel.getAttribute("data-toggle")) {
       case "show":
         panel.classList.remove("panel-show");
@@ -557,7 +547,6 @@ class Page extends Component {
   }
 
   togglePluginModal(index, toggle) {
-    console.log(toggle);
     if (toggle === "show") {
       document
         .getElementById(`plugins${index}`)
@@ -578,7 +567,6 @@ class Page extends Component {
   }
 
   componentDidUpdate() {
-    // console.log(this.state);
   }
 
   render() {
@@ -646,9 +634,7 @@ class Page extends Component {
                           let index = document
                             .getElementById(e.target.id)
                             .getAttribute("index");
-                          console.log(index);
                           let menu = document.getElementById(`menu${index}`);
-                          console.log(menu);
                           let toggle = menu.getAttribute("data-toggle");
                           if (toggle === "show") {
                             menu.classList.replace("panel-show", "panel-hide");
