@@ -24,6 +24,7 @@ class Widget extends Component {
     let dot_list_item = document.createElement("li");
     let currentSlide;
     const handleDotEvent = e => {
+      console.log(e.type);
       if (e.type === "before.lory.init") {
         if (pages.length != this.state.pages.length) return;
         for (let i = 0, len = dot_count; i < len; i++) {
@@ -62,10 +63,6 @@ class Widget extends Component {
     simple_dots.addEventListener("before.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.init", handleDotEvent);
     simple_dots.addEventListener("after.lory.slide", handleDotEvent);
-    simple_dots.addEventListener("after.lory.slide", e => {
-      localStorage.setItem("currentSlide", e.detail.currentSlide);
-      console.log(localStorage.getItem("currentSlide"));
-    });
     simple_dots.addEventListener("on.lory.resize", handleDotEvent);
 
     setTimeout(() => {
@@ -78,7 +75,8 @@ class Widget extends Component {
 
     let dot_navigation_slider = lory(simple_dots, {
       infinite: 0,
-      enableMouseEvents: true
+      enableMouseEvents: true,
+      initialIndex: localStorage.getItem("currentSlide")
     });
     () => {
       console.log("slide");
@@ -115,14 +113,6 @@ class Widget extends Component {
           this.setState({ pages: snapshot.data.pages });
           break;
         }
-        case "image": {
-          this.setState({ image: snapshot.data.image });
-          break;
-        }
-        case "text": {
-          this.setState({ text: snapshot.data.text });
-          break;
-        }
         default:
           return;
       }
@@ -146,24 +136,6 @@ class Widget extends Component {
         });
       } else {
         this.setState({ pages: response.data.pages });
-      }
-    });
-    db.get("image", (err, response) => {
-      if (err) throw err;
-      // if none are present, insert a default page
-      if (!response.id) {
-        return;
-      } else {
-        this.setState({ image: response.data.image });
-      }
-    });
-    db.get("text", (err, response) => {
-      if (err) throw err;
-      // if none are present, insert a default page
-      if (!response.id) {
-        return;
-      } else {
-        this.setState({ text: response.data.text });
       }
     });
   }
