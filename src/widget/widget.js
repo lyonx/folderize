@@ -22,7 +22,7 @@ class Widget extends Component {
     let dot_count = pages.length;
     let dot_container = simple_dots.querySelector(".js_dots");
     let dot_list_item = document.createElement("li");
-    let currentSlide;
+
     const handleDotEvent = e => {
       if (e.type === "before.lory.init") {
         if (pages.length != this.state.pages.length) return;
@@ -82,10 +82,9 @@ class Widget extends Component {
     });
     () => {
       console.log("slide");
-      dot_navigation_slider.slideTo(localStorage.getItem("currentSlide"));
+      // dot_navigation_slider.slideTo(localStorage.getItem("currentSlide"));
     };
   }
-  
 
   renderPages() {
     let pages = [];
