@@ -73,8 +73,47 @@ ul {
     margin-top: 0px;
   }
   to {
-
   }
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hide-cover {
+  animation-name: fadeout;
+  animation-duration: .5s;
+  animation-fill-mode: forwards;
+  z-index: 9000;
+  height: 100vh;
+  position: absolute;
+  width: 100vw;
+  background: rgb(0, 0, 0);
+}
+
+.show-cover {
+  animation-name: fadein;
+  animation-duration: .1s;
+  animation-fill-mode: forwards;
+  z-index: 9000;
+  height: 100vh;
+  position: absolute;
+  width: 100vw;
+  background: rgb(0, 0, 0);
 }
 
 #dot-nav > .active {
@@ -171,7 +210,6 @@ ul {
   background: transparent;
 } */
 
-
 .sticky + .js_dots {
   padding-top: 60px;
 }
@@ -208,8 +246,8 @@ h6 {
   margin-right: -15px;
   margin-left: -15px;
   width: 100vw;
-  padding-left: 15px; 
-  padding-right: 15px; 
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
 .plugin {
@@ -222,5 +260,3 @@ h6 {
   border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
   display: flex;
 }
-
-

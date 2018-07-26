@@ -587,7 +587,7 @@ class Page extends Component {
                         className="form-control"
                         name="title"
                         aria-describedby="sizing-addon2"
-                        value={this.state.title}
+                        value={this.props.data.title}
                         onChange={this.handleChange}
                       />
                     </div>

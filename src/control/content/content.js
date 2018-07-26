@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Page from "./Components/Page";
+import debounce from "lodash.debounce";
 
 let buildfire = window.buildfire;
 let tinymce = window.tinymce;
@@ -15,6 +16,7 @@ class Content extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.renderPages = this.renderPages.bind(this);
     this.reorderPages = this.reorderPages.bind(this);
+    this.debounceSync = debounce(this.syncState, 500);
     this.state = {
       pages: [],
       layout: 1
@@ -69,6 +71,11 @@ class Content extends Component {
   }
 
   syncState() {
+
+
+
+
+
     // when a state change is detected,
     db.get("pages", (err, response) => {
       if (err) throw err;
@@ -187,7 +194,8 @@ class Content extends Component {
 
   componentDidUpdate() {
     console.log(this.state);
-    this.syncState();
+    // this.syncState();
+    this.debounceSync();
   }
 
   render() {
