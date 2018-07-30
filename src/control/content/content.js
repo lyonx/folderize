@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import Page from "./Components/Page";
-import debounce from "lodash.debounce";
+import React, { Component } from 'react';
+import Page from './Components/Page';
+import debounce from 'lodash.debounce';
 
 let buildfire = window.buildfire;
 let tinymce = window.tinymce;
@@ -16,7 +16,7 @@ class Content extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.renderPages = this.renderPages.bind(this);
     this.reorderPages = this.reorderPages.bind(this);
-    this.debounceSync = debounce(this.syncState, 500);
+    this.debounceSync = debounce(this.syncState, 1000);
     this.state = {
       pages: [],
       layout: 1
@@ -25,20 +25,30 @@ class Content extends Component {
 
   fetch() {
     // Control looks in db for any pages
-    db.get("pages", (err, response) => {
+    db.get('pages', (err, response) => {
       if (err) throw err;
       // if none are present, insert a default page
       if (!response.id) {
         this.setState({
           pages: [
             {
-              title: "new page",
+              title: 'new page',
               id: Date.now(),
+              customizations: [],
+              backgroundColor: {
+                colorType: false,
+                solid: {
+                  backgroundCSS: "",
+                },
+                gradient: {
+                  backgroundCSS: "",
+                }
+              },
               nodes: [
                 {
-                  type: "header",
+                  type: 'header',
                   data: {
-                    text: "new page"
+                    text: 'new page'
                   }
                 }
               ]
@@ -50,13 +60,23 @@ class Content extends Component {
           this.setState({
             pages: [
               {
-                title: "New Page",
+                title: 'New Page',
                 id: Date.now(),
+                customizations: [],
+                backgroundColor: {
+                  colorType: false,
+                  solid: {
+                    backgroundCSS: "",
+                  },
+                  gradient: {
+                    backgroundCSS: "",
+                  }
+                },
                 nodes: [
                   {
-                    type: "header",
+                    type: 'header',
                     data: {
-                      text: "new page"
+                      text: 'new page'
                     }
                   }
                 ]
@@ -71,31 +91,21 @@ class Content extends Component {
   }
 
   syncState() {
-
-
-
-
-
     // when a state change is detected,
-    db.get("pages", (err, response) => {
+    db.get('pages', (err, response) => {
       if (err) throw err;
       if (!response.id) {
-        db.insert({ pages: this.state.pages }, "pages", true, (err, status) => {
+        db.insert({ pages: this.state.pages }, 'pages', true, (err, status) => {
           if (err) throw err;
         });
         return;
       } else {
         // insert pages into db
-        db.update(
-          response.id,
-          { pages: this.state.pages },
-          "pages",
-          (err, status) => {
-            if (err) {
-              throw err;
-            }
+        db.update(response.id, { pages: this.state.pages }, 'pages', (err, status) => {
+          if (err) {
+            throw err;
           }
-        );
+        });
       }
     });
   }
@@ -108,20 +118,8 @@ class Content extends Component {
 
   renderPages() {
     let pages = [];
-    // let nodeDiv = document.getElementById("nodeDiv");
-    // if (nodeDiv) {
-    //   nodeDiv.innerHTML = "";
-    // }
     this.state.pages.map(page => {
-      pages.push(
-        <Page
-          index={this.state.pages.indexOf(page)}
-          updatePage={this.updatePage}
-          deletePage={this.deletePage}
-          data={page}
-          reorderPages={this.reorderPages}
-        />
-      );
+      pages.push(<Page index={this.state.pages.indexOf(page)} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
     });
     return pages;
   }
@@ -149,13 +147,22 @@ class Content extends Component {
 
   addPage() {
     let newPage = {
-      title: "New Page",
+      title: 'New Page',
       id: Date.now(),
+      backgroundColor: {
+        colorType: false,
+        solid: {
+          backgroundCSS: "",
+        },
+        gradient: {
+          backgroundCSS: "",
+        }
+      },
       nodes: [
         {
-          type: "header",
+          type: 'header',
           data: {
-            text: "new page"
+            text: 'new page'
           }
         }
       ]
@@ -173,7 +180,6 @@ class Content extends Component {
   }
 
   deletePage(index) {
-    console.log(index);
     let pages = this.state.pages;
     pages.splice(index, 1);
     this.setState({ pages: pages });
@@ -193,13 +199,12 @@ class Content extends Component {
   }
 
   componentDidUpdate() {
-    console.log(this.state);
     // this.syncState();
     this.debounceSync();
   }
 
   render() {
-    console.count("render");
+    console.count('render');
     return (
       <div className="container-fluid">
         <div className="row">

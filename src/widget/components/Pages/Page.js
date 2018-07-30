@@ -1,6 +1,16 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 // Widget Side Page
 class Page extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: props.data.title,
+      nodes: [],
+      show: false,
+      backgroundColor: '',
+      backgroundImg: ''
+    };
+  }
 
   renderPlugins() {
     let plugins = [];
@@ -11,10 +21,7 @@ class Page extends Component {
             <h3 className="panel-title">{plugin.title}</h3>
           </div>
           <div className="panel-body plugin-panel">
-            <div
-              className="thumbnail"
-              style={`background: url(${plugin.iconUrl}`}
-            />
+            <div className="thumbnail" style={`background: url(${plugin.iconUrl}`} />
           </div>
         </div>
       );
@@ -37,7 +44,7 @@ class Page extends Component {
     this.props.data.nodes.forEach(node => {
       if (!node) return;
       switch (node.type) {
-        case "header": {
+        case 'header': {
           nodes.push(
             <div className="col-sm-12">
               <div className="page-header">
@@ -47,7 +54,7 @@ class Page extends Component {
           );
           break;
         }
-        case "desc": {
+        case 'desc': {
           nodes.push(
             <div className="col-sm-12">
               <p className="description">{node.data.text}</p>
@@ -55,29 +62,40 @@ class Page extends Component {
           );
           break;
         }
-        case "image": {
+        case 'image': {
           nodes.push(
             <div className="col-sm-12">
               <div className="image-wrap">
-                <div
-                  className="images"
-                  style={`background: url(${node.data.src})`}
-                />
+                <div className="images" style={`background: url(${node.data.src})`} />
               </div>
             </div>
           );
           break;
         }
-        case "plugin": {
+        case 'plugin': {
           if (!node.data) return;
           nodes.push(
             <div className="col-sm-12">
               <div className="plugin" onClick={e => this.pluginNav(node)}>
-                <div
-                  className="plugin-thumbnail"
-                  style={`background: url("${node.data.iconUrl}")`}
-                  alt="..."
-                />
+                <div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." />
+                <h3 className="plugin-title">{node.data.title}</h3>
+              </div>
+            </div>
+          );
+          break;
+        }
+        case 'action': {
+          if (!node.data) return;
+          nodes.push(
+            <div className="col-sm-12">
+              <div
+                className="plugin"
+                onClick={e => {
+                  buildfire.actionItems.execute(node.data, (err, res) => {
+                    if (err) throw err;
+                  });
+                }}>
+                <div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." />
                 <h3 className="plugin-title">{node.data.title}</h3>
               </div>
             </div>
@@ -90,11 +108,14 @@ class Page extends Component {
     });
     return nodes;
   }
+  componentDidMount() {
+    this.setState({ data: this.props.data });
+  }
 
   render() {
     return (
-      <li className="js_slide" index={this.props.index}>
-        <div className="container-fluid page-content">
+      <li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={`background: url("${this.props.data.backgroundImg}")`}>
+        <div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
           <div className="row">{this.renderNodes()}</div>
         </div>
       </li>
