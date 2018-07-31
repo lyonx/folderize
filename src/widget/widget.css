@@ -276,6 +276,10 @@ h6 {
   min-height: 100vh
 }
 
+.dot-nav-bottom {
+  position: sticky
+}
+
 /* Safari */
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }

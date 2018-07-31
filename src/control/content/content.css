@@ -1,125 +1,157 @@
-
 .title {
-  flex: 1 !important;
+	flex: 1 !important;
 }
 
 .delete {
-  flex: 1;
-  max-width: 20px !important;
+	flex: 1;
+	max-width: 20px !important;
 }
 
 /* The slider */
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	-webkit-transition: 0.4s;
+	transition: 0.4s;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+	position: absolute;
+	content: '';
+	height: 26px;
+	width: 26px;
+	left: 4px;
+	bottom: 4px;
+	background-color: white;
+	-webkit-transition: 0.4s;
+	transition: 0.4s;
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+	-webkit-transform: translateX(26px);
+	-ms-transform: translateX(26px);
+	transform: translateX(26px);
 }
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+	border-radius: 34px;
 }
 
-
 .slider.round:before {
-  border-radius: 50%;
+	border-radius: 50%;
 }
 
 .input-group {
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
+	width: 100%;
+	margin-top: 5px;
+	margin-bottom: 5px;
 }
 
 .tab,
 .toggle-group {
-  display: flex;
+	display: flex;
 }
 
 .toggle-group {
-  display: flex;
-  flex: 1;
+	display: flex;
+	flex: 1;
 }
 
 .tab-title,
 .tab-toggle {
-  flex: 1;
+	flex: 1;
+}
+
+.add {
 }
 
 .panel-title {
-  font-size: 18px;
+	font-size: 18px;
 }
 
 .draggable-list-view {
-  display: none;
+	display: none;
 }
 
 .panel-hide {
-  display: none;
+	display: none;
 }
 
 .panel-show {
-  display: block;
-}
-.plugin-title, .action-title {
-  flex: 1;
-  padding-left: 15px;
-  height: 50px;
-  line-height: 50px;
-}
-.plugins, .actions {
-  position: absolute;
-
-  z-index: 900;
-  background: rgb(255, 255, 255);
-  width: 95vw;
-  padding: 111px;
-  height: 105vw;
-  top: -200px;
-  left: -14px;
+	display: block;
 }
 
-.plugin, .action {
-  margin-top: -1px;
-  margin-left: -15px;
-  margin-right: -15px;
-  background: #eef0f0;
-  padding: 15px;
-  border-top: 1px solid rgba(57, 52, 46, 0.25) !important;
-  border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
+.header {
+  margin-top: 0px;
   display: flex;
+  position: sticky;
+  top: 0px;
+  background: white;
+  z-index: 1000;
 }
 
-
-.plugin-thumbnail, .action-thumbnail {
-  background-size: cover !important;
-  max-width: 80px;
-  margin: auto;
-  flex: 1;
-  border-radius: 10px;
-  height: 80px;
+.page-panel {
+	position: fixed;
+	overflow-y: overlay;
+  width: 96vw;
+  padding-top: 0px;
+	height: 80vh;
+	top: 0px;
+	background: white;
+	border: 1em solid gray;
 }
+.plugin-title,
+.action-title {
+	flex: 1;
+	padding-left: 15px;
+	height: 50px;
+	line-height: 50px;
+}
+.plugins,
+.actions {
+	position: absolute;
+
+	z-index: 900;
+	background: rgb(255, 255, 255);
+	width: 95vw;
+	padding: 111px;
+	height: 105vw;
+	top: -200px;
+	left: -14px;
+}
+
+.plugin,
+.action {
+	margin-top: -1px;
+	margin-left: -15px;
+	margin-right: -15px;
+	background: #eef0f0;
+	padding: 15px;
+	border-top: 1px solid rgba(57, 52, 46, 0.25) !important;
+	border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
+	display: flex;
+}
+
+.plugin-thumbnail,
+.action-thumbnail {
+	background-size: cover !important;
+	max-width: 80px;
+	margin: auto;
+	flex: 1;
+	border-radius: 10px;
+	height: 80px;
+}
+
+.dot-nav-bottom {
+  position: sticky
+}
+
+/* .plugins > button {
+  width: 100%
+} */

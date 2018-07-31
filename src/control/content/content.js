@@ -19,8 +19,41 @@ class Content extends Component {
     this.debounceSync = debounce(this.syncState, 1000);
     this.state = {
       pages: [],
-      layout: 1
+      layout: 1,
+      styleOverrides: [{
+        target: "dot-nav",
+        data: {
+          styles: [
+            {
+            attr: "position",
+            value: "bottom"
+            }
+          ]
+        }
+      }]
     };
+  }
+
+  addStyleOverride(target, attr, value) {
+    console.log(target, attr, value);
+    let styleOverrides = this.state.styleOverrides;
+    let index = -1;
+    let style = styleOverrides.filter(style => {
+      index = styleOverrides.indexOf(style);
+      return style.target === target;
+    });
+
+    
+    let currentStyle = style[0].data.styles.filter(e => {
+      return e.attr === attr;
+    });
+    
+    currentStyle[0].value = value;
+
+    styleOverrides[index] = currentStyle;
+
+    this.setState({ styleOverrides });
+    
   }
 
   fetch() {
@@ -200,6 +233,7 @@ class Content extends Component {
 
   componentDidUpdate() {
     // this.syncState();
+    console.warn(this.state);
     this.debounceSync();
   }
 
@@ -217,6 +251,9 @@ class Content extends Component {
                 <button className="btn btn-primary" onClick={this.addPage}>
                   Add a Page
                 </button>
+                <button onClick={e => {
+                  this.addStyleOverride("dot-nav", "position", "top");
+                }}>Move</button>
                 {/* <form>
                   <div className="input-group">
                     <input
