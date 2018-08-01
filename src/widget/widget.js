@@ -10,15 +10,22 @@ class Widget extends Component {
 		super(props);
 		this.renderPages = this.renderPages.bind(this);
 		this.state = {
-			pages: [],
 			plugins: [],
+			settings: {
+				pages: [],
+				styleOverrides: [],
+				options: {
+					navPosition: 'top',
+					renderTitlebar: false,
+				}
+			},
 			currentSlide: null
 		};
 	}
 
 	loryFormat() {
 		let slideIndex = localStorage.getItem('currentSlide');
-		let pages = this.state.pages;
+		let pages = this.state.settings.pages;
 
 		if (pages.length === 0) return;
 		console.count('format');
@@ -31,7 +38,7 @@ class Widget extends Component {
 		const handleDotEvent = e => {
 			// console.log(e.type);
 			if (e.type === 'before.lory.init') {
-				if (pages.length != this.state.pages.length) return;
+				if (pages.length != this.state.settings.pages.length) return;
 				for (let i = 0, len = dot_count; i < len; i++) {
 					let clone = dot_list_item.cloneNode();
 					if (dot_container.childNodes.length >= pages.length) return;
@@ -51,6 +58,8 @@ class Widget extends Component {
 				for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
 					dot_container.childNodes[i].classList.remove('backgroundColorTheme');
 				}
+				console.log(dot_container.childNodes[e.detail.currentSlide]);
+
 				dot_container.childNodes[e.detail.currentSlide].classList.add('backgroundColorTheme');
 				localStorage.setItem('currentSlide', e.detail.currentSlide);
 				// console.log(dot_navigation_slider.returnIndex());
@@ -71,8 +80,8 @@ class Widget extends Component {
 		setTimeout(() => {
 			let dot_tabs = simple_dots.querySelector('.js_dots').childNodes;
 			for (let i = 0; i < dot_tabs.length; i++) {
-				if (!this.state.pages[i]) return;
-				dot_tabs[i].innerHTML = this.state.pages[i].title;
+				if (!this.state.settings.pages[i]) return;
+				dot_tabs[i].innerHTML = this.state.settings.pages[i].title;
 			}
 		}, 1);
 
@@ -99,8 +108,8 @@ class Widget extends Component {
 
 	renderPages() {
 		console.count('page render');
-		// console.log('page length', this.state.pages.length);
-		if (this.state.pages.length === 0) {
+		// console.log('page length', this.state.settings.pages.length);
+		if (this.state.settings.pages.length === 0) {
 			// console.log(this);
 			// this.fetch();
 			return;
@@ -113,30 +122,45 @@ class Widget extends Component {
 
 		if (document.querySelector('.js_dots')) {
 			let dots = document.querySelector('.js_dots');
-			if (dots.childElementCount > this.state.pages.length) {
+			if (dots.childElementCount > this.state.settings.pages.length) {
 				while (dots.childElementCount > 0) {
 					dots.removeChild(dots.firstChild);
 				}
 			}
 		}
-		// if (this.state.pages.length === 0) return;
-		this.state.pages.forEach(page => {
+		// if (this.state.settings.pages.length === 0) return;
+		this.state.settings.pages.forEach(page => {
 			if (!page.backgroundColor.solid) return;
 			page.backgroundColor.colorType === 'solid' ? (page.backgroundColor = page.backgroundColor.solid.backgroundCSS) : (page.backgroundColor = page.backgroundColor.gradient.backgroundCSS);
 
-			pages.push(<Page index={this.state.pages.indexOf(page)} data={page} />);
+			pages.push(<Page index={this.state.settings.pages.indexOf(page)} data={page} />);
 		});
 
 		setTimeout(() => this.loryFormat(), 1);
 		return pages;
 	}
 
+	applyStyles() {
+		let styles = this.state.settings.styleOverrides;
+		console.log(styles);
+		if (styles.length === 0) return;
+		styles.forEach(style => {
+			console.warn(style);
+			let target = document.getElementById(style.target);
+			console.log(target);
+		});
+	}
+
 	listener() {
 		db.onUpdate(snapshot => {
-			// console.log(snapshot);
+			console.log(snapshot);
 			switch (snapshot.tag) {
 				case 'pages': {
-					this.setState({ pages: snapshot.data.pages });
+					// this.setState({ pages: snapshot.data.pages });
+					break;
+				}
+				case 'master': {
+					this.setState({ settings: snapshot.data.settings });
 					break;
 				}
 				default:
@@ -146,7 +170,7 @@ class Widget extends Component {
 	}
 
 	fetch() {
-		db.get('pages', (err, response) => {
+		db.get('master', (err, response) => {
 			if (err) throw err;
 			// console.log(response);
 			// if none are present, insert a default page
@@ -163,20 +187,39 @@ class Widget extends Component {
 				// });
 				return;
 			} else {
-				// if (this.state.pages.length === 0) return;
-				this.setState({ pages: response.data.pages });
+				// if (this.state.settings.pages.length === 0) return;
+				this.setState({ settings: response.data.settings });
 			}
 		});
 	}
 
 	componentDidUpdate() {
-		// this.render();
-		// console.log(this.state);
-		// window.location.reload();
+		console.warn(this.state);
+		// this.state.settings.options.renderTitlebar === true ? console.log(this.state.settings.options.renderTitlebar) : console.log(this.state.settings.options.renderTitlebar);
+		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
+		// this.applyStyles();
 	}
 
 	componentDidMount() {
-		// this.fetch();
+		this.fetch();
+		console.log(window.location.pathname);
+		if (window.location.pathname.indexOf('/widget/') === 0) {
+			buildfire.getContext(function(err, context) {
+				if (err) {
+					console.error(err);
+				} else {
+					if (context && context.debugTag) buildfire.logger.attachRemoteLogger(context.debugTag);
+					if (window.location.pathname.indexOf('/widget/') === 0) {
+						var disableTheme = buildfire.options && buildfire.options.disableTheme ? buildfire.options.disableTheme : false;
+
+						if (!disableTheme) {
+							if (buildfire.isWeb() || !context.liveMode) buildfire.appearance.attachAppThemeCSSFiles(context.appId, context.liveMode, context.endPoints.appHost);
+							else buildfire.appearance.attachLocalAppThemeCSSFiles(context.appId);
+						}
+					}
+				}
+			});
+		}
 		// document
 		// .getElementById("cover")
 		// .classList.replace("hide-cover", "show-cover");
@@ -184,17 +227,20 @@ class Widget extends Component {
 	}
 
 	render() {
+		let dotNav = <ul key={Date.now()} className="dots js_dots sticky defaultBackgroundTheme titleBarTextAndIcons" id="dot-nav" />;
 		return (
 			<div key={Date.now()} id="container foo backgroundColorTheme">
 				<div id="cover" className="hide-cover">
 					<div className="loader" />
 				</div>
 				<div id="sandbox">
+					{/* {this.state.settings.options.showTitleBar ? <div className="title-bar">Title Bar</div> : <div/>} */}
 					<div key={Date.now()} className="slider js_simple_dots simple">
+						{this.state.settings.options.navPosition === 'top' ? dotNav : null }
 						<div className="frame js_frame">
 							<ul className="slides js_slides">{this.renderPages()}</ul>
 						</div>
-						<ul key={Date.now()} className="dots js_dots sticky defaultBackgroundTheme titleBarTextAndIcons" id="dot-nav" />
+						{this.state.settings.options.navPosition === 'bottom' ? dotNav : null }
 					</div>
 				</div>
 			</div>

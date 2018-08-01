@@ -148,9 +148,6 @@ input:checked + .slider:before {
 	height: 80px;
 }
 
-.dot-nav-bottom {
-  position: sticky
-}
 
 /* .plugins > button {
   width: 100%
