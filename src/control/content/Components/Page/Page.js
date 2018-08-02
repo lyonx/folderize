@@ -17,7 +17,8 @@ class Page extends Component {
 			nodes: [],
 			show: false,
 			backgroundColor: this.props.backgroundColor,
-			backgroundImg: this.props.backgroundImg
+			backgroundImg: this.props.backgroundImg,
+			iconUrl: this.props.iconUrl
 		};
 	}
 
@@ -104,7 +105,8 @@ class Page extends Component {
 			show: this.state.show,
 			customizations: this.state.customizations,
 			backgroundColor: this.state.backgroundColor,
-			backgroundImg: this.state.backgroundImg
+			backgroundImg: this.state.backgroundImg,
+			iconUrl: this.state.iconUrl
 		});
 	}
 
@@ -164,6 +166,15 @@ class Page extends Component {
 			}
 			case 'action': {
 				node.data.title = event.target.value;
+				nodes[index] = node;
+				this.setState({
+					nodes
+				});
+				this.update();
+				break;
+			}
+			case 'icon': {
+				node.data.iconUrl = event.target.value;
 				nodes[index] = node;
 				this.setState({
 					nodes
@@ -510,6 +521,16 @@ class Page extends Component {
 				});
 				break;
 			}
+			case 'icon': {
+				buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
+					if (err) throw err;
+					this.setState({ iconUrl: res.selectedIcons[0] });
+
+					this.update();
+					// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
+				});
+				break;
+			}
 			default: {
 				let target = this.props.data.nodes[index];
 				buildfire.imageLib.showDialog({}, (err, result) => {
@@ -531,6 +552,7 @@ class Page extends Component {
 			console.log(res);
 			// res.colorType === 'solid' ? (css = res.solid.backgroundCSS) : (css = res.gradient.backgroundCSS);
 			// this.setState({ [attr]: css });
+			console.log(this.state);
 			this.setState({ [attr]: res });
 			// switch (attr) {
 			//   case "backgroundColor": {
@@ -569,14 +591,15 @@ class Page extends Component {
 			title: this.props.data.title,
 			nodes: this.props.data.nodes,
 			backgroundColor: this.props.data.backgroundColor,
-			backgroundImg: this.props.data.backgroundImg
+			backgroundImg: this.props.data.backgroundImg,
+			iconUrl: this.props.data.iconUrl
 		});
 		this.initSortable();
 		this.initActionItems();
 	}
 
 	componentDidUpdate() {
-		// console.warn(this.state);
+		console.warn(this.state);
 	}
 
 	render() {
@@ -645,6 +668,20 @@ class Page extends Component {
 													className="btn btn-danger"
 													onClick={() => {
 														this.setState({ backgroundImg: {} });
+														this.update();
+													}}>
+													X
+												</button>
+											</div>
+											<br />
+											<div className="tab">
+												<button className="btn btn-success tab-toggle" onClick={() => this.addImg('icon')}>
+													Add Nav Icon
+												</button>
+												<button
+													className="btn btn-danger"
+													onClick={() => {
+														this.setState({ iconUrl: '' });
 														this.update();
 													}}>
 													X

@@ -273,11 +273,15 @@ h6 {
 
 .row, .page-content {
   /* background: rgba(51, 51, 51, 0.555); */
-  min-height: 100vh
+  min-height: 100%
 }
 
 .dot-nav-bottom {
   position: sticky
+}
+
+span {
+  pointer-events: none
 }
 
 /* Safari */

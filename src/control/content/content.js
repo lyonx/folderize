@@ -23,7 +23,8 @@ class Content extends Component {
 				pages: [],
 				styleOverrides: [],
 				options: {
-					renderTitlebar: true
+					renderTitlebar: true,
+					navPosition: 'top'
 				}
 			}
 		};
@@ -98,7 +99,11 @@ class Content extends Component {
 								]
 							}
 						],
-						styleOverrides: []
+						styleOverrides: [],
+						options: {
+							showTitleBar: false,
+							navPosition: 'top'
+						}
 					}
 				});
 			} else {
@@ -263,6 +268,8 @@ class Content extends Component {
 	}
 
 	componentDidMount() {
+		alert('foo');
+
 		// Control looks in db for any pages
 		this.fetch();
 		// this.initSortable();
@@ -271,8 +278,8 @@ class Content extends Component {
 
 	componentDidUpdate() {
 		// this.syncState();
-		this.state.settings.options.navPosition === 'bottom' ? document.getElementById('nav-pos').checked = true : document.getElementById('nav-pos').checked = false;
-		this.state.settings.options.renderTitlebar === true ? document.getElementById('titlebar').checked = true : document.getElementById('titlebar').checked = false;
+		this.state.settings.options.navPosition === 'bottom' ? (document.getElementById('nav-pos').checked = true) : (document.getElementById('nav-pos').checked = false);
+		this.state.settings.options.renderTitlebar === true ? (document.getElementById('titlebar').checked = true) : (document.getElementById('titlebar').checked = false);
 		console.warn(this.state);
 		this.debounceSync();
 	}
@@ -301,53 +308,53 @@ class Content extends Component {
 											<div className="col-md-6">
 												<div className="btn-group">
 													<label htmlFor="nav-pos">Page Navigation Position Bottom &nbsp;</label>
-														<input
-															id="nav-pos"
-															type="checkbox"
-															aria-label="..."
-															onClick={e => {
-																switch (e.target.checked) {
-																	case true: {
-																		let settings = this.state.settings;
-																		settings.options.navPosition = 'bottom';
-																		this.setState({ settings });
-																		break;
-																	}
-																	case false: {
-																		let settings = this.state.settings;
-																		settings.options.navPosition = 'top';
-																		this.setState({ settings });
-																		break;
-																	}
-																	default:
-																		return;
+													<input
+														id="nav-pos"
+														type="checkbox"
+														aria-label="..."
+														onClick={e => {
+															switch (e.target.checked) {
+																case true: {
+																	let settings = this.state.settings;
+																	settings.options.navPosition = 'bottom';
+																	this.setState({ settings });
+																	break;
 																}
-															}}
-														/>
-														<label htmlFor="titlebar">Display Titlebar &nbsp;</label>
-														<input
-															id="titlebar"
-															type="checkbox"
-															aria-label="..."
-															onClick={e => {
-																switch (e.target.checked) {
-																	case true: {
-																		let settings = this.state.settings;
-																		settings.options.renderTitlebar = true;
-																		this.setState({ settings });
-																		break;
-																	}
-																	case false: {
-																		let settings = this.state.settings;
-																		settings.options.renderTitlebar = false;
-																		this.setState({ settings });
-																		break;
-																	}
-																	default:
-																		return;
+																case false: {
+																	let settings = this.state.settings;
+																	settings.options.navPosition = 'top';
+																	this.setState({ settings });
+																	break;
 																}
-															}}
-														/>
+																default:
+																	return;
+															}
+														}}
+													/>
+													<label htmlFor="titlebar">Display Titlebar &nbsp;</label>
+													<input
+														id="titlebar"
+														type="checkbox"
+														aria-label="..."
+														onClick={e => {
+															switch (e.target.checked) {
+																case true: {
+																	let settings = this.state.settings;
+																	settings.options.renderTitlebar = true;
+																	this.setState({ settings });
+																	break;
+																}
+																case false: {
+																	let settings = this.state.settings;
+																	settings.options.renderTitlebar = false;
+																	this.setState({ settings });
+																	break;
+																}
+																default:
+																	return;
+															}
+														}}
+													/>
 												</div>
 											</div>
 											<div className="col-md-6" />

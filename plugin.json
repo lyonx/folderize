@@ -1,7 +1,7 @@
 {
-  "author":"Christopher Berger",
+  "author":"Buildfire",
   "pluginName": "Pages",
-  "pluginDescription": "BuildFire plugin template for React",
+  "pluginDescription": " ",
   "supportEmail":"support@buildfire.com",
   "control": {
     "content":{

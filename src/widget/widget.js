@@ -28,20 +28,22 @@ class Widget extends Component {
 		let pages = this.state.settings.pages;
 
 		if (pages.length === 0) return;
-		console.count('format');
 		let simple_dots = document.querySelector('.js_simple_dots');
+		alert(lory);
+		alert(buildfire);
 
 		let dot_count = pages.length;
 		let dot_container = simple_dots.querySelector('.js_dots');
 		let dot_list_item = document.createElement('li');
 
 		const handleDotEvent = e => {
-			// console.log(e.type);
+			alert(e.type);
 			if (e.type === 'before.lory.init') {
 				if (pages.length != this.state.settings.pages.length) return;
 				for (let i = 0, len = dot_count; i < len; i++) {
 					let clone = dot_list_item.cloneNode();
 					if (dot_container.childNodes.length >= pages.length) return;
+
 					dot_container.appendChild(clone);
 				}
 				dot_container.childNodes[0].classList.add('backgroundColorTheme');
@@ -68,6 +70,7 @@ class Widget extends Component {
 				for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
 					dot_container.childNodes[i].classList.remove('backgroundColorTheme');
 				}
+				if (!dot_container.childNodes[0]) return;
 				dot_container.childNodes[0].classList.add('backgroundColorTheme');
 			}
 		};
@@ -81,7 +84,18 @@ class Widget extends Component {
 			let dot_tabs = simple_dots.querySelector('.js_dots').childNodes;
 			for (let i = 0; i < dot_tabs.length; i++) {
 				if (!this.state.settings.pages[i]) return;
-				dot_tabs[i].innerHTML = this.state.settings.pages[i].title;
+				console.log(this.state.settings.pages[i].iconUrl);
+				if (this.state.settings.pages[i].iconUrl) {
+					if (this.state.settings.pages[i].iconUrl === '') return;
+					let icon = document.createElement('span');
+					let url = this.state.settings.pages[i].iconUrl.split(' ');
+					icon.classList.add(`${url[0]}`);
+					icon.classList.add(`${url[1]}`);
+					// icon.classList.add(`${this.state.settings.pages[i].iconUrl}`);
+					dot_tabs[i].appendChild(icon);
+				} else {
+					dot_tabs[i].innerHTML = this.state.settings.pages[i].title;
+				}
 			}
 		}, 1);
 
