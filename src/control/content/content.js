@@ -18,53 +18,14 @@ class Content extends Component {
 		this.reorderPages = this.reorderPages.bind(this);
 		this.debounceSync = debounce(this.syncState, 1000);
 		this.state = {
-			layout: 1,
 			settings: {
 				pages: [],
-				styleOverrides: [],
 				options: {
 					renderTitlebar: true,
 					navPosition: 'top'
 				}
 			}
 		};
-	}
-
-	addStyleOverride(target, attr, value) {
-		console.log(target, attr, value);
-		let settings = this.state.settings;
-		let styleOverrides = this.state.settings.styleOverrides;
-		let currentStyle = [];
-		let index = 0;
-		let i = 0;
-
-		let style = styleOverrides.filter(style => {
-			index = styleOverrides.indexOf(style);
-			return style.target === target;
-		});
-
-		if (style[0]) {
-			currentStyle = style[0].data.styles.filter(e => {
-				i = style[0].data.styles.indexOf(e);
-				return e.attr === attr;
-			});
-			currentStyle[0].value = value;
-			style[0].data.styles[i] = currentStyle;
-			styleOverrides[index] = style;
-		} else {
-			style = {
-				target,
-				data: {
-					attr,
-					value
-				}
-			};
-			styleOverrides.push(style);
-		}
-
-		settings.styleOverrides = styleOverrides;
-
-		this.setState({ settings });
 	}
 
 	fetch() {
@@ -163,27 +124,9 @@ class Content extends Component {
 					if (err) {
 						throw err;
 					}
-					console.log(status);
 				});
 			}
 		});
-		// db.get('settings', (err, response) => {
-		// 	if (err) throw err;
-		// 	if (!response.id) {
-		// 		db.insert({ pages: this.state.settings }, 'settings', true, (err, status) => {
-		// 			if (err) throw err;
-		// 		});
-		// 		return;
-		// 	} else {
-		// 		// insert pages into db
-		// 		db.update(response.id, { settings: this.state.settings }, 'settings', (err, status) => {
-		// 			if (err) {
-		// 				throw err;
-		// 			}
-		// 			console.log(status);
-		// 		});
-		// 	}
-		// });
 	}
 
 	handleChange(event) {
@@ -280,12 +223,10 @@ class Content extends Component {
 		// this.syncState();
 		this.state.settings.options.navPosition === 'bottom' ? (document.getElementById('nav-pos').checked = true) : (document.getElementById('nav-pos').checked = false);
 		this.state.settings.options.renderTitlebar === true ? (document.getElementById('titlebar').checked = true) : (document.getElementById('titlebar').checked = false);
-		console.warn(this.state);
 		this.debounceSync();
 	}
 
 	render() {
-		console.count('render');
 		return (
 			<div className="container-fluid">
 				<div className="row">

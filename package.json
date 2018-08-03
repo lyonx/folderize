@@ -36,6 +36,6 @@
   },
   "dependencies": {
     "lodash.debounce": "^4.0.8",
-    "redux": "^4.0.0"
+    "react-lazy-load": "^3.0.13"
   }
 }
