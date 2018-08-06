@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Lazyload from 'react-lazy-load';
 
-// Widget Side Page
+// --------------------------- WIDGET PAGE COMPONENT --------------------------- //
 class Page extends Component {
 	constructor(props) {
 		super(props);
@@ -12,25 +12,9 @@ class Page extends Component {
 			backgroundColor: '',
 			backgroundImg: ''
 		};
-	}
-
-	renderPlugins() {
-		let plugins = [];
-		this.props.data.plugins.forEach(plugin => {
-			plugins.push(
-				<div className="panel panel-default">
-					<div className="panel-heading">
-						<h3 className="panel-title">{plugin.title}</h3>
-					</div>
-					<div className="panel-body plugin-panel">
-						<div className="thumbnail" style={`background: url(${plugin.iconUrl}`} />
-					</div>
-				</div>
-			);
-		});
-		return plugins;
-	}
-
+  }
+  
+  // PLUGIN NAVIGATION HANDLER
 	pluginNav(node) {
 		buildfire.navigation.navigateTo({
 			pluginId: node.data.pluginTypeId,
@@ -38,8 +22,9 @@ class Page extends Component {
 			folderName: node.data._buildfire.pluginType.result[0].folderName,
 			title: node.data.title
 		});
-	}
-
+  }
+  
+	// LOOPS THROUGH THE NODES AND RETURNS ELEMENTS OF THE CORRESPONDING TYPE
 	renderNodes() {
 		let nodes = [];
 		if (!this.props.data.nodes) return;
@@ -68,7 +53,6 @@ class Page extends Component {
 					nodes.push(
 						<div className="col-sm-12">
 							<div className="image-wrap">
-								{/* <div className="images" style={`background: url(${node.data.src})`} /> */}
 								<Lazyload offsetHorizontal={50} height={200}>
 									<div className="images" style={`background: url(${node.data.src})`} />
 								</Lazyload>
@@ -129,7 +113,9 @@ class Page extends Component {
 			}
 		});
 		return nodes;
-	}
+  }
+  
+  // ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
 		this.setState({ data: this.props.data });
 	}

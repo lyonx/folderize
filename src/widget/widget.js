@@ -1,13 +1,6 @@
 import React, { Component } from 'react';
 import Page from './components/Pages/Page';
 
-// let lazy = Lazyload();
-// console.log(lazy);
-
-let buildfire = window.buildfire;
-let lory = window.lory;
-let db = buildfire.datastore;
-
 buildfire.spinner.show();
 class Widget extends Component {
 	constructor(props) {
@@ -26,6 +19,97 @@ class Widget extends Component {
 			currentSlide: null
 		};
 	}
+	// ------------------------- DATA HANDLING ------------------------- //
+
+	// ON MOUNT...
+	componentDidMount() {
+		// GET ANY PREVIOUSLY STORED DATA
+		this.fetch();
+
+		// INITIALIZE THE DB LISTENER
+		this.listener();
+
+		// COMPENSATES FOR CSS INJECTION BUG IN REACT TEMPLATE (BUILDFIRE.JS:1891)
+		if (window.location.pathname.indexOf('/widget/') === 0) {
+			buildfire.getContext(function(err, context) {
+				if (err) throw err;
+				if (context && context.debugTag) buildfire.logger.attachRemoteLogger(context.debugTag);
+				if (window.location.pathname.indexOf('/widget/') === 0) {
+					var disableTheme = buildfire.options && buildfire.options.disableTheme ? buildfire.options.disableTheme : false;
+
+					if (!disableTheme) {
+						if (buildfire.isWeb() || !context.liveMode) buildfire.appearance.attachAppThemeCSSFiles(context.appId, context.liveMode, context.endPoints.appHost);
+						else buildfire.appearance.attachLocalAppThemeCSSFiles(context.appId);
+					}
+				}
+			});
+		}
+		buildfire.spinner.hide();
+
+		// --------------------------- IN DEVELOPMENT -------------------------- //
+		// buildfire.appearance.getAppTheme((err, res) => {
+		// 	let themeData = [];
+		// 	if (err) throw err;
+		// 	for (var key in res.colors) {
+		// 		if (res.colors.hasOwnProperty(key)) {
+		// 			console.log(key);
+		// 			console.log(res.colors[key]);
+		// 			themeData.push({
+		// 				[key]: res.colors[key]
+		// 			});
+		// 		}
+		// 	}
+		// 	console.log(themeData);
+		// 	themeData.forEach(theme => {
+		// 		let targets = Array.from(document.getElementsByClassName(Object.keys(theme)));
+		// 		console.log(targets);
+		// 		if (targets.length === 0) return;
+		// 		// for (let i = 0; i < targets.length - 1; i++) {
+		// 		// 	console.log(i);
+		// 		// 	targets[i].setAttribute('background', theme.Object.keys(theme));
+		// 		// }
+		// 		let key = Object.keys(theme)[0];
+		// 		targets.forEach(element => {
+		// 			element.setAttribute('background', theme[key]);
+		// 		});
+		// 	});
+		// });
+		// --------------------------------------------------------------------- //
+	}
+
+	// UPDATES THE STATE WHEN DB UPDATES
+	listener() {
+		buildfire.datastore.onUpdate(snapshot => {
+			switch (snapshot.tag) {
+				case 'pages': {
+					// this.setState({ pages: snapshot.data.pages });
+					break;
+				}
+				case 'master': {
+					this.setState({ settings: snapshot.data.settings });
+					break;
+				}
+				default:
+					return;
+			}
+		});
+	}
+
+	// FETCHES DATA FROM DB, IMPORTANT WHEN WIDGET IS DEPLOYED
+	fetch() {
+		buildfire.datastore.get('master', (err, response) => {
+			if (err) throw err;
+
+			// IF NO ENTRIES ARE FOUND, RETURN FOR NOW
+			if (!response.id) return;
+
+			// OTHERWISE LOAD THE SETTINGS
+			this.setState({ settings: response.data.settings });
+		});
+	}
+
+	// --------------------------- RENDERING --------------------------- //
+
 	// REINITIALIZES THE SLIDER AND NAV ON INIT OR AFTER DOM CHANGE
 	loryFormat() {
 		// PREVENT ACCIDENTAL FORMATS
@@ -74,6 +158,8 @@ class Widget extends Component {
 				dot_container.childNodes[0].classList.add('active');
 			}
 		};
+
+		// IF THERE IS ONLY ONE PAGE, DONT BIND EVENT HANDLERS AND HIDE NAVBAR
 		if (pages.length > 1) {
 			// BIND HANDLERS
 			simple_dots.addEventListener('before.lory.init', handleDotEvent);
@@ -81,8 +167,8 @@ class Widget extends Component {
 			simple_dots.addEventListener('after.lory.slide', handleDotEvent);
 			simple_dots.addEventListener('on.lory.resize', handleDotEvent);
 		} else {
-			dot_container.classList.add("hide");
-			document.getElementsByClassName("js_slide")[0].classList.add("full");
+			dot_container.classList.add('hide');
+			document.getElementsByClassName('js_slide')[0].classList.add('full');
 		}
 
 		// SETS NAV LABELS
@@ -114,6 +200,7 @@ class Widget extends Component {
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
 		dot_navigation_slider.slideTo(parseInt(slideIndex));
 	}
+
 	// SETS UP AND RETURNS PAGE COMPONENTS
 	renderPages() {
 		// PREVENT ACCIDENTAL RENDERS
@@ -144,95 +231,12 @@ class Widget extends Component {
 		setTimeout(() => this.loryFormat(), 1);
 		return pages;
 	}
-	// UPDATES THE STATE WHEN DB UPDATES
-	listener() {
-		db.onUpdate(snapshot => {
-			switch (snapshot.tag) {
-				case 'pages': {
-					// this.setState({ pages: snapshot.data.pages });
-					break;
-				}
-				case 'master': {
-					this.setState({ settings: snapshot.data.settings });
-					break;
-				}
-				default:
-					return;
-			}
-		});
-	}
-	// FETCHES DATA FROM DB, IMPORTANT WHEN WIDGET IS DEPLOYED
-	fetch() {
-		db.get('master', (err, response) => {
-			if (err) throw err;
-
-			// IF NO ENTRIES ARE FOUND, RETURN FOR NOW
-			if (!response.id) return;
-
-			// OTHERWISE LOAD THE SETTINGS
-			this.setState({ settings: response.data.settings });
-		});
-	}
 	// OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
 		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
-		this.state.settings.pages.length === 1 ? document.querySelector(".hero-img").classList.add("full") : null;
-	}
-	// ON MOUNT...
-	componentDidMount() {
-		// GET ANY PREVIOUSLY STORED DATA
-		this.fetch();
-
-		// INITIALIZE THE DB LISTENER
-		this.listener();
-
-		// COMPENSATES FOR CSS INJECTION BUG IN REACT TEMPLATE (BUILDFIRE.JS:1891)
-		if (window.location.pathname.indexOf('/widget/') === 0) {
-			buildfire.getContext(function(err, context) {
-				if (err) throw err;
-				if (context && context.debugTag) buildfire.logger.attachRemoteLogger(context.debugTag);
-				if (window.location.pathname.indexOf('/widget/') === 0) {
-					var disableTheme = buildfire.options && buildfire.options.disableTheme ? buildfire.options.disableTheme : false;
-
-					if (!disableTheme) {
-						if (buildfire.isWeb() || !context.liveMode) buildfire.appearance.attachAppThemeCSSFiles(context.appId, context.liveMode, context.endPoints.appHost);
-						else buildfire.appearance.attachLocalAppThemeCSSFiles(context.appId);
-					}
-				}
-			});
+		if (document.querySelector('.hero-img')) {
+			this.state.settings.pages.length === 1 ? document.querySelector('.hero-img').classList.add('full') : null;
 		}
-		buildfire.spinner.hide();
-
-		// --------------------------- IN DEVELOPMENT -------------------------- //
-			// buildfire.appearance.getAppTheme((err, res) => {
-			// 	let themeData = [];
-			// 	if (err) throw err;
-			// 	for (var key in res.colors) {
-			// 		if (res.colors.hasOwnProperty(key)) {
-			// 			console.log(key);
-			// 			console.log(res.colors[key]);
-			// 			themeData.push({
-			// 				[key]: res.colors[key]
-			// 			});
-			// 		}
-			// 	}
-			// 	console.log(themeData);
-			// 	themeData.forEach(theme => {
-			// 		let targets = Array.from(document.getElementsByClassName(Object.keys(theme)));
-			// 		console.log(targets);
-			// 		if (targets.length === 0) return;
-			// 		// for (let i = 0; i < targets.length - 1; i++) {
-			// 		// 	console.log(i);
-			// 		// 	targets[i].setAttribute('background', theme.Object.keys(theme));
-			// 		// }
-			// 		let key = Object.keys(theme)[0];
-			// 		targets.forEach(element => {
-			// 			element.setAttribute('background', theme[key]);
-			// 		});
-			// 	});
-			// });
-		// --------------------------------------------------------------------- //
-
 	}
 
 	render() {
