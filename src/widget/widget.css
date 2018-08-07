@@ -139,6 +139,10 @@ ul {
 	height: 50px;
 }
 
+.thumbnail {
+	margin-bottom: 0px;
+}
+
 .header {
 	margin-bottom: 5px;
 }

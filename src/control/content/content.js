@@ -50,7 +50,7 @@ class Content extends Component {
 	addPage() {
 		let newPage = {
 			title: 'New Page',
-			id: Date.now(),
+			instanceId: Date.now(),
 			backgroundColor: {
 				colorType: false,
 				solid: {
@@ -63,6 +63,8 @@ class Content extends Component {
 			nodes: [
 				{
 					type: 'header',
+					title: 'header',
+					instanceId: Date.now(),
 					data: {
 						text: 'new page'
 					}
@@ -117,26 +119,26 @@ class Content extends Component {
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
 		let navigationCallback = e => {
-			console.log(e.title);
+			console.log(this.editor);
 			let target = this.state.settings.pages.filter(page => {
-				return page.title === e.title;
+				return page.instanceId === e.instanceId;
 			});
 			let index = this.state.settings.pages.indexOf(target[0]);
 			document.querySelector(`#tab${index}`).click();
 		};
-		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: true }, false, false, { itemEditable: true, navigationCallback });
+		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: false }, false, false, { itemEditable: true, navigationCallback });
 
 		this.editor.onOrderChange = () => {
 			let settings = this.state.settings;
 			settings.pages = this.editor.items;
-			console.log(settings);
+			// console.log(settings);
 			this.setState({ settings });
 		};
 
 		this.editor.onDeleteItem = () => {
 			let settings = this.state.settings;
 			settings.pages = this.editor.items;
-			console.log(settings);
+			// console.log(settings);
 			this.setState({ settings });
 		};
 
@@ -180,39 +182,40 @@ class Content extends Component {
 			} else {
 				// otherwise, if all pages have been removed, insert default data
 				if (response.data.settings.pages.length === 0) {
-					this.setState({
-						settings: {
-							pages: [
-								{
-									title: 'New Page',
-									id: Date.now(),
-									customizations: [],
-									backgroundColor: {
-										colorType: false,
-										solid: {
-											backgroundCSS: ''
-										},
-										gradient: {
-											backgroundCSS: ''
-										}
-									},
-									nodes: [
-										{
-											type: 'header',
-											data: {
-												text: 'new page'
-											}
-										}
-									]
-								}
-							],
-							styleOverrides: [],
-							options: {
-								showTitleBar: false,
-								navPosition: 'top'
-							}
-						}
-					});
+					this.addPage();
+					// this.setState({
+					// 	settings: {
+					// 		pages: [
+					// 			{
+					// 				title: 'New Page',
+					// 				id: Date.now(),
+					// 				customizations: [],
+					// 				backgroundColor: {
+					// 					colorType: false,
+					// 					solid: {
+					// 						backgroundCSS: ''
+					// 					},
+					// 					gradient: {
+					// 						backgroundCSS: ''
+					// 					}
+					// 				},
+					// 				nodes: [
+					// 					{
+					// 						type: 'header',
+					// 						data: {
+					// 							text: 'new page'
+					// 						}
+					// 					}
+					// 				]
+					// 			}
+					// 		],
+					// 		styleOverrides: [],
+					// 		options: {
+					// 			showTitleBar: false,
+					// 			navPosition: 'top'
+					// 		}
+					// 	}
+					// });
 				} else {
 					// update settings
 					this.setState({ settings: response.data.settings });
@@ -225,13 +228,13 @@ class Content extends Component {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
 		this.debounceSync();
 		// CHANGES THE CHECKBOXES TO MATCH STATE
-		this.state.settings.options.navPosition === 'bottom' ? (document.getElementById('nav-pos-bottom').checked = true) : (document.getElementById('nav-pos-bottom').checked = false);
-		this.state.settings.options.navPosition === 'top' ? (document.getElementById('nav-pos-top').checked = true) : (document.getElementById('nav-pos-top').checked = false);
-		this.state.settings.options.renderTitlebar === true ? (document.getElementById('titlebar').checked = true) : (document.getElementById('titlebar').checked = false);
+		// this.state.settings.options.navPosition === 'bottom' ? (document.getElementById('nav-pos-bottom').checked = true) : (document.getElementById('nav-pos-bottom').checked = false);
+		// this.state.settings.options.navPosition === 'top' ? (document.getElementById('nav-pos-top').checked = true) : (document.getElementById('nav-pos-top').checked = false);
+		// this.state.settings.options.renderTitlebar === true ? (document.getElementById('titlebar').checked = true) : (document.getElementById('titlebar').checked = false);
 		if (this.state.settings.pages.length < 1) return;
 		this.editor.loadItems(this.state.settings.pages, false);
 		document.querySelector('.carousel-items > div').onClick = e => {
-			console.log(e);
+			// console.log(e);
 		};
 	}
 
@@ -254,106 +257,11 @@ class Content extends Component {
 				<div className="row">
 					<div className="col-md-12">
 						<div className="panel panel-default">
-							<div className="panel-heading">
-								<h3 className="panel-title">Plugin Configuration</h3>
-							</div>
 							<div className="panel-body">
 								<div className="col-md-12">
-									<div className="panel panel-default">
-										<button className="btn btn-primary" style="width: 100%" onClick={this.addPage}>
-											Add a Page
-										</button>
-									</div>
-								</div>
-								<div className="col-md-12">
-									<div className="panel panel-default">
-										<div className="panel-body">
-											<div className="col-md-6">
-												<div className="btn-group">
-												<form onChange={e=>console.log(e)}>
-													<h4>Page Navigation Position</h4>
-													<label htmlFor="nav-pos">Bottom &nbsp;</label>
-													<input
-														id="nav-pos-bottom"
-														type="checkbox"
-														name='bottom'
-														aria-label="..."
-														onClick={e => {
-															switch (e.target.checked) {
-																case true: {
-																	let settings = this.state.settings;
-																	settings.options.navPosition = 'bottom';
-																	this.setState({ settings });
-																	break;
-																}
-																case false: {
-																	let settings = this.state.settings;
-																	settings.options.navPosition = 'top';
-																	this.setState({ settings });
-																	break;
-																}
-																default:
-																	return;
-															}
-														}}
-													/>
-													<br/>
-													<label htmlFor="nav-pos">top &nbsp;</label>
-													<input
-														id="nav-pos-top"
-														type="checkbox"
-														name='top'
-														aria-label="..."
-														onClick={e => {
-															switch (e.target.checked) {
-																case true: {
-																	let settings = this.state.settings;
-																	settings.options.navPosition = 'top';
-																	this.setState({ settings });
-																	break;
-																}
-																case false: {
-																	let settings = this.state.settings;
-																	settings.options.navPosition = 'bottom';
-																	this.setState({ settings });
-																	break;
-																}
-																default:
-																	return;
-															}
-														}}
-													/>
-													</form>
-													<br/>
-													<label htmlFor="titlebar">Display Titlebar &nbsp;</label>
-													<input
-														id="titlebar"
-														type="checkbox"
-														aria-label="..."
-														onClick={e => {
-															switch (e.target.checked) {
-																case true: {
-																	let settings = this.state.settings;
-																	settings.options.renderTitlebar = true;
-																	this.setState({ settings });
-																	break;
-																}
-																case false: {
-																	let settings = this.state.settings;
-																	settings.options.renderTitlebar = false;
-																	this.setState({ settings });
-																	break;
-																}
-																default:
-																	return;
-															}
-														}}
-													/>
-												</div>
-											</div>
-											<div className="col-md-6" />
-										</div>
-									</div>
+									<button className="btn btn-primary" style="width: 100%" onClick={this.addPage}>
+										Add a Page
+									</button>
 								</div>
 							</div>
 						</div>
