@@ -139,10 +139,6 @@ ul {
 	height: 50px;
 }
 
-.thumbnail {
-	margin-bottom: 0px;
-}
-
 .header {
 	margin-bottom: 5px;
 }
@@ -258,4 +254,9 @@ span {
 	100% {
 		transform: rotate(360deg);
 	}
+}
+
+::-webkit-scrollbar {
+	display: none;
+	width: 0px;
 }

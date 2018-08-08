@@ -68,7 +68,7 @@ class Page extends Component {
 	}
 
 	componentDidUpdate() {
-		// console.log(this.state);
+		// console.warn(this.state);
 		this.editor.loadItems(this.state.nodes, false);
 	}
 
@@ -391,7 +391,7 @@ class Page extends Component {
 	update() {
 		this.updatePage(this.props.index, {
 			title: this.state.title,
-			id: this.props.data.id,
+			instanceId: this.props.data.instanceId,
 			images: this.state.images,
 			nodes: this.state.nodes,
 			show: this.state.show,
@@ -404,7 +404,7 @@ class Page extends Component {
 
 	// USED TO TOGGLE MODALS OR PANELS
 	toggle(e, type) {
-		console.log(Date.now());
+		// console.log(Date.now());
 		if (!e.target.id) return;
 		let panel;
 		switch (type) {
@@ -415,6 +415,17 @@ class Page extends Component {
 			case 'options': {
 				panel = document.getElementById(`page${document.getElementById(e.target.id).getAttribute('index')}options`);
 				break;
+			}
+			case 'addnodes': {
+				panel = document.getElementById(`page${document.getElementById(e.target.id).getAttribute('index')}addnodes`);
+				if (panel.getAttribute('data-toggle') === 'hide') {
+					panel.style.display = 'block';
+					panel.setAttribute('data-toggle', 'show');
+				} else {
+					panel.style.display = 'none';
+					panel.setAttribute('data-toggle', 'hide');
+				}
+				return;
 			}
 			default: {
 				panel = document.getElementById(`panel${document.getElementById(e.target.id).getAttribute('index')}`);
@@ -464,10 +475,14 @@ class Page extends Component {
 								<div className="panel-heading tab">
 									<h3 className="panel-title tab-title">Header</h3>
 									<div className="toggle-group">
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} page={`${this.props.index}`} onClick={e =>
-											{
+										<button
+											className="btn btn-deafult tab-toggle"
+											id={`page${this.props.index}node${index}`}
+											index={`${index}`}
+											page={`${this.props.index}`}
+											onClick={e => {
 												this.toggle(e, 'node');
-												}}>
+											}}>
 											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 										</button>
 									</div>
@@ -485,19 +500,19 @@ class Page extends Component {
 										// e.nativeEvent.stopImmediatePropagation();
 										// e.nativeEvent.stopPropagation();
 										this.toggle(e, 'node');
-									}}>
-									<div className="panel-body nodepanel">
-										<div className="input-group">
-											<input type="text" className="form-control" name="heading" aria-describedby="sizing-addon2" value={node.data.text} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text')} />
-										</div>
-										<div className="tab">
-											<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} page={`${this.props.index}`} onClick={e => this.toggle(e, 'node')}>
-												{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
-											</button>
-											<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
-												Remove
-											</button>
-										</div>
+									}}
+								/>
+								<div className="panel-body nodepanel">
+									<div className="input-group">
+										<input type="text" className="form-control" name="heading" aria-describedby="sizing-addon2" value={node.data.text} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text')} />
+									</div>
+									<div className="tab">
+										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} page={`${this.props.index}`} onClick={e => this.toggle(e, 'node')}>
+											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										</button>
+										<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+											Remove
+										</button>
 									</div>
 								</div>
 							</div>
@@ -532,27 +547,27 @@ class Page extends Component {
 									page={`${this.props.index}`}
 									onClick={e => {
 										this.toggle(e, 'node');
-									}}>
-									<div className="panel-body nodepanel" data-toggle="hide">
-										<div className="input-group">
-											<textarea
-												type="text"
-												// className="form-control"
-												style="width: 100%; height: 100px"
-												name="desc"
-												aria-describedby="sizing-addon2"
-												value={node.data.text}
-												onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text')}
-											/>
-										</div>
-										<div className="tab">
-											<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
-												{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
-											</button>
-											<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
-												Remove
-											</button>
-										</div>
+									}}
+								/>
+								<div className="panel-body nodepanel" data-toggle="hide">
+									<div className="input-group">
+										<textarea
+											type="text"
+											// className="form-control"
+											style="width: 100%; height: 100px"
+											name="desc"
+											aria-describedby="sizing-addon2"
+											value={node.data.text}
+											onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text')}
+										/>
+									</div>
+									<div className="tab">
+										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										</button>
+										<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+											Remove
+										</button>
 									</div>
 								</div>
 							</div>
@@ -587,23 +602,23 @@ class Page extends Component {
 									page={`${this.props.index}`}
 									onClick={e => {
 										this.toggle(e, 'node');
-									}}>
-									<div className="panel-body  nodepanel">
-										<div className="tab">
-											<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} />
-											<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))}>
-												Change Image
-											</button>
-										</div>
-										<div className="tab">
-											<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
-												{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
-											</button>
+									}}
+								/>
+								<div className="panel-body  nodepanel">
+									<div className="tab">
+										<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} />
+										<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))}>
+											Change Image
+										</button>
+									</div>
+									<div className="tab">
+										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										</button>
 
-											<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
-												X
-											</button>
-										</div>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+											X
+										</button>
 									</div>
 								</div>
 							</div>
@@ -683,39 +698,34 @@ class Page extends Component {
 									page={`${this.props.index}`}
 									onClick={e => {
 										this.toggle(e, 'node');
-									}}>
-									<div className="panel-body nodepanel">
-										<div className="action">
-											<div className="action-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node))} />
-											<h3 className="action-title">{node.data.title}</h3>
-										</div>
-										<hr />
-										<div className="tab">
-											<button 
-											className="btn btn-deafult tab-toggle" 
-											id={`page${this.props.index}node${index}`} 
-											page={`${this.props.index}`}
-											index={`${index}`} 
-											onClick={e => this.toggle(e, 'node')}>
-												{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
-											</button>
-											<button
-												className="btn btn-success tab-toggle"
-												onClick={e => {
-													// console.log(node);
-													buildfire.actionItems.showDialog(node.data, {}, (err, res) => {
-														if (err) throw err;
-														if (!res) return;
-														node.data = res;
-														this.update();
-													});
-												}}>
-												Edit
-											</button>
-											<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, index, 'delete')}>
-												X
-											</button>
-										</div>
+									}}
+								/>
+								<div className="panel-body nodepanel">
+									<div className="action">
+										<div className="action-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node))} />
+										<h3 className="action-title">{node.data.title}</h3>
+									</div>
+									<hr />
+									<div className="tab">
+										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} page={`${this.props.index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										</button>
+										<button
+											className="btn btn-success tab-toggle"
+											onClick={e => {
+												// console.log(node);
+												buildfire.actionItems.showDialog(node.data, {}, (err, res) => {
+													if (err) throw err;
+													if (!res) return;
+													node.data = res;
+													this.update();
+												});
+											}}>
+											Edit
+										</button>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, index, 'delete')}>
+											X
+										</button>
 									</div>
 								</div>
 							</div>
@@ -784,43 +794,49 @@ class Page extends Component {
 							</button>
 						</div>
 					</div>
-
-					<div className="panel-body page-panel panel-hide" data-toggle="hide" id={`panel${this.props.index}`}>
-						<div className="container">
-							<div className="row">
-								<div className="col-sm-12 header">
-									<button className="btn" style="flex: 1; margin-bottom: 15px; margin-top: 15px;" id={`tab${this.props.index}`} index={this.props.index} onClick={e => this.toggle(e)}>
-										Done
-									</button>
-								</div>
-								<div className="col-sm-12">
-									<div className="panel panel-default">
-										<div className="panel-heading tab">
-											<h3 className="panel-title tab-title">Page Config</h3>
-											<div className="toggle-group">
-												<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
-													{document.getElementById(`page${this.props.index}options`) ? (document.getElementById(`page${this.props.index}options`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
-												</button>
-											</div>
+					<div className="modal-wrap panel-hide" data-toggle="hide" id={`panel${this.props.index}`}>
+						<div
+							className="backdrop"
+							id={`panel${this.props.index}backdrop`}
+							index={`${this.props.index}`}
+							page={`${this.props.index}`}
+							onClick={e => {
+								e.preventDefault();
+								e.stopPropagation();
+								// e.nativeEvent.stopImmediatePropagation();
+								// e.nativeEvent.stopPropagation();
+								this.toggle(e);
+							}}
+						/>
+						<div className="panel-body nodepanel" style="top: 10%; height: 80%">
+							<div className="container">
+								<div className="row">
+									<div className="col-sm-12 header" />
+									<form>
+										<div className="input-group">
+											<h4>Edit Page Title</h4>
+											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={this.handleChange} />
 										</div>
+									</form>
+									<div className="col-sm-12">
+										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
+											{document.getElementById(`page${this.props.index}options`) ? (document.getElementById(`page${this.props.index}options`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										</button>
+										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}addnodesbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'addnodes')}>
+											Add Nodes
+										</button>
+										{/* ------- Config ------ */}
 										<div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}options`}>
 											<div className="backdrop" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
 												<div className="panel-body nodepanel" data-toggle="hide">
-													<form>
-														<div className="input-group">
-															<h4>Edit Page Title</h4>
-															<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={this.handleChange} />
-														</div>
-													</form>
 													<br />
 													<div className="tab">
 														<h4 className="tag" style="width: 33%">
 															Background Color:{' '}
 														</h4>
-														<button className={`thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor')} style={`${this.state.backgroundCSS}`} />
-														{/* <button className="btn btn-success tab-toggle" onClick={() => this.colorPicker('backgroundColor')}>
-															Change background color
-														</button> */}
+														<button className={`btn thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor')} style={`${this.state.backgroundCSS}`}>
+															{this.state.backgroundColor ? (this.state.backgroundColor.colorType ? `${this.state.backgroundColor.colorType}` : 'Add Background Color') : null}
+														</button>
 
 														<button
 															className="btn btn-danger"
@@ -828,7 +844,7 @@ class Page extends Component {
 																this.setState({ backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } } });
 																this.update();
 															}}>
-															X
+															Remove
 														</button>
 													</div>
 													<br />
@@ -836,7 +852,7 @@ class Page extends Component {
 														<h4 className="tag" style="width: 33%">
 															Background Image:{' '}
 														</h4>
-														<button className="btn btn-success thumbnail" style={this.state.backgroundImg ? `background: url("${this.state.backgroundImg}")` : `background: #33333`} onClick={() => this.addImg('background')}>
+														<button className="btn thumbnail" style={this.state.backgroundImg ? `background: url("${this.state.backgroundImg}")` : `background: #33333`} onClick={() => this.addImg('background')}>
 															{typeof this.state.backgroundImg === 'string' ? 'Change Background Image' : 'Add Background Image'}
 														</button>
 														<button
@@ -845,13 +861,16 @@ class Page extends Component {
 																this.setState({ backgroundImg: {} });
 																this.update();
 															}}>
-															X
+															Remove
 														</button>
 													</div>
 													<br />
 													<div className="tab">
-														<button className="btn btn-success tab-toggle" onClick={() => this.addImg('icon')}>
-															Add Nav Icon
+														<h4 className="tag" style="width: 33%">
+															Navigation Icon:{' '}
+														</h4>
+														<button className="btn thumbnail" onClick={() => this.addImg('icon')}>
+															{this.state.iconUrl ? <span className={`glyphicon ${this.state.iconUrl}`} /> : 'Add Icon'}
 														</button>
 														<button
 															className="btn btn-danger"
@@ -859,87 +878,105 @@ class Page extends Component {
 																this.setState({ iconUrl: '' });
 																this.update();
 															}}>
-															X
+															Remove
 														</button>
 													</div>
+													<button
+														className="btn btn-deafult tab-toggle"
+														id={`page${this.props.index}optionsbutton`}
+														index={`${this.props.index}`}
+														onClick={e => {
+															if (!document.querySelector(`page${this.props.index}optionsbutton`)) return;
+															document.querySelector(`page${this.props.index}optionsbutton`).click();
+														}}>
+														Done
+													</button>
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-								<div className="col-sm-12">
-									<div style="margin-bottom: 20px;">
-										<div className="btn-group tab" id={`menu${this.props.index}`}>
-											<button
-												className="btn btn-default add tab-toggle"
-												onClick={e => {
-													this.addNode('header');
-												}}>
-												Add Header
-											</button>
-											<button
-												className="btn btn-default add tab-toggle"
-												onClick={() => {
-													this.addNode('desc');
-												}}>
-												Add Description
-											</button>
-											<button
-												className="btn btn-default add tab-toggle"
-												onClick={() => {
-													this.addNode('image');
-												}}>
-												Add Image
-											</button>
-											<button
-												className="btn btn-default add tab-toggle"
-												onClick={() => {
-													this.addNode('hero');
-												}}>
-												Add Hero Image
-											</button>
-											<button
-												className="btn btn-default add tab-toggle"
-												onClick={() => {
-													// this.toggleModal(this.props.index, 'actions', 'show');
-													this.addNode('action');
-												}}>
-												Add Action Item
-											</button>
+									{/* <div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}addnodes`}> */}
+									<div id={`page${this.props.index}addnodes`} className="addnodes" data-toggle="hide">
+										<div className="col-sm-12">
+											<div style="margin-bottom: 20px;">
+												<div className="btn-group tab" id={`menu${this.props.index}`}>
+													<button
+														className="btn btn-default add tab-toggle"
+														onClick={e => {
+															this.addNode('header');
+														}}>
+														Add Header
+													</button>
+													<button
+														className="btn btn-default add tab-toggle"
+														onClick={() => {
+															this.addNode('desc');
+														}}>
+														Add Description
+													</button>
+													<button
+														className="btn btn-default add tab-toggle"
+														onClick={() => {
+															this.addNode('image');
+														}}>
+														Add Image
+													</button>
+													<button
+														className="btn btn-default add tab-toggle"
+														onClick={() => {
+															this.addNode('hero');
+														}}>
+														Add Hero Image
+													</button>
+													<button
+														className="btn btn-default add tab-toggle"
+														onClick={() => {
+															// this.toggleModal(this.props.index, 'actions', 'show');
+															this.addNode('action');
+														}}>
+														Add Action Item
+													</button>
+												</div>
+												{/* </div> */}
+											</div>
+											<div className="col-sm-12">
+												<div className="plugins panel-hide" id={`plugins${this.props.index}`}>
+													<button
+														className="btm btn-danger"
+														style="position: relative; left: 10em; top: 10em;"
+														onClick={() => {
+															this.toggleModal(this.props.index, 'plugins', 'hide');
+														}}>
+														Cancel
+													</button>
+												</div>
+											</div>
+											<div className="col-sm-12">
+												<div className="actions panel-hide" id={`actions${this.props.index}`}>
+													<button
+														className="btm btn-danger"
+														style="position: relative; left: 10em; top: 10em;"
+														onClick={() => {
+															this.toggleModal(this.props.index, 'actions', 'hide');
+														}}>
+														Cancel
+													</button>
+												</div>
+											</div>
 										</div>
-										{/* </div> */}
 									</div>
-									<div className="col-sm-12">
-										<div className="plugins panel-hide" id={`plugins${this.props.index}`}>
-											<button
-												className="btm btn-danger"
-												style="position: relative; left: 10em; top: 10em;"
-												onClick={() => {
-													this.toggleModal(this.props.index, 'plugins', 'hide');
-												}}>
-												Cancel
-											</button>
-										</div>
+
+									{/* </div> */}
+									<div className="col-sm-12">{this.renderNodes()}</div>
+									<div className="col-sm-12" id={`nodelist${this.props.index}`} />
+									<div className="tab modal-footer">
+										<button className="btn tab-toggle" id={`tab${this.props.index}`} index={this.props.index} onClick={e => this.toggle(e)}>
+											Done
+										</button>
+										<button className="btn btn-danger tab-toggle" onClick={this.delete}>
+											Delete Page
+										</button>
 									</div>
-									<div className="col-sm-12">
-										<div className="actions panel-hide" id={`actions${this.props.index}`}>
-											<button
-												className="btm btn-danger"
-												style="position: relative; left: 10em; top: 10em;"
-												onClick={() => {
-													this.toggleModal(this.props.index, 'actions', 'hide');
-												}}>
-												Cancel
-											</button>
-										</div>
-									</div>
-								</div>
-								<div className="col-sm-12">{this.renderNodes()}</div>
-								<div className="col-sm-12" id={`nodelist${this.props.index}`} />
-								<div className="col-sm-12 tab">
-									<button className="btn btn-danger tab-toggle" onClick={this.delete}>
-										Delete Page
-									</button>
 								</div>
 							</div>
 						</div>

@@ -96,7 +96,6 @@
 .header {
 	margin-top: 0px;
 	display: flex;
-	position: sticky;
 	top: 0px;
 	background: white;
 	z-index: 1000;
@@ -135,7 +134,7 @@
 	position: fixed;
 	z-index: 9000;
 	width: 100vw;
-	margin-left: -15px;
+	/* margin-left: -15px; */
 	height: 100vh;
 	left: 0px;
 	top: 0px;
@@ -145,6 +144,7 @@
 	position: absolute;
 	margin-left: 5vw;
 	margin-right: 5vw;
+	overflow: overlay;
 	width: 90vw;
 	top: 25%;
 	z-index: 9091;
@@ -154,9 +154,19 @@
 	background-clip: padding-box;
 }
 
+.modal-footer {
+	position: sticky;
+}
+
 .thumbnail {
 	margin-bottom: 0px;
 	width: 66%
+}
+
+.addnodes {
+	display: none;
+	margin-bottom: -30px;
+	margin-top: 10px;
 }
 
 .tag {
@@ -173,8 +183,8 @@
 	top: 0px;
 	left: 0px;
 	background: white;
-	border: 1em solid #33333367;
-	border-bottom: 46em solid #33333367;
+	/* border: 1em solid #33333367; */
+	/* border-bottom: 46em solid #33333367; */
 	-moz-background-clip: padding;
 	-webkit-background-clip: padding;
 	background-clip: padding-box;
@@ -223,4 +233,13 @@
 
 ::-webkit-scrollbar {
 	display: none;
+	width: 0px;
+}
+html {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.tab > .thumbnail {
+	margin-right: 10px;
 }

@@ -6,6 +6,7 @@ class Widget extends Component {
 	constructor(props) {
 		super(props);
 		this.renderPages = this.renderPages.bind(this);
+		this.slider = null;
 		this.state = {
 			plugins: [],
 			settings: {
@@ -13,7 +14,8 @@ class Widget extends Component {
 				styleOverrides: [],
 				options: {
 					navPosition: 'top',
-					renderTitlebar: false
+					renderTitlebar: false,
+					colorOverrides: []
 				}
 			},
 			currentSlide: null
@@ -45,6 +47,8 @@ class Widget extends Component {
 			});
 		}
 		buildfire.spinner.hide();
+
+		
 
 		// --------------------------- IN DEVELOPMENT -------------------------- //
 		// buildfire.appearance.getAppTheme((err, res) => {
@@ -85,7 +89,7 @@ class Widget extends Component {
 					// this.setState({ pages: snapshot.data.pages });
 					break;
 				}
-				case 'master': {
+				case 'data': {
 					this.setState({ settings: snapshot.data.settings });
 					break;
 				}
@@ -93,11 +97,12 @@ class Widget extends Component {
 					return;
 			}
 		});
+		buildfire.messaging.onReceivedMessage = message => this.slider.slideTo(message.index);
 	}
 
 	// FETCHES DATA FROM DB, IMPORTANT WHEN WIDGET IS DEPLOYED
 	fetch() {
-		buildfire.datastore.get('master', (err, response) => {
+		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 
 			// IF NO ENTRIES ARE FOUND, RETURN FOR NOW
@@ -192,13 +197,13 @@ class Widget extends Component {
 		}, 1);
 
 		// INITIALIZE THE SLIDER
-		let dot_navigation_slider = lory(simple_dots, {
+		this.slider = lory(simple_dots, {
 			infinite: 0,
 			enableMouseEvents: true
 		});
 
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
-		dot_navigation_slider.slideTo(parseInt(slideIndex));
+		this.slider.slideTo(parseInt(slideIndex));
 	}
 
 	// SETS UP AND RETURNS PAGE COMPONENTS
@@ -233,6 +238,7 @@ class Widget extends Component {
 	}
 	// OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
+
 		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
 		if (document.querySelector('.hero-img')) {
 			this.state.settings.pages.length === 1 ? document.querySelector('.hero-img').classList.add('full') : null;

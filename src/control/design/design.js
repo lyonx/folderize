@@ -9,23 +9,24 @@ class Design extends React.Component {
 			settings: {
 				options: {
 					renderTitlebar: true,
-					navPosition: 'top'
+					navPosition: 'top',
+					colorOverrides: []
 				}
 			}
 		};
   }
   
   syncState() {
-		buildfire.datastore.get('master', (err, response) => {
+		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			if (!response.id) {
-				buildfire.datastore.insert({ settings: this.state.settings }, 'master', true, (err, status) => {
+				buildfire.datastore.insert({ settings: this.state.settings }, 'data', true, (err, status) => {
 					if (err) throw err;
 				});
 				return;
 			} else {
 				// insert pages into db
-				buildfire.datastore.update(response.id, { settings: this.state.settings }, 'master', (err, status) => {
+				buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
 					if (err) {
 						throw err;
 					}
@@ -43,7 +44,7 @@ class Design extends React.Component {
   }
   
   componentDidMount() {
-    buildfire.datastore.get('master', (err, response) => {
+    buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
 			if (!response.id) {

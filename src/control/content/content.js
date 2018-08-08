@@ -18,7 +18,8 @@ class Content extends Component {
 				pages: [],
 				options: {
 					renderTitlebar: true,
-					navPosition: 'top'
+					navPosition: 'top',
+					colorOverrides: []
 				}
 			}
 		};
@@ -48,6 +49,7 @@ class Content extends Component {
 	}
 	// ADDS A NEW PAGE TO THE STATE
 	addPage() {
+		// debugger
 		let newPage = {
 			title: 'New Page',
 			instanceId: Date.now(),
@@ -99,16 +101,18 @@ class Content extends Component {
 
 	// SYNCS THE CONTENT STATE WITH THE DB
 	syncState() {
-		buildfire.datastore.get('master', (err, response) => {
+		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
+			// console.warn(response);
+
 			if (!response.id) {
-				buildfire.datastore.insert({ settings: this.state.settings }, 'master', true, (err, status) => {
+				buildfire.datastore.insert({ settings: this.state.settings }, 'data', true, (err, status) => {
 					if (err) throw err;
 				});
 				return;
 			} else {
 				// insert pages into db
-				buildfire.datastore.update(response.id, { settings: this.state.settings }, 'master', (err, status) => {
+				buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
 					if (err) {
 						throw err;
 					}
@@ -119,12 +123,14 @@ class Content extends Component {
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
 		let navigationCallback = e => {
-			console.log(this.editor);
+			// console.log(this.editor);
 			let target = this.state.settings.pages.filter(page => {
 				return page.instanceId === e.instanceId;
 			});
 			let index = this.state.settings.pages.indexOf(target[0]);
+			buildfire.messaging.sendMessageToWidget({index});
 			document.querySelector(`#tab${index}`).click();
+
 		};
 		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: false }, false, false, { itemEditable: true, navigationCallback });
 
@@ -142,9 +148,30 @@ class Content extends Component {
 			this.setState({ settings });
 		};
 
-		buildfire.datastore.get('master', (err, response) => {
+		// (() => {
+		// 	buildfire.datastore.get('data', (err, response) => {
+		// 		if (err) throw err;
+		// 		// if none are present, insert default data
+		// 		if (!response.id) return;
+		// 		buildfire.datastore.delete(response.id, 'data', (err, status) => {
+		// 			if (err) throw err;
+		// 			console.log(status);
+		// 		});
+		// 	});
+		// })();
+
+		// (() => {
+		// 	buildfire.datastore.search({ limit: 20 }, 'data', (err, response) => {
+		// 		if (err) throw err;
+		// 		// console.warn(response);
+		// 	});
+		// })();
+
+		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
+			// console.warn(response);
+
 			if (!response.id) {
 				this.setState({
 					settings: {
@@ -172,10 +199,10 @@ class Content extends Component {
 								]
 							}
 						],
-						styleOverrides: [],
 						options: {
 							showTitleBar: false,
-							navPosition: 'top'
+							navPosition: 'top',
+							colorOverrides: []
 						}
 					}
 				});
@@ -183,39 +210,6 @@ class Content extends Component {
 				// otherwise, if all pages have been removed, insert default data
 				if (response.data.settings.pages.length === 0) {
 					this.addPage();
-					// this.setState({
-					// 	settings: {
-					// 		pages: [
-					// 			{
-					// 				title: 'New Page',
-					// 				id: Date.now(),
-					// 				customizations: [],
-					// 				backgroundColor: {
-					// 					colorType: false,
-					// 					solid: {
-					// 						backgroundCSS: ''
-					// 					},
-					// 					gradient: {
-					// 						backgroundCSS: ''
-					// 					}
-					// 				},
-					// 				nodes: [
-					// 					{
-					// 						type: 'header',
-					// 						data: {
-					// 							text: 'new page'
-					// 						}
-					// 					}
-					// 				]
-					// 			}
-					// 		],
-					// 		styleOverrides: [],
-					// 		options: {
-					// 			showTitleBar: false,
-					// 			navPosition: 'top'
-					// 		}
-					// 	}
-					// });
 				} else {
 					// update settings
 					this.setState({ settings: response.data.settings });
@@ -225,6 +219,8 @@ class Content extends Component {
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
+		console.warn(this.state);
+
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
 		this.debounceSync();
 		// CHANGES THE CHECKBOXES TO MATCH STATE
