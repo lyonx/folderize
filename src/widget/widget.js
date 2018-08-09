@@ -26,7 +26,8 @@ class Widget extends Component {
 	// ON MOUNT...
 	componentDidMount() {
 		// GET ANY PREVIOUSLY STORED DATA
-		this.fetch();
+		//  ----------------------- IMPORTANT! IN PROD MUST BE UNCOMMENTED!!! -------------------------------------- //
+		// this.fetch();
 
 		// INITIALIZE THE DB LISTENER
 		this.listener();
@@ -48,7 +49,6 @@ class Widget extends Component {
 		}
 		buildfire.spinner.hide();
 
-		
 
 		// --------------------------- IN DEVELOPMENT -------------------------- //
 		// buildfire.appearance.getAppTheme((err, res) => {

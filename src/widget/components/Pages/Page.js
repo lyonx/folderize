@@ -12,9 +12,9 @@ class Page extends Component {
 			backgroundColor: '',
 			backgroundImg: ''
 		};
-  }
-  
-  // PLUGIN NAVIGATION HANDLER
+	}
+
+	// PLUGIN NAVIGATION HANDLER
 	pluginNav(node) {
 		buildfire.navigation.navigateTo({
 			pluginId: node.data.pluginTypeId,
@@ -22,8 +22,8 @@ class Page extends Component {
 			folderName: node.data._buildfire.pluginType.result[0].folderName,
 			title: node.data.title
 		});
-  }
-  
+	}
+
 	// LOOPS THROUGH THE NODES AND RETURNS ELEMENTS OF THE CORRESPONDING TYPE
 	renderNodes() {
 		let nodes = [];
@@ -99,7 +99,7 @@ class Page extends Component {
 								<div className="hero-img" style={`background: url("${node.data.src}")`} alt="...">
 									<div className="hero-text">
 										<h1>{node.data.header}</h1>
-                    {node.data.subtext.length > 0 ? <p>{node.data.subtext}</p> : null}
+										{node.data.subtext.length > 0 ? <p>{node.data.subtext}</p> : null}
 									</div>
 								</div>
 								{/* <h3 className="plugin-title">{node.data.title}</h3> */}
@@ -113,19 +113,32 @@ class Page extends Component {
 			}
 		});
 		return nodes;
-  }
-  
-  // ON MOUNT, MOVE DATA TO STATE
+	}
+
+	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
 		this.setState({ data: this.props.data });
+		let getOffest = e => {
+			setTimeout(() => {
+				// console.warn(document.querySelector(`#slide${this.props.index}`).offsetLeft);
+				let x = document.querySelector(`#slide${this.props.index}`).getBoundingClientRect().x;
+				// console.log(this.props.index, x, window.scrollX);
+				this.setState({
+					offset: Math.abs(x)
+				});
+			}, 250);
+		};
+		// document.removeEventListener('after.lory.slide', getOffest);
+		document.addEventListener('after.lory.slide', getOffest);
 	}
 
 	render() {
+		let content = <div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
+		<div className="row">{this.renderNodes()}</div>
+	</div>;
 		return (
 			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={`background: url("${this.props.data.backgroundImg}")`}>
-				<div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
-					<div className="row">{this.renderNodes()}</div>
-				</div>
+			{this.state.offset > window.innerWidth + 100 ? null : content}
 			</li>
 		);
 	}
