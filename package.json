@@ -33,5 +33,9 @@
     "webpack-dev-server": "^2.11.2",
     "webpack-hot-middleware": "^2.22.2",
     "zip-webpack-plugin": "^2.1.0"
+  },
+  "dependencies": {
+    "lodash.debounce": "^4.0.8",
+    "react-lazy-load": "^3.0.13"
   }
 }
