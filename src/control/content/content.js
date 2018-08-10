@@ -11,7 +11,7 @@ class Content extends Component {
 		this.updatePage = this.updatePage.bind(this);
 		this.renderPages = this.renderPages.bind(this);
 		this.reorderPages = this.reorderPages.bind(this);
-		this.debounceSync = debounce(this.syncState, 1000);
+		this.debounceSync = debounce(this.syncState, 100);
 		this.editor = {};
 		this.state = {
 			settings: {
@@ -74,6 +74,13 @@ class Content extends Component {
 			]
 		};
 		let pages = this.state.settings.pages;
+
+		setTimeout(() => {
+			document.querySelector(`#tab${pages.length - 1}`).click();
+		}, 100); 
+		setTimeout(() => {
+			buildfire.messaging.sendMessageToWidget({index: pages.length});
+		}, 1000);
 		pages.push(newPage);
 		this.setState({ pages: pages });
 	}
@@ -177,7 +184,7 @@ class Content extends Component {
 					settings: {
 						pages: [
 							{
-								title: 'new page',
+								title: 'New Page',
 								id: Date.now(),
 								customizations: [],
 								backgroundColor: {

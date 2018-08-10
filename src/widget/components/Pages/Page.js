@@ -130,14 +130,17 @@ class Page extends Component {
 		};
 		// document.removeEventListener('after.lory.slide', getOffest);
 		document.addEventListener('after.lory.slide', getOffest);
+		document.addEventListener('after.lory.init', getOffest);
 	}
 
 	render() {
+		console.log(this.props.index,this.state.offset, window.innerWidth);
+		
 		let content = <div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
 		<div className="row">{this.renderNodes()}</div>
 	</div>;
 		return (
-			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={`background: url("${this.props.data.backgroundImg}")`}>
+			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={this.props.data.backgroundImg ? `background: url("${this.props.data.backgroundImg}")`: null}>
 			{this.state.offset > window.innerWidth + 100 ? null : content}
 			</li>
 		);

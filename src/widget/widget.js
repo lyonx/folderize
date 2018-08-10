@@ -27,11 +27,12 @@ class Widget extends Component {
 	componentDidMount() {
 		// GET ANY PREVIOUSLY STORED DATA
 		//  ----------------------- IMPORTANT! IN PROD MUST BE UNCOMMENTED!!! -------------------------------------- //
-		// this.fetch();
+		this.fetch();
 
 		// INITIALIZE THE DB LISTENER
 		this.listener();
-
+		console.warn(window.location.pathname);
+		
 		// COMPENSATES FOR CSS INJECTION BUG IN REACT TEMPLATE (BUILDFIRE.JS:1891)
 		if (window.location.pathname.indexOf('/widget/') === 0) {
 			buildfire.getContext(function(err, context) {
@@ -84,6 +85,7 @@ class Widget extends Component {
 	// UPDATES THE STATE WHEN DB UPDATES
 	listener() {
 		buildfire.datastore.onUpdate(snapshot => {
+			console.log(snapshot, Date.now());
 			switch (snapshot.tag) {
 				case 'pages': {
 					// this.setState({ pages: snapshot.data.pages });
@@ -203,7 +205,7 @@ class Widget extends Component {
 		});
 
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
-		this.slider.slideTo(parseInt(slideIndex));
+		// this.slider.slideTo(parseInt(slideIndex));
 	}
 
 	// SETS UP AND RETURNS PAGE COMPONENTS
