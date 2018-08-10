@@ -234,7 +234,10 @@ class Page extends Component {
 					data: { src: 'https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8' }
 				});
 				this.setState({ nodes });
-				setTimeout(() => this.openLast(), 100);
+				setTimeout(() => {
+					this.addImg('node', nodes.length - 1);
+					this.openLast();
+				}, 100);
 				break;
 			}
 			case 'hero': {
@@ -356,6 +359,7 @@ class Page extends Component {
 				let target = this.props.data.nodes[index];
 				buildfire.imageLib.showDialog({}, (err, result) => {
 					if (err) throw err;
+					if (result.selectedFiles.length === 0) return;
 					this.handleNodeChange(result.selectedFiles[0], index, 'src');
 				});
 			}
@@ -606,11 +610,61 @@ class Page extends Component {
 								/>
 								<div className="panel-body  nodepanel">
 									<div className="tab">
-										<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} />
-										<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))}>
-											Change Image
-										</button>
+										<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))} />
+										<label>Full screen {'  '}</label>
+
+										<input
+											type="checkbox"
+											id={`${node.instanceId}`}
+											onChange={e => {
+												console.log(e.target.checked);
+												if (e.target.checked) {
+													let nodes = this.state.nodes;
+													// node.type = 'hero';
+													// node.title = 'hero';
+													node.format = 'hero';
+													node.data.header = 'header';
+													node.data.subtext = 'subtext';
+													console.log(node);
+													nodes[this.state.nodes.indexOf(node)] = node;
+													this.setState({ nodes });
+													this.update();
+													// this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete');
+												} else {
+													let nodes = this.state.nodes;
+													// node.type = 'hero';
+													// node.title = 'hero';
+													node.format = 'image';
+													node.data.header = '';
+													node.data.subtext = '';
+													console.log(node);
+													nodes[this.state.nodes.indexOf(node)] = node;
+													this.setState({ nodes });
+													this.update();
+												}
+											}}
+										/>
 									</div>
+									<div className='panel-hide'>
+									{setTimeout(() => {
+										if (node.format === 'hero'){
+										document.getElementById(`${node.instanceId}`).checked = true;
+										} else {
+											return
+										};
+									}, 1)}
+									</div>
+									{node.format === 'hero' ? (
+										
+										<div>
+											<div className="input-group">
+												<input type="text" className="form-control" name="header" aria-describedby="sizing-addon2" value={node.data.header} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-header')} />
+											</div>
+											<div className="input-group">
+												<input type="text" className="form-control" name="subtext" aria-describedby="sizing-addon2" value={node.data.subtext} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-subtext')} />
+											</div>
+										</div>
+									) : <div/>}
 									<div className="tab">
 										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
@@ -622,6 +676,7 @@ class Page extends Component {
 									</div>
 								</div>
 							</div>
+							
 						</div>
 					);
 					break;
@@ -752,24 +807,50 @@ class Page extends Component {
 									</div>
 								</div>
 							</div>
-							<div className="panel-body panel-hide nodepanel" data-toggle="hide" id={`page${this.props.index}nodepanel${index}`}>
-								<div className="input-group">
-									<input type="text" className="form-control" name="header" aria-describedby="sizing-addon2" value={node.data.header} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-header')} />
-								</div>
-								<div className="input-group">
-									<input type="text" className="form-control" name="subtext" aria-describedby="sizing-addon2" value={node.data.subtext} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-subtext')} />
-								</div>
-								{/* <div className="input-group">
-										Show Button &nbsp;
-										<input type="checkbox" onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-button')} />
-									</div> */}
-								<div className="tab">
-									<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))}>
-										Change Image
-									</button>
-									<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
-										X
-									</button>
+							<div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}nodepanel${index}`}>
+								<div
+									className="backdrop"
+									id={`page${this.props.index}node${index}`}
+									index={`${index}`}
+									page={`${this.props.index}`}
+									onClick={e => {
+										this.toggle(e, 'node');
+									}}
+								/>
+								<div className="panel-body nodepanel" data-toggle="hide" id={`page${this.props.index}nodepanel${index}`}>
+									<div className="input-group">
+										<input type="text" className="form-control" name="header" aria-describedby="sizing-addon2" value={node.data.header} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-header')} />
+									</div>
+									<div className="input-group">
+										<input type="text" className="form-control" name="subtext" aria-describedby="sizing-addon2" value={node.data.subtext} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-subtext')} />
+									</div>
+									<input
+										type="checkbox"
+										id={`${node.instanceId}`}
+										onChange={e => {
+											console.log(e.target.checked);
+											if (e.target.checked) {
+												let nodes = this.state.nodes;
+												node.type = 'hero';
+												node.title = 'hero';
+												node.data.header = 'header';
+												node.data.subtext = 'subtext';
+												console.log(node);
+												nodes[this.state.nodes.indexOf(node)] = node;
+												this.setState({ nodes });
+												this.update();
+												// this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete');
+											}
+										}}
+									/>
+									<div className="tab">
+										<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))}>
+											Change Image
+										</button>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+											X
+										</button>
+									</div>
 								</div>
 							</div>
 						</div>
