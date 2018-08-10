@@ -97,7 +97,10 @@ class Widget extends Component {
 					return;
 			}
 		});
-		buildfire.messaging.onReceivedMessage = message => this.slider.slideTo(message.index);
+		buildfire.messaging.onReceivedMessage = message => {
+			console.log(message);
+			this.slider.slideTo(message.index);
+		};
 	}
 
 	// FETCHES DATA FROM DB, IMPORTANT WHEN WIDGET IS DEPLOYED
@@ -203,7 +206,7 @@ class Widget extends Component {
 		});
 
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
-		this.slider.slideTo(parseInt(slideIndex));
+		// this.slider.slideTo(parseInt(slideIndex));
 	}
 
 	// SETS UP AND RETURNS PAGE COMPONENTS

@@ -5,6 +5,7 @@ import Lazyload from 'react-lazy-load';
 class Page extends Component {
 	constructor(props) {
 		super(props);
+		this.getOffest = this.getOffest.bind(this);
 		this.state = {
 			title: props.data.title,
 			nodes: [],
@@ -115,21 +116,30 @@ class Page extends Component {
 		return nodes;
 	}
 
+	getOffest() {	
+		setTimeout(() => {
+			// console.warn(document.querySelector(`#slide${this.props.index}`).offsetLeft);
+			let slide = document.querySelector(`#slide${this.props.index}`);
+			if (!slide) return;
+			let x = slide.getBoundingClientRect().x;
+			// console.log(this.props.index, x, window.scrollX);
+			this.setState({
+				offset: Math.abs(x)
+			});
+		}, 250);
+	}
+
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
 		this.setState({ data: this.props.data });
-		let getOffest = e => {
-			setTimeout(() => {
-				// console.warn(document.querySelector(`#slide${this.props.index}`).offsetLeft);
-				let x = document.querySelector(`#slide${this.props.index}`).getBoundingClientRect().x;
-				// console.log(this.props.index, x, window.scrollX);
-				this.setState({
-					offset: Math.abs(x)
-				});
-			}, 250);
-		};
+		
 		// document.removeEventListener('after.lory.slide', getOffest);
-		document.addEventListener('after.lory.slide', getOffest);
+		document.addEventListener('after.lory.slide', this.getOffest);
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('after.lory.slide', this.getOffest);
+
 	}
 
 	render() {

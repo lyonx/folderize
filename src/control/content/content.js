@@ -11,7 +11,7 @@ class Content extends Component {
 		this.updatePage = this.updatePage.bind(this);
 		this.renderPages = this.renderPages.bind(this);
 		this.reorderPages = this.reorderPages.bind(this);
-		this.debounceSync = debounce(this.syncState, 1000);
+		this.debounceSync = debounce(this.syncState, 250);
 		this.editor = {};
 		this.state = {
 			settings: {
@@ -76,6 +76,13 @@ class Content extends Component {
 		let pages = this.state.settings.pages;
 		pages.push(newPage);
 		this.setState({ pages: pages });
+		// debugger
+		setTimeout(() => {
+			document.querySelector(`#tab${pages.length-1}`).click();
+			setTimeout(() => {
+			buildfire.messaging.sendMessageToWidget({index: pages.length - 1});				
+			}, 250);
+		}, 250);
 	}
 	// USED BY THE PAGES TO DELETE THEMSELVES
 	deletePage(index) {
@@ -148,18 +155,22 @@ class Content extends Component {
 			this.setState({ settings });
 		};
 
-		// (() => {
-		// 	buildfire.datastore.get('data', (err, response) => {
-		// 		if (err) throw err;
-		// 		// if none are present, insert default data
-		// 		if (!response.id) return;
-		// 		buildfire.datastore.delete(response.id, 'data', (err, status) => {
-		// 			if (err) throw err;
-		// 			console.log(status);
-		// 		});
-		// 	});
-		// })();
-
+// 		(() => {
+// 			buildfire.datastore.get('data', (err, response) => {
+// 				if (err) throw err;
+// 				// console.warn(response);
+	
+				
+// 					// insert pages into db
+// 					buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
+// 						if (err) {
+// 							throw err;
+// 						}
+// 					});
+				
+// 			});
+// 		})();
+// debugger
 		// (() => {
 		// 	buildfire.datastore.search({ limit: 20 }, 'data', (err, response) => {
 		// 		if (err) throw err;
