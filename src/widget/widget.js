@@ -27,7 +27,7 @@ class Widget extends Component {
 	componentDidMount() {
 		// GET ANY PREVIOUSLY STORED DATA
 		//  ----------------------- IMPORTANT! IN PROD MUST BE UNCOMMENTED!!! -------------------------------------- //
-		// this.fetch();
+		this.fetch();
 
 		// INITIALIZE THE DB LISTENER
 		this.listener();
@@ -49,27 +49,26 @@ class Widget extends Component {
 		}
 		buildfire.spinner.hide();
 
-
 		// --------------------------- IN DEVELOPMENT -------------------------- //
 		// buildfire.appearance.getAppTheme((err, res) => {
 		// 	let themeData = [];
 		// 	if (err) throw err;
 		// 	for (var key in res.colors) {
 		// 		if (res.colors.hasOwnProperty(key)) {
-		// 			console.log(key);
-		// 			console.log(res.colors[key]);
+		//
+		//
 		// 			themeData.push({
 		// 				[key]: res.colors[key]
 		// 			});
 		// 		}
 		// 	}
-		// 	console.log(themeData);
+		//
 		// 	themeData.forEach(theme => {
 		// 		let targets = Array.from(document.getElementsByClassName(Object.keys(theme)));
-		// 		console.log(targets);
+		//
 		// 		if (targets.length === 0) return;
 		// 		// for (let i = 0; i < targets.length - 1; i++) {
-		// 		// 	console.log(i);
+		// 		//
 		// 		// 	targets[i].setAttribute('background', theme.Object.keys(theme));
 		// 		// }
 		// 		let key = Object.keys(theme)[0];
@@ -98,7 +97,8 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
-			console.log(message);
+			console.error(message);
+			if (this.state.settings.pages.length === 0) return;
 			this.slider.slideTo(message.index);
 		};
 	}
@@ -146,8 +146,8 @@ class Widget extends Component {
 			if (e.type === 'after.lory.init') {
 				for (let i = 0, len = dot_count; i < len; i++) {
 					if (!dot_container.childNodes[i]) return;
-					dot_container.childNodes[i].addEventListener('click', function(e) {
-						dot_navigation_slider.slideTo(Array.prototype.indexOf.call(dot_container.childNodes, e.target));
+					dot_container.childNodes[i].addEventListener('click', e => {
+						this.slider.slideTo(Array.prototype.indexOf.call(dot_container.childNodes, e.target));
 					});
 				}
 			}
@@ -181,22 +181,33 @@ class Widget extends Component {
 
 		// SETS NAV LABELS
 		setTimeout(() => {
-			let dot_tabs = simple_dots.querySelector('.js_dots').childNodes;
-			for (let i = 0; i < dot_tabs.length; i++) {
-				if (!this.state.settings.pages[i]) return;
-				// IF THERE IS AN ICON, DISPLAY IT
-				if (this.state.settings.pages[i].iconUrl) {
-					if (this.state.settings.pages[i].iconUrl === '') return;
-					let icon = document.createElement('span');
-					let url = this.state.settings.pages[i].iconUrl.split(' ');
-					icon.classList.add(`${url[0]}`);
-					icon.classList.add(`${url[1]}`);
-					dot_tabs[i].appendChild(icon);
-					// OTHERWISE SET TITLE
-				} else {
-					dot_tabs[i].innerHTML = this.state.settings.pages[i].title;
+			// if (this.state.navStyle === 'content') {
+				let dot_tabs = simple_dots.querySelector('.js_dots').childNodes;
+				for (let i = 0; i < dot_tabs.length; i++) {
+					if (!this.state.settings.pages[i]) return;
+					// IF THERE IS AN ICON, DISPLAY IT
+					if (this.state.settings.pages[i].iconUrl) {
+						if (this.state.settings.pages[i].iconUrl === '') return;
+						let icon = document.createElement('span');
+						let url = this.state.settings.pages[i].iconUrl.split(' ');
+						icon.classList.add(`${url[0]}`);
+						icon.classList.add(`${url[1]}`);
+						dot_tabs[i].appendChild(icon);
+						// OTHERWISE SET TITLE
+					} else {
+						dot_tabs[i].innerHTML = this.state.settings.pages[i].title;
+					}
 				}
-			}
+			// } else if (this.state.navStyle === 'dots') {
+				// let dot_tabs = simple_dots.querySelector('.js_dots').childNodes;
+				// for (let i = 0; i < dot_tabs.length; i++) {
+				// 	if (!this.state.settings.pages[i]) return;
+
+				// 		let icon = document.createElement('span');
+				// 		dot_tabs[i].appendChild(icon);
+
+				// }
+			// }
 		}, 1);
 
 		// INITIALIZE THE SLIDER
@@ -206,7 +217,7 @@ class Widget extends Component {
 		});
 
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
-		// this.slider.slideTo(parseInt(slideIndex));
+		this.slider.slideTo(parseInt(slideIndex));
 	}
 
 	// SETS UP AND RETURNS PAGE COMPONENTS
@@ -241,7 +252,6 @@ class Widget extends Component {
 	}
 	// OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
-
 		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
 		if (document.querySelector('.hero-img')) {
 			this.state.settings.pages.length === 1 ? document.querySelector('.hero-img').classList.add('full') : null;
@@ -256,7 +266,7 @@ class Widget extends Component {
 					<div className="loader" />
 				</div>
 				<div id="sandbox">
-					<div key={Date.now()} className="slider js_simple_dots simple" onScroll={e => console.log(e)}>
+					<div key={Date.now()} className="slider js_simple_dots simple">
 						{this.state.settings.options.navPosition === 'top' ? dotNav : null}
 						<div className="frame js_frame">
 							<ul className="slides js_slides">{this.renderPages()}</ul>

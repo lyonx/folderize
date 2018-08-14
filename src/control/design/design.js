@@ -36,7 +36,6 @@ class Design extends React.Component {
 	}
 
 	componentDidUpdate() {
-		console.log(this.state);
 		this.debounceSync();
 		this.state.settings.options.navPosition === 'bottom' ? (document.getElementById('nav-pos-bottom').checked = true) : (document.getElementById('nav-pos-bottom').checked = false);
 		this.state.settings.options.navPosition === 'top' ? (document.getElementById('nav-pos-top').checked = true) : (document.getElementById('nav-pos-top').checked = false);
@@ -132,7 +131,7 @@ class Design extends React.Component {
 						<div className="col-md-12">
 							<h4>Page Navigation Position</h4>
 							<div className="btn-group">
-								<form onChange={e => console.log(e)}>
+								<form>
 									<label htmlFor="nav-pos">Bottom</label>
 									<input
 										id="nav-pos-bottom"
@@ -159,7 +158,7 @@ class Design extends React.Component {
 										}}
 									/>
 								</form>
-								<form onChange={e => console.log(e)}>
+								<form>
 									<label htmlFor="nav-pos">Top</label>
 									<input
 										id="nav-pos-top"
@@ -187,30 +186,32 @@ class Design extends React.Component {
 									/>
 								</form>
 								<br />
-								<label htmlFor="titlebar">Display Titlebar &nbsp;</label>
-								<input
-									id="titlebar"
-									type="checkbox"
-									aria-label="..."
-									onClick={e => {
-										switch (e.target.checked) {
-											case true: {
-												let settings = this.state.settings;
-												settings.options.renderTitlebar = true;
-												this.setState({ settings });
-												break;
+								<form>
+									<label htmlFor="titlebar">Display Titlebar &nbsp;</label>
+									<input
+										id="titlebar"
+										type="checkbox"
+										aria-label="..."
+										onClick={e => {
+											switch (e.target.checked) {
+												case true: {
+													let settings = this.state.settings;
+													settings.options.renderTitlebar = true;
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													let settings = this.state.settings;
+													settings.options.renderTitlebar = false;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													return;
 											}
-											case false: {
-												let settings = this.state.settings;
-												settings.options.renderTitlebar = false;
-												this.setState({ settings });
-												break;
-											}
-											default:
-												return;
-										}
-									}}
-								/>
+										}}
+									/>
+								</form>
 							</div>
 						</div>
 					</div>

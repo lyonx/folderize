@@ -6,7 +6,7 @@ class Page extends Component {
 		super(props);
 		this.updatePage = props.updatePage;
 		this.deletePage = props.deletePage;
-		this.reorderPages = props.reorderPages;
+		// this.reorderPages = props.reorderPages;
 		this.key = props.key;
 		this.update = this.update.bind(this);
 		this.handleChange = this.handleChange.bind(this);
@@ -18,7 +18,8 @@ class Page extends Component {
 			backgroundColor: this.props.backgroundColor,
 			backgroundImg: this.props.backgroundImg,
 			iconUrl: this.props.iconUrl,
-			backgroundCSS: ''
+			backgroundCSS: '',
+			tutorials: false
 		};
 	}
 
@@ -26,27 +27,34 @@ class Page extends Component {
 
 	// ON MOUNT...
 	componentDidMount() {
+		// Unknown bug caused main panel to render with the wrong attributes
+		let panel = document.getElementById(`panel${this.props.index}`);
+		if (panel.getAttribute('data-toggle') === 'show') {
+			panel.setAttribute('data-toggle', 'hide');
+			panel.classList.replace('panel-show', 'panel-hide');
+		}
 		// this.state.backgroundColor ? (this.state.backgroundColor.colorType === 'solid' ? this.setState({ backgroundCSS: this.state.backgroundColor.solid.backgroundCSS }) : this.setState({ backgroundCSS: this.state.backgroundColor.gradient.backgroundCSS })) : null;
 		// MOVE DATA TO STATE
-		// console.warn(this.props);
+
 		this.setState({
 			title: this.props.data.title,
 			nodes: this.props.data.nodes,
 			backgroundColor: this.props.data.backgroundColor,
 			backgroundImg: this.props.data.backgroundImg,
 			iconUrl: this.props.data.iconUrl,
-			backgroundCSS: this.props.data.backgroundColor ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : ''
+			backgroundCSS: this.props.data.backgroundColor != false ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : false,
+			tutorials: this.props.tutorials
 		});
 
 		let navigationCallback = e => {
-			// console.log(e);
+			//
 			let target = this.state.nodes.filter(node => {
 				return node.instanceId === e.instanceId;
 			});
-			// console.log(target, this.state.nodes);
+			//
 			let nodeIndex = this.state.nodes.indexOf(target[0]);
-			// console.log(nodeIndex);
-			// console.log(document.querySelector(`#page${this.props.index}node${nodeIndex}`));
+			//
+			//
 			document.querySelector(`#page${this.props.index}node${nodeIndex}`).click();
 		};
 
@@ -68,7 +76,7 @@ class Page extends Component {
 	}
 
 	componentDidUpdate() {
-		// console.warn(this.state);
+		console.log(this.state);
 		this.editor.loadItems(this.state.nodes, false);
 	}
 
@@ -180,7 +188,7 @@ class Page extends Component {
 				break;
 			}
 			case 'hero-button': {
-				// console.log(event.target.checked);
+				//
 				node.data.showButton = event.target.value;
 				nodes[index] = node;
 				this.setState({
@@ -206,7 +214,7 @@ class Page extends Component {
 			case 'header': {
 				nodes.push({
 					type: 'header',
-					title: 'header',
+					title: 'Header',
 					instanceId: Date.now(),
 					data: { text: 'new page' }
 				});
@@ -218,7 +226,7 @@ class Page extends Component {
 			case 'desc': {
 				nodes.push({
 					type: 'desc',
-					title: 'text',
+					title: 'Text',
 					instanceId: Date.now(),
 					data: { text: 'You can edit this description in the control.' }
 				});
@@ -229,7 +237,7 @@ class Page extends Component {
 			case 'image': {
 				nodes.push({
 					type: 'image',
-					title: 'image',
+					title: 'Image',
 					instanceId: Date.now(),
 					data: { src: 'https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8' }
 				});
@@ -257,7 +265,8 @@ class Page extends Component {
 					let nodes = this.state.nodes;
 					nodes.push({
 						type: 'action',
-						title: res.action,
+						instanceId: Date.now(),
+						title: `Action Item: ${res.title}`,
 						data: res
 					});
 					this.setState({
@@ -270,30 +279,30 @@ class Page extends Component {
 			default:
 				return;
 		}
-		// console.log(this.editor);
+		//
 
 		this.update();
 	}
 
-	// USED TO CHANGE TO ORDER OF NODES
-	reorderNodes(index, dir) {
-		let nodes = this.props.data.nodes;
-		if (dir === 1) {
-			let temp = nodes[index - 1];
-			if (!temp) return;
-			nodes[index - 1] = nodes[index];
-			nodes[index] = temp;
-			this.setState({ nodes });
-			this.update();
-		} else {
-			let temp = nodes[index + 1];
-			if (!temp) return;
-			nodes[index + 1] = nodes[index];
-			nodes[index] = temp;
-			this.setState({ nodes });
-			this.update();
-		}
-	}
+	// // USED TO CHANGE TO ORDER OF NODES
+	// reorderNodes(index, dir) {
+	// 	let nodes = this.props.data.nodes;
+	// 	if (dir === 1) {
+	// 		let temp = nodes[index - 1];
+	// 		if (!temp) return;
+	// 		nodes[index - 1] = nodes[index];
+	// 		nodes[index] = temp;
+	// 		this.setState({ nodes });
+	// 		this.update();
+	// 	} else {
+	// 		let temp = nodes[index + 1];
+	// 		if (!temp) return;
+	// 		nodes[index + 1] = nodes[index];
+	// 		nodes[index] = temp;
+	// 		this.setState({ nodes });
+	// 		this.update();
+	// 	}
+	// }
 
 	// USED BY INPUT FEILDS TO UPDATE STATE
 	handleChange(event) {
@@ -388,7 +397,18 @@ class Page extends Component {
 
 	// DELETES THIS PAGE
 	delete() {
-		this.deletePage(this.props.index);
+		let confirm = buildfire.notifications.confirm(
+			{
+				title: 'Remove Page',
+				message: 'Are you sure? Page will be lost!',
+				buttonLabels: ['delete', 'cancel']
+			},
+			confirm => {
+				if (confirm) {
+					this.deletePage(this.props.index);
+				}
+			}
+		);
 	}
 
 	// PIPES CURRENT STATE TO CONTROL'S STATE, UPDATES PAGE AT THIS INDEX
@@ -408,7 +428,6 @@ class Page extends Component {
 
 	// USED TO TOGGLE MODALS OR PANELS
 	toggle(e, type) {
-		// console.log(Date.now());
 		if (!e.target.id) return;
 		let panel;
 		switch (type) {
@@ -441,17 +460,18 @@ class Page extends Component {
 				panel.classList.remove('panel-show');
 				panel.classList.add('panel-hide');
 				panel.setAttribute('data-toggle', 'hide');
-				this.setState({ show: false });
+				// this.setState({ show: false });
 				break;
 			case 'hide':
 				panel.classList.remove('panel-hide');
 				panel.classList.add('panel-show');
 				panel.setAttribute('data-toggle', 'show');
-				this.setState({ show: true });
+				// this.setState({ show: true });
 				break;
 			default:
 				break;
 		}
+		this.state.tutorials ? this.setState({ tutorials: false }) : null;
 	}
 
 	// USED TO TOGGLE A SPECIAL MODAL FOR PLUGINS AND ACTION NODE CREATION
@@ -460,6 +480,23 @@ class Page extends Component {
 			document.getElementById(`${target}${index}`).classList.replace('panel-hide', 'panel-show');
 		} else {
 			document.getElementById(`${target}${index}`).classList.replace('panel-show', 'panel-hide');
+		}
+	}
+
+	toggleTutorials(control) {
+		switch (control) {
+			case 'on':
+				localStorage.setItem('tutorial', true);
+
+				this.setState({ tutorials: true });
+				break;
+			case 'off':
+				localStorage.setItem('tutorial', false);
+				this.setState({ tutorials: false });
+				break;
+
+			default:
+				break;
 		}
 	}
 
@@ -480,7 +517,7 @@ class Page extends Component {
 									<h3 className="panel-title tab-title">Header</h3>
 									<div className="toggle-group">
 										<button
-											className="btn btn-deafult tab-toggle"
+											className="btn btn-success tab-toggle"
 											id={`page${this.props.index}node${index}`}
 											index={`${index}`}
 											page={`${this.props.index}`}
@@ -507,14 +544,21 @@ class Page extends Component {
 									}}
 								/>
 								<div className="panel-body nodepanel">
+									<h4>Header Text</h4>
 									<div className="input-group">
 										<input type="text" className="form-control" name="heading" aria-describedby="sizing-addon2" value={node.data.text} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text')} />
 									</div>
+									<br />
 									<div className="tab">
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} page={`${this.props.index}`} onClick={e => this.toggle(e, 'node')}>
-											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										<button className="btn btn-success" id={`page${this.props.index}node${index}`} index={`${index}`} page={`${this.props.index}`} onClick={e => this.toggle(e, 'node')}>
+											{/* {document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'} */}
+											<span className="glyphicon glyphicon-ok" />
+											{'  '}
+											Done
 										</button>
-										<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+											<span className="glyphicon glyphicon-alert" />
+											{'  '}
 											Remove
 										</button>
 									</div>
@@ -537,7 +581,7 @@ class Page extends Component {
 										<button className="btn btn-deafult tab-toggle" onClick={e => this.reorderNodes(index, 0)}>
 											<span className="glyphicon glyphicon-chevron-down" aria-hidden="true" />
 										</button>
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+										<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 										</button>
 									</div>
@@ -554,6 +598,7 @@ class Page extends Component {
 									}}
 								/>
 								<div className="panel-body nodepanel" data-toggle="hide">
+									<h4>Description Text</h4>
 									<div className="input-group">
 										<textarea
 											type="text"
@@ -566,10 +611,15 @@ class Page extends Component {
 										/>
 									</div>
 									<div className="tab">
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
-											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										<button className="btn btn-success" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+											{/* {document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'} */}
+											<span className="glyphicon glyphicon-ok" />
+											{'  '}
+											Done
 										</button>
-										<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+											<span className="glyphicon glyphicon-alert" />
+											{'  '}
 											Remove
 										</button>
 									</div>
@@ -592,7 +642,7 @@ class Page extends Component {
 										<button className="btn btn-deafult tab-toggle" onClick={e => this.reorderNodes(index, 0)}>
 											<span className="glyphicon glyphicon-chevron-down" aria-hidden="true" />
 										</button>
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+										<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 										</button>
 									</div>
@@ -609,23 +659,25 @@ class Page extends Component {
 									}}
 								/>
 								<div className="panel-body  nodepanel">
+									<h4 className="text-center">Selected Image:</h4>
+									<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))} />
+									<h6 className="text-center">Click to change</h6>
 									<div className="tab">
-										<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))} />
 										<label>Full screen {'  '}</label>
 
 										<input
 											type="checkbox"
 											id={`${node.instanceId}`}
 											onChange={e => {
-												console.log(e.target.checked);
+												//
 												if (e.target.checked) {
 													let nodes = this.state.nodes;
 													// node.type = 'hero';
 													// node.title = 'hero';
 													node.format = 'hero';
-													node.data.header = 'header';
-													node.data.subtext = 'subtext';
-													console.log(node);
+													node.data.header = node.data.header || 'header';
+													node.data.subtext = node.data.subtext || 'subtext';
+													//
 													nodes[this.state.nodes.indexOf(node)] = node;
 													this.setState({ nodes });
 													this.update();
@@ -635,9 +687,9 @@ class Page extends Component {
 													// node.type = 'hero';
 													// node.title = 'hero';
 													node.format = 'image';
-													node.data.header = '';
-													node.data.subtext = '';
-													console.log(node);
+													// node.data.header = '';
+													// node.data.subtext = '';
+													//
 													nodes[this.state.nodes.indexOf(node)] = node;
 													this.setState({ nodes });
 													this.update();
@@ -645,17 +697,16 @@ class Page extends Component {
 											}}
 										/>
 									</div>
-									<div className='panel-hide'>
-									{setTimeout(() => {
-										if (node.format === 'hero'){
-										document.getElementById(`${node.instanceId}`).checked = true;
-										} else {
-											return
-										};
-									}, 1)}
+									<div className="panel-hide">
+										{setTimeout(() => {
+											if (node.format === 'hero') {
+												document.getElementById(`${node.instanceId}`).checked = true;
+											} else {
+												return;
+											}
+										}, 1)}
 									</div>
 									{node.format === 'hero' ? (
-										
 										<div>
 											<div className="input-group">
 												<input type="text" className="form-control" name="header" aria-describedby="sizing-addon2" value={node.data.header} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-header')} />
@@ -664,19 +715,25 @@ class Page extends Component {
 												<input type="text" className="form-control" name="subtext" aria-describedby="sizing-addon2" value={node.data.subtext} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-subtext')} />
 											</div>
 										</div>
-									) : <div/>}
+									) : (
+										<div />
+									)}
 									<div className="tab">
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
-											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										<button className="btn btn-success" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+											{/* {document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'} */}
+											<span className="glyphicon glyphicon-ok" />
+											{'  '}
+											Done
 										</button>
 
 										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
-											X
+											<span className="glyphicon glyphicon-alert" />
+											{'  '}
+											Remove
 										</button>
 									</div>
 								</div>
 							</div>
-							
 						</div>
 					);
 					break;
@@ -697,7 +754,7 @@ class Page extends Component {
 										<button className="btn btn-deafult tab-toggle" onClick={e => this.reorderNodes(index, 0)}>
 											<span className="glyphicon glyphicon-chevron-down" aria-hidden="true" />
 										</button>
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+										<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 										</button>
 									</div>
@@ -713,10 +770,12 @@ class Page extends Component {
 								</div>
 								<hr />
 								<div className="tab">
-									<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+									<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 										{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 									</button>
 									<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, index, 'delete')}>
+										<span className="glyphicon glyphicon-alert" />
+										{'  '}
 										Remove
 									</button>
 								</div>
@@ -739,7 +798,7 @@ class Page extends Component {
 										<button className="btn btn-deafult tab-toggle" onClick={e => this.reorderNodes(index, 0)}>
 											<span className="glyphicon glyphicon-chevron-down" aria-hidden="true" />
 										</button>
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+										<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 										</button>
 									</div>
@@ -756,30 +815,40 @@ class Page extends Component {
 									}}
 								/>
 								<div className="panel-body nodepanel">
-									<div className="action">
-										<div className="action-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node))} />
-										<h3 className="action-title">{node.data.title}</h3>
-									</div>
+									{/* <div className="action"> */}
+									<h4 className="text-center">Selected Image:</h4>
+									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node))} />
+									<h6 className="text-center">Click to change</h6>
+
+									<h3 className="action-title">Action Text: {node.data.title}</h3>
+									{/* </div> */}
 									<hr />
 									<div className="tab">
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} page={`${this.props.index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
-											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
+										<button className="btn btn-success" id={`page${this.props.index}node${index}`} page={`${this.props.index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+											<span className="glyphicon glyphicon-ok" />
+											{'  '}
+											Done
 										</button>
 										<button
-											className="btn btn-success tab-toggle"
+											className="btn btn-primary"
 											onClick={e => {
-												// console.log(node);
+												//
 												buildfire.actionItems.showDialog(node.data, {}, (err, res) => {
 													if (err) throw err;
 													if (!res) return;
 													node.data = res;
+													node.title = res.title;
 													this.update();
 												});
 											}}>
+											<span className="glyphicon glyphicon-wrench" />
+											{'  '}
 											Edit
 										</button>
 										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, index, 'delete')}>
-											X
+											<span className="glyphicon glyphicon-alert" />
+											{'  '}
+											Remove
 										</button>
 									</div>
 								</div>
@@ -801,7 +870,7 @@ class Page extends Component {
 										<button className="btn btn-deafult tab-toggle" onClick={e => this.reorderNodes(index, 0)}>
 											<span className="glyphicon glyphicon-chevron-down" aria-hidden="true" />
 										</button>
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+										<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 										</button>
 									</div>
@@ -828,14 +897,14 @@ class Page extends Component {
 										type="checkbox"
 										id={`${node.instanceId}`}
 										onChange={e => {
-											console.log(e.target.checked);
+											//
 											if (e.target.checked) {
 												let nodes = this.state.nodes;
 												node.type = 'hero';
 												node.title = 'hero';
 												node.data.header = 'header';
 												node.data.subtext = 'subtext';
-												console.log(node);
+												//
 												nodes[this.state.nodes.indexOf(node)] = node;
 												this.setState({ nodes });
 												this.update();
@@ -865,12 +934,33 @@ class Page extends Component {
 	}
 
 	render() {
+		let pageTutorialTop = (
+			<div className="alert alert-success" role="alert">
+				Welcome to your first page! You can change the title and add elements below! <a onClick={e => this.toggleTutorials('off')}>Hide tutorials</a>
+			</div>
+		);
+		let pageTutorialMid = (
+			<div className="alert alert-success" role="alert">
+				All of the elements on your page will appear here. You can drag them to reorder, or click them to edit! <a onClick={e => this.toggleTutorials('off')}>Hide tutorials</a>
+			</div>
+		);
+		let pageTutorialBottom = (
+			<div className="alert alert-success" role="alert">
+				You can set a navbar icon and change the background color and image under "options"! <a onClick={e => this.toggleTutorials('off')}>Hide tutorials</a>
+			</div>
+		);
 		return (
 			<div>
 				<div className="panel panel-default no-border">
 					<div className="panel-heading tab panel-hide">
 						<div className="toggle-group">
-							<button className="btn tab-toggle" id={`tab${this.props.index}`} index={this.props.index} onClick={e => this.toggle(e)}>
+							<button
+								className="btn tab-toggle"
+								id={`tab${this.props.index}`}
+								index={this.props.index}
+								onClick={e => {
+									this.toggle(e);
+								}}>
 								Edit
 							</button>
 						</div>
@@ -890,8 +980,18 @@ class Page extends Component {
 							}}
 						/>
 						<div className="panel-body nodepanel" style="top: 10%; height: 80%">
+							{this.state.tutorials ? (
+								false
+							) : (
+								<a style={'position: absolute; right: 15px; z-index: 10000'} onClick={e => this.toggleTutorials('on')}>
+									Show tutorials
+								</a>
+							)}
+
 							<div className="container">
 								<div className="row">
+									<div className="info">{this.state.tutorials ? pageTutorialTop : false}</div>
+
 									<div className="col-sm-12 header" />
 									<form>
 										<div className="input-group">
@@ -900,12 +1000,9 @@ class Page extends Component {
 										</div>
 									</form>
 									<div className="col-sm-12">
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
-											{document.getElementById(`page${this.props.index}options`) ? (document.getElementById(`page${this.props.index}options`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
-										</button>
-										<button className="btn btn-deafult tab-toggle" id={`page${this.props.index}addnodesbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'addnodes')}>
+										{/* <button className="btn btn-deafult tab-toggle" id={`page${this.props.index}addnodesbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'addnodes')}>
 											Add Nodes
-										</button>
+										</button> */}
 										{/* ------- Config ------ */}
 										<div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}options`}>
 											<div className="backdrop" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
@@ -916,13 +1013,24 @@ class Page extends Component {
 															Background Color:{' '}
 														</h4>
 														<button className={`btn thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor')} style={`${this.state.backgroundCSS}`}>
-															{this.state.backgroundColor ? (this.state.backgroundColor.colorType ? `${this.state.backgroundColor.colorType}` : 'Add Background Color') : null}
+															{this.state.backgroundColor ? (this.state.backgroundColor.colorType != false ? `${this.state.backgroundColor.colorType}` : 'Add Background Color') : null}
 														</button>
 
 														<button
 															className="btn btn-danger"
 															onClick={() => {
-																this.setState({ backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } } });
+																this.setState({
+																	backgroundColor: {
+																		colorType: false,
+																		solid: {
+																			backgroundCSS: ''
+																		},
+																		gradient: {
+																			backgroundCSS: ''
+																		}
+																	},
+																	backgroundCSS: false
+																});
 																this.update();
 															}}>
 															Remove
@@ -963,7 +1071,7 @@ class Page extends Component {
 														</button>
 													</div>
 													<button
-														className="btn btn-deafult tab-toggle"
+														className="btn btn-success tab-toggle"
 														id={`page${this.props.index}optionsbutton`}
 														index={`${this.props.index}`}
 														onClick={e => {
@@ -977,85 +1085,94 @@ class Page extends Component {
 										</div>
 									</div>
 									{/* <div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}addnodes`}> */}
-									<div id={`page${this.props.index}addnodes`} className="addnodes" data-toggle="hide">
+									{/* <div id={`page${this.props.index}addnodes`} className="addnodes" data-toggle="hide"> */}
+
+									<div className="col-sm-12">
+										<div style="margin-bottom: 15px;">
+											<h5 className="text-center">Add Elements</h5>
+											<div className="btn-group tab" id={`menu${this.props.index}`}>
+												<button
+													className="btn btn-default add tab-toggle"
+													onClick={e => {
+														this.addNode('header');
+													}}>
+													Add Header
+												</button>
+												<button
+													className="btn btn-default add tab-toggle"
+													onClick={() => {
+														this.addNode('desc');
+													}}>
+													Add Description
+												</button>
+												<button
+													className="btn btn-default add tab-toggle"
+													onClick={() => {
+														this.addNode('image');
+													}}>
+													Add Image
+												</button>
+												<button
+													className="btn btn-default add tab-toggle"
+													onClick={() => {
+														// this.toggleModal(this.props.index, 'actions', 'show');
+														this.addNode('action');
+													}}>
+													Add Action Item
+												</button>
+											</div>
+											{/* </div> */}
+										</div>
 										<div className="col-sm-12">
-											<div style="margin-bottom: 20px;">
-												<div className="btn-group tab" id={`menu${this.props.index}`}>
-													<button
-														className="btn btn-default add tab-toggle"
-														onClick={e => {
-															this.addNode('header');
-														}}>
-														Add Header
-													</button>
-													<button
-														className="btn btn-default add tab-toggle"
-														onClick={() => {
-															this.addNode('desc');
-														}}>
-														Add Description
-													</button>
-													<button
-														className="btn btn-default add tab-toggle"
-														onClick={() => {
-															this.addNode('image');
-														}}>
-														Add Image
-													</button>
-													<button
-														className="btn btn-default add tab-toggle"
-														onClick={() => {
-															this.addNode('hero');
-														}}>
-														Add Hero Image
-													</button>
-													<button
-														className="btn btn-default add tab-toggle"
-														onClick={() => {
-															// this.toggleModal(this.props.index, 'actions', 'show');
-															this.addNode('action');
-														}}>
-														Add Action Item
-													</button>
-												</div>
-												{/* </div> */}
+											<div className="plugins panel-hide" id={`plugins${this.props.index}`}>
+												<button
+													className="btm btn-danger"
+													style="position: relative; left: 10em; top: 10em;"
+													onClick={() => {
+														this.toggleModal(this.props.index, 'plugins', 'hide');
+													}}>
+													Cancel
+												</button>
 											</div>
-											<div className="col-sm-12">
-												<div className="plugins panel-hide" id={`plugins${this.props.index}`}>
-													<button
-														className="btm btn-danger"
-														style="position: relative; left: 10em; top: 10em;"
-														onClick={() => {
-															this.toggleModal(this.props.index, 'plugins', 'hide');
-														}}>
-														Cancel
-													</button>
-												</div>
-											</div>
-											<div className="col-sm-12">
-												<div className="actions panel-hide" id={`actions${this.props.index}`}>
-													<button
-														className="btm btn-danger"
-														style="position: relative; left: 10em; top: 10em;"
-														onClick={() => {
-															this.toggleModal(this.props.index, 'actions', 'hide');
-														}}>
-														Cancel
-													</button>
-												</div>
+										</div>
+										<div className="col-sm-12">
+											<div className="actions panel-hide" id={`actions${this.props.index}`}>
+												<button
+													className="btm btn-danger"
+													style="position: relative; left: 10em; top: 10em;"
+													onClick={() => {
+														this.toggleModal(this.props.index, 'actions', 'hide');
+													}}>
+													Cancel
+												</button>
 											</div>
 										</div>
 									</div>
+									{/* </div> */}
 
 									{/* </div> */}
 									<div className="col-sm-12">{this.renderNodes()}</div>
+									{/* <div className="info">{localStorage.getItem('tutorial') === 'true' ? pageTutorialMid : false}</div> */}
+									<div className="info">{this.state.tutorials ? pageTutorialMid : false}</div>
+
 									<div className="col-sm-12" id={`nodelist${this.props.index}`} />
+									<div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div>
 									<div className="tab modal-footer">
-										<button className="btn tab-toggle" id={`tab${this.props.index}`} index={this.props.index} onClick={e => this.toggle(e)}>
+										<button className="btn btn-success" style="margin-left: 5px;" id={`tab${this.props.index}`} index={this.props.index} onClick={e => this.toggle(e)}>
+											<span className="glyphicon glyphicon-ok" />
+											{'  '}
 											Done
 										</button>
-										<button className="btn btn-danger tab-toggle" onClick={this.delete}>
-											Delete Page
+										<button className="btn btn-primary" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
+											{/* {document.getElementById(`page${this.props.index}options`) ? (document.getElementById(`page${this.props.index}options`).getAttribute('data-toggle') === 'hide' ? 'Options' : 'Done') : 'Options'} */}
+											<span className="glyphicon glyphicon-wrench" />
+											{'  '}
+											Options
+										</button>
+										<button className="btn btn-danger" onClick={this.delete}>
+											<span className="glyphicon glyphicon-alert" />
+											{'  '}
+											Remove Page
 										</button>
 									</div>
 								</div>
