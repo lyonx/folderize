@@ -19,7 +19,7 @@ class Page extends Component {
 			backgroundImg: this.props.backgroundImg,
 			iconUrl: this.props.iconUrl,
 			backgroundCSS: '',
-			tutorials: false
+			tutorials: this.props.tutorials
 		};
 	}
 
@@ -132,14 +132,24 @@ class Page extends Component {
 						// buttonLabels: ['delete', 'cancel']
 					},
 					(err, result) => {
-						
-						if (err) throw err;
-						if (result.selectedButton.key === 'confirm') {
-							nodes.splice(index, 1);
-							this.setState({
-								nodes
-							});
-							this.update();
+						if (err) {
+							if (typeof err == 'boolean') {
+								nodes.splice(index, 1);
+								this.setState({
+									nodes
+								});
+								this.update();
+							} else {
+								throw err;
+							}
+						} else {
+							if (result.selectedButton.key === 'confirm') {
+								nodes.splice(index, 1);
+								this.setState({
+									nodes
+								});
+								this.update();
+							}
 						}
 					}
 				);
@@ -275,6 +285,7 @@ class Page extends Component {
 					this.setState({
 						nodes: nodes
 					});
+					setTimeout(() => this.openLast(), 100);
 					this.update();
 				});
 				break;
@@ -286,26 +297,6 @@ class Page extends Component {
 
 		this.update();
 	}
-
-	// // USED TO CHANGE TO ORDER OF NODES
-	// reorderNodes(index, dir) {
-	// 	let nodes = this.props.data.nodes;
-	// 	if (dir === 1) {
-	// 		let temp = nodes[index - 1];
-	// 		if (!temp) return;
-	// 		nodes[index - 1] = nodes[index];
-	// 		nodes[index] = temp;
-	// 		this.setState({ nodes });
-	// 		this.update();
-	// 	} else {
-	// 		let temp = nodes[index + 1];
-	// 		if (!temp) return;
-	// 		nodes[index + 1] = nodes[index];
-	// 		nodes[index] = temp;
-	// 		this.setState({ nodes });
-	// 		this.update();
-	// 	}
-	// }
 
 	// USED BY INPUT FEILDS TO UPDATE STATE
 	handleChange(event) {
@@ -407,9 +398,16 @@ class Page extends Component {
 				// buttonLabels: ['delete', 'cancel']
 			},
 			(err, result) => {
-				if (err) throw err;
-				if (result.selectedButton.key === 'confirm') {
-					this.deletePage(this.props.index);
+				if (err) {
+					if (typeof err === 'boolean') {
+						this.deletePage(this.props.index);
+					} else {
+						throw err;
+					}
+				} else {
+					if (result.selectedButton.key === 'confirm') {
+						this.deletePage(this.props.index);
+					}
 				}
 			}
 		);
@@ -475,7 +473,6 @@ class Page extends Component {
 			default:
 				break;
 		}
-		this.state.tutorials ? this.setState({ tutorials: false }) : null;
 	}
 
 	// USED TO TOGGLE A SPECIAL MODAL FOR PLUGINS AND ACTION NODE CREATION
@@ -790,6 +787,44 @@ class Page extends Component {
 				}
 				case 'action': {
 					if (!node.data) return;
+					let defaultImgDiag = (
+						<div style={'position: absolute; right: 15px; z-index: 10000'}>
+							<label Htmlfor="defaultImg">Use Default Plugin Image</label>
+							<input
+								name="defaultImg"
+								id={`defaultImg${index}`}
+								type="checkbox"
+								onChange={e => {
+									switch (e.target.checked) {
+										case true:
+											{
+												localStorage.setItem(`prevImg${node.instanceId}`, node.data.iconUrl);
+												buildfire.pluginInstance.get(node.data.instanceId, (err, inst) => {
+													if (err) throw err;
+													node.data.iconUrl = inst.iconUrl;
+													this.update();
+												});
+											}
+											break;
+										case false:
+											{
+												let prevImg = localStorage.getItem(`prevImg${node.instanceId}`);
+
+												if (prevImg) {
+													this.handleNodeChange(prevImg, index, 'src');
+												} else {
+													this.addImg(null, this.props.data.nodes.indexOf(node));
+												}
+											}
+											break;
+										default:
+											break;
+									}
+								}}
+							/>
+						</div>
+					);
+
 					nodes.push(
 						<div>
 							<div className="panel panel-default" style={'display:none'}>
@@ -819,6 +854,20 @@ class Page extends Component {
 									}}
 								/>
 								<div className="panel-body nodepanel">
+									{node.data.action === 'linkToApp' ? defaultImgDiag : null}
+									<div className="panel-hide">
+										{node.data.iconUrl
+											? null
+											: setTimeout(() => {
+													document.getElementById(`defaultImg${index}`).checked = true;
+													buildfire.pluginInstance.get(node.data.instanceId, (err, inst) => {
+														if (err) throw err;
+														node.data.iconUrl = inst.iconUrl;
+														this.update();
+													});
+											  }, 100)}
+										;
+									</div>
 									{/* <div className="action"> */}
 									<h4 className="text-center">Selected Image:</h4>
 									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node))} />
@@ -828,7 +877,15 @@ class Page extends Component {
 									{/* </div> */}
 									<hr />
 									<div className="tab">
-										<button className="btn btn-success" id={`page${this.props.index}node${index}`} page={`${this.props.index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
+										<button
+											className="btn btn-success"
+											id={`page${this.props.index}node${index}`}
+											page={`${this.props.index}`}
+											index={`${index}`}
+											onClick={e => {
+												localStorage.removeItem(`prevImg${node.instanceId}`);
+												this.toggle(e, 'node');
+											}}>
 											<span className="glyphicon glyphicon-ok" />
 											{'  '}
 											Done
@@ -939,18 +996,18 @@ class Page extends Component {
 
 	render() {
 		let pageTutorialTop = (
-			<div className="alert alert-success" role="alert">
-				Welcome to your first page! You can change the title and add elements below! <a onClick={e => this.toggleTutorials('off')}>Hide tutorials</a>
+			<div className="alert alert-primary" style="font-size: 16px" role="alert">
+				Welcome to your first page! You can change the title and add elements below!
 			</div>
 		);
 		let pageTutorialMid = (
-			<div className="alert alert-success" role="alert">
-				All of the elements on your page will appear here. You can drag them to reorder, or click them to edit! <a onClick={e => this.toggleTutorials('off')}>Hide tutorials</a>
+			<div className="alert alert-primary" style="font-size: 16px" role="alert">
+				All of the elements on your page will appear here. You can drag them to reorder, or click them to edit!
 			</div>
 		);
 		let pageTutorialBottom = (
-			<div className="alert alert-success" role="alert">
-				You can set a navbar icon and change the background color and image under "options"! <a onClick={e => this.toggleTutorials('off')}>Hide tutorials</a>
+			<div className="alert alert-primary" style="font-size: 16px" role="alert">
+				You can set a navbar icon and change the background color and image under "options"!
 			</div>
 		);
 		return (
@@ -985,17 +1042,31 @@ class Page extends Component {
 						/>
 						<div className="panel-body nodepanel" style="top: 10%; height: 80%">
 							{this.state.tutorials ? (
-								false
+								<a
+									style={'position: absolute; top: 5px; right: 15px; z-index: 10000'}
+									onClick={e => {
+										e.preventDefault();
+										this.toggleTutorials('off');
+									}}>
+									Hide tutorials
+								</a>
 							) : (
 								<a
-									style={'position: absolute; right: 15px; z-index: 10000'}
+									style={'position: absolute; top: 5px; right: 15px; z-index: 10000'}
 									onClick={e => {
+										e.preventDefault();
 										this.toggleTutorials('on');
 									}}>
 									Show tutorials
 								</a>
+								// <a
+								// 	style={'position: absolute; right: 15px; z-index: 10000'}
+								// 	onClick={e => {
+								// 		this.toggleTutorials('on');
+								// 	}}>
+								// 	Show tutorials
+								// </a>
 							)}
-
 							<div className="container">
 								<div className="row">
 									<div className="info">{this.state.tutorials ? pageTutorialTop : false}</div>
@@ -1004,6 +1075,7 @@ class Page extends Component {
 									<form>
 										<div className="input-group">
 											<h4>Edit Page Title</h4>
+
 											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={this.handleChange} />
 										</div>
 									</form>
@@ -1166,7 +1238,16 @@ class Page extends Component {
 									<div className="col-sm-12" id={`nodelist${this.props.index}`} />
 									<div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div>
 									<div className="tab modal-footer">
-										<button className="btn btn-success" style="margin-left: 5px;" id={`tab${this.props.index}`} index={this.props.index} onClick={e => this.toggle(e)}>
+										<button
+											className="btn btn-success"
+											style="margin-left: 5px;"
+											id={`tab${this.props.index}`}
+											index={this.props.index}
+											onClick={e => {
+												this.state.tutorials ? this.setState({ tutorials: false }) : null;
+												localStorage.setItem('tutorial', false);
+												this.toggle(e);
+											}}>
 											<span className="glyphicon glyphicon-ok" />
 											{'  '}
 											Done

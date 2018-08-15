@@ -252,16 +252,16 @@ class Content extends Component {
 				}
 			}
 		});
-		// let tutorials = localStorage.getItem('tutorial');
-		// if (tutorials === 'true') {
-		// let tutorials = this.state.tutorials;
-		// tutorials = true;
-		// this.setState({ tutorials });
-		// } else {
-		// let tutorials = this.state.tutorials;
-		// tutorials = false;
-		// this.setState({ tutorials });
-		// }
+		let tutorials = localStorage.getItem('tutorial');
+		if (tutorials === 'true') {
+		let tutorials = this.state.tutorials;
+		tutorials = true;
+		this.setState({ tutorials });
+		} else {
+		let tutorials = this.state.tutorials;
+		tutorials = false;
+		this.setState({ tutorials });
+		}
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
