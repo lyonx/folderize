@@ -163,6 +163,7 @@ class Content extends Component {
 		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: true }, false, false, { itemEditable: true, navigationCallback });
 
 		this.editor.onOrderChange = () => {
+			debugger
 			let settings = this.state.settings;
 			settings.pages = this.editor.items;
 			//
@@ -266,7 +267,7 @@ class Content extends Component {
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
 
-		// console.log(this.state);
+		
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
 	}
@@ -278,8 +279,9 @@ class Content extends Component {
 		// if (this.state.settings.pages.length < 1) return;
 		let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
-		this.state.settings.pages.map(page => {
-			pages.push(<Page index={this.state.settings.pages.indexOf(page)} tutorials={tutorials} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
+		this.state.settings.pages.map((page, index) => {
+			// debugger
+			pages.push(<Page index={index} tutorials={tutorials} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
 

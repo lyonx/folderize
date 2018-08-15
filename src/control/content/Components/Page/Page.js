@@ -48,13 +48,14 @@ class Page extends Component {
 
 		let navigationCallback = e => {
 			//
-			let target = this.state.nodes.filter(node => {
+			let target = this.props.data.nodes.filter(node => {
 				return node.instanceId === e.instanceId;
 			});
+			
 			//
-			let nodeIndex = this.state.nodes.indexOf(target[0]);
+			let nodeIndex = this.props.data.nodes.indexOf(target[0]);
 			//
-			//
+		  
 			document.querySelector(`#page${this.props.index}node${nodeIndex}`).click();
 		};
 
@@ -76,8 +77,8 @@ class Page extends Component {
 	}
 
 	componentDidUpdate() {
-		console.log(this.state);
-		this.editor.loadItems(this.state.nodes, false);
+		
+		this.editor.loadItems(this.props.data.nodes, false);
 	}
 
 	// USED TO EDIT NODES
@@ -124,11 +125,12 @@ class Page extends Component {
 			}
 			case 'delete': {
 				// let confirm = window.confirm("Are you sure? Item will be lost!");
+				
 				let confirm = buildfire.notifications.confirm(
 					{
 						title: 'Remove Node',
-						message: 'Are you sure? Node will be lost!',
-						buttonLabels: ['delete', 'cancel']
+						message: 'Are you sure? Node will be lost!'
+						// buttonLabels: ['delete', 'cancel']
 					},
 					confirm => {
 						if (confirm) {
@@ -397,7 +399,7 @@ class Page extends Component {
 
 	// DELETES THIS PAGE
 	delete() {
-		let confirm = buildfire.notifications.confirm(
+		buildfire.notifications.confirm(
 			{
 				title: 'Remove Page',
 				message: 'Are you sure? Page will be lost!',
@@ -413,21 +415,23 @@ class Page extends Component {
 
 	// PIPES CURRENT STATE TO CONTROL'S STATE, UPDATES PAGE AT THIS INDEX
 	update() {
+		
 		this.updatePage(this.props.index, {
-			title: this.state.title,
+			title: this.props.data.title,
 			instanceId: this.props.data.instanceId,
-			images: this.state.images,
-			nodes: this.state.nodes,
-			show: this.state.show,
-			customizations: this.state.customizations,
-			backgroundColor: this.state.backgroundColor,
-			backgroundImg: this.state.backgroundImg,
-			iconUrl: this.state.iconUrl
+			images: this.props.data.images,
+			nodes: this.props.data.nodes,
+			show: this.props.data.show,
+			customizations: this.props.data.customizations,
+			backgroundColor: this.props.data.backgroundColor,
+			backgroundImg: this.props.data.backgroundImg,
+			iconUrl: this.props.data.iconUrl
 		});
 	}
 
 	// USED TO TOGGLE MODALS OR PANELS
 	toggle(e, type) {
+		
 		if (!e.target.id) return;
 		let panel;
 		switch (type) {
@@ -983,7 +987,10 @@ class Page extends Component {
 							{this.state.tutorials ? (
 								false
 							) : (
-								<a style={'position: absolute; right: 15px; z-index: 10000'} onClick={e => this.toggleTutorials('on')}>
+								<a style={'position: absolute; right: 15px; z-index: 10000'} onClick={e => {
+									
+									// this.toggleTutorials('on')
+									}}>
 									Show tutorials
 								</a>
 							)}
