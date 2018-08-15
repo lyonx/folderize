@@ -97,7 +97,7 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
-			console.error(message);
+			
 			if (this.state.settings.pages.length === 0) return;
 			this.slider.slideTo(message.index);
 		};

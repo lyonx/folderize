@@ -51,11 +51,11 @@ class Page extends Component {
 			let target = this.props.data.nodes.filter(node => {
 				return node.instanceId === e.instanceId;
 			});
-			
+
 			//
 			let nodeIndex = this.props.data.nodes.indexOf(target[0]);
 			//
-		  
+
 			document.querySelector(`#page${this.props.index}node${nodeIndex}`).click();
 		};
 
@@ -77,7 +77,6 @@ class Page extends Component {
 	}
 
 	componentDidUpdate() {
-		
 		this.editor.loadItems(this.props.data.nodes, false);
 	}
 
@@ -125,15 +124,17 @@ class Page extends Component {
 			}
 			case 'delete': {
 				// let confirm = window.confirm("Are you sure? Item will be lost!");
-				
-				let confirm = buildfire.notifications.confirm(
+
+				buildfire.notifications.confirm(
 					{
 						title: 'Remove Node',
 						message: 'Are you sure? Node will be lost!'
 						// buttonLabels: ['delete', 'cancel']
 					},
-					confirm => {
-						if (confirm) {
+					(err, result) => {
+						
+						if (err) throw err;
+						if (result.selectedButton.key === 'confirm') {
 							nodes.splice(index, 1);
 							this.setState({
 								nodes
@@ -402,11 +403,12 @@ class Page extends Component {
 		buildfire.notifications.confirm(
 			{
 				title: 'Remove Page',
-				message: 'Are you sure? Page will be lost!',
-				buttonLabels: ['delete', 'cancel']
+				message: 'Are you sure? Page will be lost!'
+				// buttonLabels: ['delete', 'cancel']
 			},
-			confirm => {
-				if (confirm) {
+			(err, result) => {
+				if (err) throw err;
+				if (result.selectedButton.key === 'confirm') {
 					this.deletePage(this.props.index);
 				}
 			}
@@ -415,7 +417,6 @@ class Page extends Component {
 
 	// PIPES CURRENT STATE TO CONTROL'S STATE, UPDATES PAGE AT THIS INDEX
 	update() {
-		
 		this.updatePage(this.props.index, {
 			title: this.props.data.title,
 			instanceId: this.props.data.instanceId,
@@ -431,7 +432,6 @@ class Page extends Component {
 
 	// USED TO TOGGLE MODALS OR PANELS
 	toggle(e, type) {
-		
 		if (!e.target.id) return;
 		let panel;
 		switch (type) {
@@ -987,9 +987,10 @@ class Page extends Component {
 							{this.state.tutorials ? (
 								false
 							) : (
-								<a style={'position: absolute; right: 15px; z-index: 10000'} onClick={e => {
-									
-									// this.toggleTutorials('on')
+								<a
+									style={'position: absolute; right: 15px; z-index: 10000'}
+									onClick={e => {
+										this.toggleTutorials('on');
 									}}>
 									Show tutorials
 								</a>
