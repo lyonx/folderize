@@ -153,11 +153,16 @@ class Content extends Component {
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
 		let navigationCallback = e => {
+			// let target = this.state.settings.pages.filter(page => {
+			// 	return page.instanceId === e.instanceId;
+			// });	
 			let target = this.state.settings.pages.filter(page => {
 				return page.instanceId === e.instanceId;
 			});
 			let index = this.state.settings.pages.indexOf(target[0]);
+			console.log(index);
 			buildfire.messaging.sendMessageToWidget({ index });
+			console.log(`#tab${index}`);
 			document.querySelector(`#tab${index}`).click();
 		};
 		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: true }, false, false, { itemEditable: true, navigationCallback });
@@ -266,20 +271,26 @@ class Content extends Component {
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
 
-		// console.log(this.state);
+		// console.log(this.state, this.editor.items);
 		this.debounceSync();
-		this.editor.loadItems(this.state.settings.pages, false, false);
+		this.editor.loadItems(this.state.settings.pages, false);
 	}
 
 	// --------------------------- RENDERING --------------------------- //
 
 	// LOOPS THROUGH AND RETURNS PAGES
 	renderPages() {
+		console.count('page render');
+		console.log(this.state.settings.pages);
 		// if (this.state.settings.pages.length < 1) return;
 		let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
-		this.state.settings.pages.map(page => {
-			pages.push(<Page index={this.state.settings.pages.indexOf(page)} tutorials={tutorials} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
+		let newPages = this.state.settings.pages.forEach((page, index) => {
+			// let index = this.editor.items.filter(page => {
+			// 	return page
+			// });
+			console.log(index, page);
+			pages.push(<Page index={index} tutorials={tutorials} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
 

@@ -76,8 +76,8 @@ class Page extends Component {
 	}
 
 	componentDidUpdate() {
-		console.log(this.state);
-		this.editor.loadItems(this.state.nodes, false);
+
+		this.editor.loadItems(this.props.data.nodes, false);
 	}
 
 	// USED TO EDIT NODES
