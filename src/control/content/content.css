@@ -13,9 +13,22 @@
 	margin-bottom: 5px;
 }
 
+.btn {
+	margin-left: 5px;
+}
+
+span {
+	pointer-events: none;
+}
+
+.copy > .pull-right > span {
+	display: none;
+}
+
 .tab,
 .toggle-group {
 	display: flex;
+	justify-content: flex-end;
 }
 
 .toggle-group {
@@ -224,11 +237,11 @@
 .plugin-thumbnail,
 .action-thumbnail {
 	background-size: cover !important;
-	max-width: 80px;
+	max-width: 450px;
 	margin: auto;
 	flex: 1;
 	border-radius: 10px;
-	height: 80px;
+	height: 350px;
 }
 
 ::-webkit-scrollbar {

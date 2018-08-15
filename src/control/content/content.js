@@ -14,12 +14,14 @@ class Content extends Component {
 		this.debounceSync = debounce(this.syncState, 250);
 		this.editor = {};
 		this.state = {
+			tutorials: false,
 			settings: {
 				pages: [],
 				options: {
 					renderTitlebar: true,
 					navPosition: 'top',
-					colorOverrides: []
+					colorOverrides: [],
+					navStyle: 'content'
 				}
 			}
 		};
@@ -49,7 +51,26 @@ class Content extends Component {
 	}
 	// ADDS A NEW PAGE TO THE STATE
 	addPage() {
-		// debugger
+		if (this.state.settings.pages.length === 0) {
+			if (localStorage.getItem('tutorial') === 'true') {
+				localStorage.setItem('tutorial', false);
+				// let tutorials = this.state.tutorials;
+				// tutorials = false;
+				// this.setState({ tutorials });
+				// return;
+			}
+
+			localStorage.setItem('tutorial', true);
+			// let tutorials = this.state.tutorials;
+			// tutorials = true;
+			// this.setState({ tutorials });
+		} else {
+			localStorage.setItem('tutorial', false);
+			// let tutorials = this.state.tutorials;
+			// tutorials = false;
+			// this.setState({ tutorials });
+		}
+
 		let newPage = {
 			title: 'New Page',
 			instanceId: Date.now(),
@@ -65,7 +86,7 @@ class Content extends Component {
 			nodes: [
 				{
 					type: 'header',
-					title: 'header',
+					title: 'Header',
 					instanceId: Date.now(),
 					data: {
 						text: 'new page'
@@ -73,28 +94,31 @@ class Content extends Component {
 				}
 			]
 		};
-		let pages = this.state.settings.pages;
-		pages.push(newPage);
-		this.setState({ pages: pages });
-		// debugger
+		let settings = this.state.settings;
+		settings.pages.push(newPage);
+		this.setState({ settings });
+		// if (pages.length > 1) {
 		setTimeout(() => {
-			document.querySelector(`#tab${pages.length-1}`).click();
-			setTimeout(() => {
-			buildfire.messaging.sendMessageToWidget({index: pages.length - 1});				
-			}, 250);
+			document.querySelector(`#tab${settings.pages.length - 1}`).click();
 		}, 250);
+		setTimeout(() => {
+			buildfire.messaging.sendMessageToWidget({ index: settings.pages.length - 1 });
+		}, 750);
 	}
 	// USED BY THE PAGES TO DELETE THEMSELVES
 	deletePage(index) {
-		let pages = this.state.settings.pages;
-		pages.splice(index, 1);
-		this.setState({ pages: pages });
+		let settings = this.state.settings;
+		// let pages = this.state.settings.pages;
+		settings.pages.splice(index, 1);
+
+		this.setState({ settings });
 	}
 	// USED BY THE PAGES TO UPDATE THEIR DATA IN CONTENT STATE
 	updatePage(index, page) {
-		let pages = this.state.settings.pages;
-		pages[index] = page;
-		this.setState({ pages: pages });
+		let settings = this.state.settings;
+		// let pages = this.state.settings.pages;
+		settings.pages[index] = page;
+		this.setState({ settings });
 	}
 
 	addImg() {
@@ -110,7 +134,6 @@ class Content extends Component {
 	syncState() {
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
-			// console.warn(response);
 
 			if (!response.id) {
 				buildfire.datastore.insert({ settings: this.state.settings }, 'data', true, (err, status) => {
@@ -130,58 +153,57 @@ class Content extends Component {
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
 		let navigationCallback = e => {
-			// console.log(this.editor);
 			let target = this.state.settings.pages.filter(page => {
 				return page.instanceId === e.instanceId;
 			});
 			let index = this.state.settings.pages.indexOf(target[0]);
-			buildfire.messaging.sendMessageToWidget({index});
+			buildfire.messaging.sendMessageToWidget({ index });
 			document.querySelector(`#tab${index}`).click();
-
 		};
-		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: false }, false, false, { itemEditable: true, navigationCallback });
+		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: true }, false, false, { itemEditable: true, navigationCallback });
 
 		this.editor.onOrderChange = () => {
+			debugger
 			let settings = this.state.settings;
 			settings.pages = this.editor.items;
-			// console.log(settings);
+			//
 			this.setState({ settings });
 		};
+
+		this.editor.onAddItems = e => {};
 
 		this.editor.onDeleteItem = () => {
 			let settings = this.state.settings;
 			settings.pages = this.editor.items;
-			// console.log(settings);
+			//
 			this.setState({ settings });
 		};
 
-// 		(() => {
-// 			buildfire.datastore.get('data', (err, response) => {
-// 				if (err) throw err;
-// 				// console.warn(response);
-	
-				
-// 					// insert pages into db
-// 					buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
-// 						if (err) {
-// 							throw err;
-// 						}
-// 					});
-				
-// 			});
-// 		})();
-// debugger
+		// 		(() => {
+		// 			buildfire.datastore.get('data', (err, response) => {
+		// 				if (err) throw err;
+		// 				//
+
+		// 					// insert pages into db
+		// 					buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
+		// 						if (err) {
+		// 							throw err;
+		// 						}
+		// 					});
+
+		// 			});
+		// 		})();
+
 		// (() => {
 		// 	buildfire.datastore.search({ limit: 20 }, 'data', (err, response) => {
 		// 		if (err) throw err;
-		// 		// console.warn(response);
+		// 		//
 		// 	});
 		// })();
-
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
-			// console.warn(response);
+			//
 
 			if (!response.id) {
 				this.setState({
@@ -221,40 +243,48 @@ class Content extends Component {
 				// otherwise, if all pages have been removed, insert default data
 				if (response.data.settings.pages.length === 0) {
 					this.addPage();
+					// setTimeout(() => {
+					// 	document.querySelector(`#tab0`).click();
+					// }, 250);
 				} else {
 					// update settings
 					this.setState({ settings: response.data.settings });
 				}
 			}
 		});
+		// let tutorials = localStorage.getItem('tutorial');
+		// if (tutorials === 'true') {
+		// let tutorials = this.state.tutorials;
+		// tutorials = true;
+		// this.setState({ tutorials });
+		// } else {
+		// let tutorials = this.state.tutorials;
+		// tutorials = false;
+		// this.setState({ tutorials });
+		// }
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
-		console.warn(this.state);
-
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
+
+		
 		this.debounceSync();
-		// CHANGES THE CHECKBOXES TO MATCH STATE
-		// this.state.settings.options.navPosition === 'bottom' ? (document.getElementById('nav-pos-bottom').checked = true) : (document.getElementById('nav-pos-bottom').checked = false);
-		// this.state.settings.options.navPosition === 'top' ? (document.getElementById('nav-pos-top').checked = true) : (document.getElementById('nav-pos-top').checked = false);
-		// this.state.settings.options.renderTitlebar === true ? (document.getElementById('titlebar').checked = true) : (document.getElementById('titlebar').checked = false);
-		if (this.state.settings.pages.length < 1) return;
-		this.editor.loadItems(this.state.settings.pages, false);
-		document.querySelector('.carousel-items > div').onClick = e => {
-			// console.log(e);
-		};
+		this.editor.loadItems(this.state.settings.pages, false, false);
 	}
 
 	// --------------------------- RENDERING --------------------------- //
 
 	// LOOPS THROUGH AND RETURNS PAGES
 	renderPages() {
-		if (this.state.settings.pages.length < 1) return;
+		// if (this.state.settings.pages.length < 1) return;
+		let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
-		this.state.settings.pages.map(page => {
-			pages.push(<Page index={this.state.settings.pages.indexOf(page)} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
+		this.state.settings.pages.map((page, index) => {
+			// debugger
+			pages.push(<Page index={index} tutorials={tutorials} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
+
 		return pages;
 	}
 
@@ -274,6 +304,7 @@ class Content extends Component {
 						</div>
 					</div>
 					<div className="col-md-12" id="pages">
+					{/* <h4 className="text-center">Pages</h4> */}
 						{this.renderPages()}
 					</div>
 				</div>

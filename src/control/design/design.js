@@ -14,9 +14,9 @@ class Design extends React.Component {
 				}
 			}
 		};
-  }
-  
-  syncState() {
+	}
+
+	syncState() {
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			if (!response.id) {
@@ -36,15 +36,14 @@ class Design extends React.Component {
 	}
 
 	componentDidUpdate() {
-    console.log(this.state);
 		this.debounceSync();
 		this.state.settings.options.navPosition === 'bottom' ? (document.getElementById('nav-pos-bottom').checked = true) : (document.getElementById('nav-pos-bottom').checked = false);
 		this.state.settings.options.navPosition === 'top' ? (document.getElementById('nav-pos-top').checked = true) : (document.getElementById('nav-pos-top').checked = false);
 		this.state.settings.options.renderTitlebar === true ? (document.getElementById('titlebar').checked = true) : (document.getElementById('titlebar').checked = false);
-  }
-  
-  componentDidMount() {
-    buildfire.datastore.get('data', (err, response) => {
+	}
+
+	componentDidMount() {
+		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
 			if (!response.id) {
@@ -123,90 +122,99 @@ class Design extends React.Component {
 				}
 			}
 		});
-  }
+	}
 	render() {
 		return (
 			<div>
-				<div className="btn-group">
-					<form onChange={e => console.log(e)}>
-						<h4>Page Navigation Position</h4>
-						<label htmlFor="nav-pos">Bottom &nbsp;</label>
-						<input
-							id="nav-pos-bottom"
-							type="checkbox"
-							name="bottom"
-							aria-label="..."
-							onClick={e => {
-								switch (e.target.checked) {
-									case true: {
-										let settings = this.state.settings;
-										settings.options.navPosition = 'bottom';
-										this.setState({ settings });
-										break;
-									}
-									case false: {
-										let settings = this.state.settings;
-										settings.options.navPosition = 'top';
-										this.setState({ settings });
-										break;
-									}
-									default:
-										return;
-								}
-							}}
-						/>
-						<br />
-						<label htmlFor="nav-pos">top &nbsp;</label>
-						<input
-							id="nav-pos-top"
-							type="checkbox"
-							name="top"
-							aria-label="..."
-							onClick={e => {
-								switch (e.target.checked) {
-									case true: {
-										let settings = this.state.settings;
-										settings.options.navPosition = 'top';
-										this.setState({ settings });
-										break;
-									}
-									case false: {
-										let settings = this.state.settings;
-										settings.options.navPosition = 'bottom';
-										this.setState({ settings });
-										break;
-									}
-									default:
-										return;
-								}
-							}}
-						/>
-					</form>
-					<br />
-					<label htmlFor="titlebar">Display Titlebar &nbsp;</label>
-					<input
-						id="titlebar"
-						type="checkbox"
-						aria-label="..."
-						onClick={e => {
-							switch (e.target.checked) {
-								case true: {
-									let settings = this.state.settings;
-									settings.options.renderTitlebar = true;
-									this.setState({ settings });
-									break;
-								}
-								case false: {
-									let settings = this.state.settings;
-									settings.options.renderTitlebar = false;
-									this.setState({ settings });
-									break;
-								}
-								default:
-									return;
-							}
-						}}
-					/>
+				<div className="container">
+					<div className="row">
+						<div className="col-md-12">
+							<h4>Page Navigation Position</h4>
+							<div className="btn-group">
+								<form>
+									<label htmlFor="nav-pos">Bottom</label>
+									<input
+										id="nav-pos-bottom"
+										type="checkbox"
+										name="bottom"
+										aria-label="..."
+										onClick={e => {
+											switch (e.target.checked) {
+												case true: {
+													let settings = this.state.settings;
+													settings.options.navPosition = 'bottom';
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													let settings = this.state.settings;
+													settings.options.navPosition = 'top';
+													this.setState({ settings });
+													break;
+												}
+												default:
+													return;
+											}
+										}}
+									/>
+								</form>
+								<form>
+									<label htmlFor="nav-pos">Top</label>
+									<input
+										id="nav-pos-top"
+										type="checkbox"
+										name="top"
+										aria-label="..."
+										onClick={e => {
+											switch (e.target.checked) {
+												case true: {
+													let settings = this.state.settings;
+													settings.options.navPosition = 'top';
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													let settings = this.state.settings;
+													settings.options.navPosition = 'bottom';
+													this.setState({ settings });
+													break;
+												}
+												default:
+													return;
+											}
+										}}
+									/>
+								</form>
+								<br />
+								<form>
+									<label htmlFor="titlebar">Display Titlebar &nbsp;</label>
+									<input
+										id="titlebar"
+										type="checkbox"
+										aria-label="..."
+										onClick={e => {
+											switch (e.target.checked) {
+												case true: {
+													let settings = this.state.settings;
+													settings.options.renderTitlebar = true;
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													let settings = this.state.settings;
+													settings.options.renderTitlebar = false;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													return;
+											}
+										}}
+									/>
+								</form>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		);

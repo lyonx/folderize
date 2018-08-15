@@ -5,7 +5,7 @@ import Lazyload from 'react-lazy-load';
 class Page extends Component {
 	constructor(props) {
 		super(props);
-		this.getOffest = this.getOffest.bind(this);
+		this.getOffset = this.getOffset.bind(this);
 		this.state = {
 			title: props.data.title,
 			nodes: [],
@@ -51,15 +51,31 @@ class Page extends Component {
 					break;
 				}
 				case 'image': {
-					nodes.push(
-						<div className="col-sm-12">
-							<div className="image-wrap">
-								<Lazyload offsetHorizontal={50} height={200}>
-									<div className="images" style={`background: url(${node.data.src})`} />
-								</Lazyload>
+					if (node.format === 'hero') {
+						nodes.push(
+							<div className="col-sm-12">
+								<div className="hero">
+									<div className="hero-img" style={`background: url("${node.data.src}")`} alt="...">
+										<div className="hero-text">
+											<h1>{node.data.header}</h1>
+											{node.data.subtext.length > 0 ? <p>{node.data.subtext}</p> : null}
+										</div>
+									</div>
+									{/* <h3 className="plugin-title">{node.data.title}</h3> */}
+								</div>
 							</div>
-						</div>
-					);
+						);
+					} else {
+						nodes.push(
+							<div className="col-sm-12">
+								<div className="image-wrap">
+									<Lazyload offsetHorizontal={50} height={200}>
+										<div className="images" style={`background: url(${node.data.src})`} />
+									</Lazyload>
+								</div>
+							</div>
+						);
+					}
 					break;
 				}
 				case 'plugin': {
@@ -116,7 +132,7 @@ class Page extends Component {
 		return nodes;
 	}
 
-	getOffest() {	
+	getOffset() {
 		setTimeout(() => {
 			// console.warn(document.querySelector(`#slide${this.props.index}`).offsetLeft);
 			let slide = document.querySelector(`#slide${this.props.index}`);
@@ -132,23 +148,25 @@ class Page extends Component {
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
 		this.setState({ data: this.props.data });
-		
-		// document.removeEventListener('after.lory.slide', getOffest);
-		document.addEventListener('after.lory.slide', this.getOffest);
+
+		// document.removeEventListener('after.lory.slide', getOffset);
+		document.addEventListener('after.lory.slide', this.getOffset);
 	}
 
 	componentWillUnmount() {
-		document.removeEventListener('after.lory.slide', this.getOffest);
-
+		document.removeEventListener('after.lory.slide', this.getOffset);
 	}
 
 	render() {
-		let content = <div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
-		<div className="row">{this.renderNodes()}</div>
-	</div>;
+		let content = (
+			<div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
+				<div className="row">{this.renderNodes()}</div>
+			</div>
+		);
 		return (
-			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={`background: url("${this.props.data.backgroundImg}")`}>
-			{this.state.offset > window.innerWidth + 100 ? null : content}
+			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={this.props.data.backgroundImg ? `background: url("${this.props.data.backgroundImg}")` : null}>
+			{/* if the page is not next up or not currently in the viewport, dont render its content */}
+				{this.state.offset > window.innerWidth + 100 ? null : content}
 			</li>
 		);
 	}
