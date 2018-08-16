@@ -21,7 +21,7 @@ class Content extends Component {
 					renderTitlebar: true,
 					navPosition: 'top',
 					colorOverrides: [],
-					navStyle: 'content'
+					layout: 0
 				}
 			}
 		};
@@ -150,8 +150,8 @@ class Content extends Component {
 			}
 		});
 	}
-	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
-	componentDidMount() {
+
+	initSortable() {
 		let navigationCallback = e => {
 			let target = this.state.settings.pages.filter(page => {
 				return page.instanceId === e.instanceId;
@@ -163,7 +163,7 @@ class Content extends Component {
 		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: true }, false, false, { itemEditable: true, navigationCallback });
 
 		this.editor.onOrderChange = () => {
-			debugger
+			debugger;
 			let settings = this.state.settings;
 			settings.pages = this.editor.items;
 			//
@@ -178,28 +178,31 @@ class Content extends Component {
 			//
 			this.setState({ settings });
 		};
+	}
 
-		// 		(() => {
-		// 			buildfire.datastore.get('data', (err, response) => {
-		// 				if (err) throw err;
-		// 				//
+	// MUST BE RUN ONCE WHEN DATA STRUCTURE CHANGES
+	debugDB() {
+		(() => {
+			buildfire.datastore.get('data', (err, response) => {
+				if (err) throw err;
+				//
 
-		// 					// insert pages into db
-		// 					buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
-		// 						if (err) {
-		// 							throw err;
-		// 						}
-		// 					});
+				// insert pages into db
+				buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
+					if (err) {
+						throw err;
+					}
+				});
+			});
+		})();
+	}
 
-		// 			});
-		// 		})();
+	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
+	componentDidMount() {
+		this.initSortable();
 
-		// (() => {
-		// 	buildfire.datastore.search({ limit: 20 }, 'data', (err, response) => {
-		// 		if (err) throw err;
-		// 		//
-		// 	});
-		// })();
+		// this.debugDB();
+
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
@@ -254,20 +257,21 @@ class Content extends Component {
 		});
 		let tutorials = localStorage.getItem('tutorial');
 		if (tutorials === 'true') {
-		let tutorials = this.state.tutorials;
-		tutorials = true;
-		this.setState({ tutorials });
+			let tutorials = this.state.tutorials;
+			tutorials = true;
+			this.setState({ tutorials });
 		} else {
-		let tutorials = this.state.tutorials;
-		tutorials = false;
-		this.setState({ tutorials });
+			let tutorials = this.state.tutorials;
+			tutorials = false;
+			this.setState({ tutorials });
 		}
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
 
-		
+		console.warn(this.state);
+
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
 	}
@@ -304,7 +308,7 @@ class Content extends Component {
 						</div>
 					</div>
 					<div className="col-md-12" id="pages">
-					{/* <h4 className="text-center">Pages</h4> */}
+						{/* <h4 className="text-center">Pages</h4> */}
 						{this.renderPages()}
 					</div>
 				</div>

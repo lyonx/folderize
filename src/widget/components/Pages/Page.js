@@ -33,9 +33,12 @@ class Page extends Component {
 			if (!node) return;
 			switch (node.type) {
 				case 'header': {
+					let border;
+					node.data.border ? border = '' : border = `border-bottom: 0px !important;`;
 					nodes.push(
-						<div className="col-sm-12">
-							<div className="page-header">
+						// <div className={`col-sm-12  node-layout${node.data.layout}`}>
+						<div className='col-sm-12'>
+							<div className='page-header' style={border}>
 								<h1>{node.data.text}</h1>
 							</div>
 						</div>
@@ -97,8 +100,10 @@ class Page extends Component {
 							<div
 								className="plugin"
 								onClick={e => {
+									console.log(node.data);
 									buildfire.actionItems.execute(node.data, (err, res) => {
 										if (err) throw err;
+										console.log(res);
 									});
 								}}>
 								<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." />
@@ -149,8 +154,8 @@ class Page extends Component {
 	componentDidMount() {
 		this.setState({ data: this.props.data });
 
-		// document.removeEventListener('after.lory.slide', getOffset);
-		document.addEventListener('after.lory.slide', this.getOffset);
+		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
+		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
 	}
 
 	componentWillUnmount() {

@@ -10,7 +10,8 @@ class Design extends React.Component {
 				options: {
 					renderTitlebar: true,
 					navPosition: 'top',
-					colorOverrides: []
+					colorOverrides: [],
+					layout: 0
 				}
 			}
 		};
@@ -211,6 +212,14 @@ class Design extends React.Component {
 											}
 										}}
 									/>
+								</form>
+								<form>
+									<input type='number' value={this.state.settings.options.layout} onChange={e => {
+										let settings = this.state.settings;
+										settings.options.layout = e.target.value;
+										this.setState({ settings });
+									}}>
+									</input>
 								</form>
 							</div>
 						</div>
