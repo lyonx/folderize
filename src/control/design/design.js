@@ -277,17 +277,6 @@ class Design extends React.Component {
 								<label htmlFor="titlebar-false">False</label>
 							</div>
 						</div>
-						<form>
-							<input
-								type="number"
-								value={this.state.settings.options.layout}
-								onChange={e => {
-									let settings = this.state.settings;
-									settings.options.layout = e.target.value;
-									this.setState({ settings });
-								}}
-							/>
-						</form>
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span>Layout Style</span>

@@ -8,18 +8,33 @@ class Page extends Component {
 		this.deletePage = props.deletePage;
 		this.key = props.key;
 		this.update = this.update.bind(this);
-		this.handleChange = this.handleChange.bind(this);
+		this.reorderNodes = props.reorderNodes;
+		this.handleChange = props.handleChange;
+		this.colorPicker = props.colorPicker;
 		this.delete = this.delete.bind(this);
 		this.initEditor = this.initEditor.bind(this);
+		this.addNode = props.addNode;
+		this.addImg = props.addImg;
+		// this.state = {
+		// 	title: props.data.title,
+		// 	nodes: [],
+		// 	show: false,
+		// 	backgroundColor: this.props.backgroundColor,
+		// 	backgroundImg: this.props.backgroundImg,
+		// 	iconUrl: this.props.iconUrl,
+		// 	backgroundCSS: '',
+		// 	tutorials: this.props.tutorials
+		// };
 		this.state = {
-			title: props.data.title,
+			index: null,
+			title: '',
 			nodes: [],
 			show: false,
-			backgroundColor: this.props.backgroundColor,
-			backgroundImg: this.props.backgroundImg,
-			iconUrl: this.props.iconUrl,
+			backgroundColor: {},
+			backgroundImg: {},
+			iconUrl: '',
 			backgroundCSS: '',
-			tutorials: this.props.tutorials
+			tutorials: false
 		};
 	}
 
@@ -27,8 +42,9 @@ class Page extends Component {
 
 	// ON MOUNT...
 	componentDidMount() {
+		console.count(`page ${this.props.index} MOUNT`);
 		console.warn(this.state, this.props);
-		
+
 		// Unknown bug caused main panel to render with the wrong attributes
 		let panel = document.getElementById(`panel${this.props.index}`);
 		if (panel.getAttribute('data-toggle') === 'show') {
@@ -37,11 +53,12 @@ class Page extends Component {
 		}
 		// this.state.backgroundColor ? (this.state.backgroundColor.colorType === 'solid' ? this.setState({ backgroundCSS: this.state.backgroundColor.solid.backgroundCSS }) : this.setState({ backgroundCSS: this.state.backgroundColor.gradient.backgroundCSS })) : null;
 		// MOVE DATA TO STATE
-		
+
 		let title = '';
-		this.props.data.title.length > 0 ? title = this.props.data.title : title = "untitled";
-		
+		this.props.data.title.length > 0 ? (title = this.props.data.title) : (title = 'untitled');
+
 		this.setState({
+			index: this.props.index,
 			title: title,
 			nodes: this.props.data.nodes,
 			backgroundColor: this.props.data.backgroundColor,
@@ -50,13 +67,12 @@ class Page extends Component {
 			backgroundCSS: this.props.data.backgroundColor != false ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : false,
 			tutorials: this.props.tutorials
 		});
-		
+
 		this.initEditor();
 	}
 
 	initEditor() {
 		let navigationCallback = e => {
-			debugger
 			let target = this.props.data.nodes.filter(node => {
 				return node.instanceId === e.instanceId;
 			});
@@ -71,23 +87,17 @@ class Page extends Component {
 		this.editor = new buildfire.components.pluginInstance.sortableList(`#nodelist${this.props.index}`, [], { confirmDeleteItem: true }, false, false, { itemEditable: true, navigationCallback });
 
 		this.editor.onOrderChange = () => {
-			// let nodes = this.state.nodes;
-			let nodes = this.editor.items;
-			this.setState({ nodes });
-			this.update();
+			this.reorderNodes(this.props.index, this.editor.items);
 		};
 
 		this.editor.onDeleteItem = () => {
-			let nodes = this.state.nodes;
-			nodes = this.editor.items;
-			this.setState({ nodes });
-			this.update();
+			this.reorderNodes(this.props.index, this.editor.items);
 		};
 	}
 
 	componentDidUpdate() {
 		console.warn(this.state, this.props);
-		
+		console.log(this.props.data.title, this.state.title);
 		this.editor.loadItems(this.props.data.nodes, false);
 	}
 
@@ -271,176 +281,85 @@ class Page extends Component {
 		document.querySelector(`#page${this.props.index}node${n}`).click();
 	}
 
-	// ADDS A NODE OBJECT OF THE CORRESPONDING TYPE
-	addNode(type) {
-		let nodes = this.props.data.nodes;
-		switch (type) {
-			case 'header': {
-				nodes.push({
-					type: 'header',
-					title: 'Header',
-					instanceId: Date.now(),
-					data: { text: 'new page', border: true }
-				});
-				setTimeout(() => this.openLast(), 100);
-				this.setState({ nodes });
+	// // OPENS IMAGELIB DIALOG WITH SPECIFIC TARGET
+	// addImg(control, index) {
+	// 	switch (control) {
+	// 		case 'background': {
+	// 			buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+	// 				if (err) throw err;
+	// 				this.setState({ backgroundImg: res.selectedFiles[0] });
+	// 				this.update();
+	// 			});
+	// 			break;
+	// 		}
+	// 		case 'plugin': {
+	// 			buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+	// 				if (err) throw err;
+	// 				// this.setState({ backgroundImg: res.selectedFiles[0] });
+	// 				// this.update();
+	// 				this.handleNodeChange(res.selectedFiles[0], index, 'src');
+	// 			});
+	// 			break;
+	// 		}
+	// 		case 'action': {
+	// 			buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+	// 				if (err) throw err;
+	// 				// this.setState({ backgroundImg: res.selectedFiles[0] });
+	// 				// this.update();
+	// 				this.handleNodeChange(res.selectedFiles[0], index, 'src');
+	// 			});
+	// 			break;
+	// 		}
+	// 		case 'icon': {
+	// 			buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
+	// 				if (err) throw err;
+	// 				this.setState({ iconUrl: res.selectedIcons[0] });
 
-				break;
-			}
-			case 'desc': {
-				nodes.push({
-					type: 'desc',
-					title: 'Text',
-					instanceId: Date.now(),
-					data: { text: 'You can edit this description in the control.' }
-				});
-				this.setState({ nodes });
-				setTimeout(() => this.openLast(), 100);
-				break;
-			}
-			case 'image': {
-				nodes.push({
-					type: 'image',
-					title: 'Image',
-					instanceId: Date.now(),
-					data: { src: 'https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8' }
-				});
-				this.setState({ nodes });
-				setTimeout(() => {
-					this.addImg('node', nodes.length - 1);
-					this.openLast();
-				}, 100);
-				break;
-			}
-			case 'hero': {
-				nodes.push({
-					type: 'hero',
-					title: 'hero',
-					instanceId: Date.now(),
-					data: { src: 'https://images.unsplash.com/photo-1419833173245-f59e1b93f9ee?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=289571318ec59acf6bece7e8ece608af', header: 'Hero Header', subtext: 'Hero Subtext', showButton: false, buttonText: 'Go!' }
-				});
-				this.setState({ nodes });
-				setTimeout(() => this.openLast(), 100);
-				break;
-			}
-			case 'action': {
-				buildfire.actionItems.showDialog({}, { showIcon: true }, (err, res) => {
-					if (err) throw err;
-					debugger
-					let nodes = this.state.nodes;
-					let title = res.title ? res.title : 'Untitled';
-					nodes.push({
-						type: 'action',
-						instanceId: Date.now(),
-						title: `Action Item: ${title}`,
-						data: res
-					});
-					this.setState({
-						nodes: nodes
-					});
-					setTimeout(() => this.openLast(), 100);
-					// this.update();
-				});
-				break;
-			}
-			default:
-				return;
-		}
-		//
-
-		this.update();
-	}
-
-	// USED BY INPUT FEILDS TO UPDATE STATE
-	handleChange(event) {
-		const target = event.target;
-		const name = target.name;
-		this.setState({ [name]: event.target.value });
-		if (event.type === 'input') {
-			this.update();
-		}
-		// this.update();
-	}
-
-	// OPENS IMAGELIB DIALOG WITH SPECIFIC TARGET
-	addImg(control, index) {
-		switch (control) {
-			case 'background': {
-				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-					if (err) throw err;
-					this.setState({ backgroundImg: res.selectedFiles[0] });
-					this.update();
-				});
-				break;
-			}
-			case 'plugin': {
-				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-					if (err) throw err;
-					// this.setState({ backgroundImg: res.selectedFiles[0] });
-					// this.update();
-					this.handleNodeChange(res.selectedFiles[0], index, 'src');
-				});
-				break;
-			}
-			case 'action': {
-				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-					if (err) throw err;
-					// this.setState({ backgroundImg: res.selectedFiles[0] });
-					// this.update();
-					this.handleNodeChange(res.selectedFiles[0], index, 'src');
-				});
-				break;
-			}
-			case 'icon': {
-				buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
-					if (err) throw err;
-					this.setState({ iconUrl: res.selectedIcons[0] });
-
-					this.update();
-					// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
-				});
-				break;
-			}
-			case 'hero': {
-				buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
-					if (err) throw err;
-					// this.setState({ iconUrl: res.selectedIcons[0] });
-					this.handleNodeChange(res.selectedFiles[0], index, 'src');
-					// this.update();
-					// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
-				});
-				break;
-			}
-			default: {
-				let target = this.props.data.nodes[index];
-				buildfire.imageLib.showDialog({}, (err, result) => {
-					if (err) throw err;
-					if (result.selectedFiles.length === 0) return;
-					this.handleNodeChange(result.selectedFiles[0], index, 'src');
-				});
-			}
-		}
-	}
+	// 				this.update();
+	// 				// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
+	// 			});
+	// 			break;
+	// 		}
+	// 		case 'hero': {
+	// 			buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
+	// 				if (err) throw err;
+	// 				// this.setState({ iconUrl: res.selectedIcons[0] });
+	// 				this.handleNodeChange(res.selectedFiles[0], index, 'src');
+	// 				// this.update();
+	// 				// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
+	// 			});
+	// 			break;
+	// 		}
+	// 		default: {
+	// 			let target = this.props.data.nodes[index];
+	// 			buildfire.imageLib.showDialog({}, (err, result) => {
+	// 				if (err) throw err;
+	// 				if (result.selectedFiles.length === 0) return;
+	// 				this.handleNodeChange(result.selectedFiles[0], index, 'src');
+	// 			});
+	// 		}
+	// 	}
+	// }
 
 	// OPENS COLOR PICKER WITH SPECIFIC TARGET
-	colorPicker(attr) {
-		buildfire.colorLib.showDialog(this.state.backgroundColor, {}, null, (err, res) => {
-			if (err) throw err;
-			let bgCSS;
-			switch (res.colorType) {
-				case 'solid': {
-					bgCSS = res.solid.backgroundCSS;
-					break;
-				}
-				case 'gradient': {
-					bgCSS = res.gradient.backgroundCSS;
-					break;
-				}
-			}
-			this.setState({ [attr]: res, backgroundCSS: bgCSS });
-			this.update();
-		});
-	}
+	// colorPicker(attr) {
+	// 	buildfire.colorLib.showDialog(this.state.backgroundColor, {}, null, (err, res) => {
+	// 		if (err) throw err;
+	// 		let bgCSS;
+	// 		switch (res.colorType) {
+	// 			case 'solid': {
+	// 				bgCSS = res.solid.backgroundCSS;
+	// 				break;
+	// 			}
+	// 			case 'gradient': {
+	// 				bgCSS = res.gradient.backgroundCSS;
+	// 				break;
+	// 			}
+	// 		}
+	// 		this.setState({ [attr]: res, backgroundCSS: bgCSS });
+	// 		this.update();
+	// 	});
+	// }
 
 	// DELETES THIS PAGE
 	delete() {
@@ -471,31 +390,30 @@ class Page extends Component {
 		if (!updateAll) {
 			updateAll = '';
 			this.updatePage(this.props.index, {
-				title: this.state.title,
+				title: this.props.data.title,
 				instanceId: this.props.data.instanceId,
 				images: this.props.data.images,
-				nodes: this.state.nodes,
+				nodes: this.props.data.nodes,
 				show: this.props.data.show,
 				customizations: this.props.data.customizations,
-				backgroundColor: this.state.backgroundColor,
-				backgroundImg: this.state.backgroundImg,
-				iconUrl: this.state.iconUrl
+				backgroundColor: this.props.data.backgroundColor,
+				backgroundImg: this.props.data.backgroundImg,
+				iconUrl: this.props.data.iconUrl
 			});
 		} else {
 			let data = {};
 			switch (target) {
 				case 'color':
-					data.backgroundColor = this.state.backgroundColor;
+					data.backgroundColor = this.props.data.backgroundColor;
 					break;
-					case 'img':
-					data.backgroundImg = this.state.backgroundImg;
+				case 'img':
+					data.backgroundImg = this.props.data.backgroundImg;
 					break;
 				default:
 					return;
 			}
-			
-			this.updatePage(this.props.index, data, true
-		);
+
+			this.updatePage(this.props.index, data, true);
 		}
 	}
 
@@ -740,7 +658,7 @@ class Page extends Component {
 								/>
 								<div className="panel-body  nodepanel">
 									<h4 className="text-center">Selected Image:</h4>
-									<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))} />
+									<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node), this.props.index)} />
 									<h6 className="text-center">Click to change</h6>
 									<div className="tab">
 										<label>Full screen {'  '}</label>
@@ -836,7 +754,7 @@ class Page extends Component {
 							</div>
 							<div className="panel-body panel-hide nodepanel" id={`page${this.props.index}nodepanel${index}`} data-toggle="hide">
 								<div className="plugin">
-									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node))} />
+									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node), this.props.index)} />
 									{/* <h3 className="plugin-title">{node.data.title}</h3> */}
 									<div className="input-group tab-toggle" style="margin-left:15px;">
 										<input type="text" className="plugin-title form-control" name="plugin" aria-describedby="sizing-addon2" value={node.data.title} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'plugin')} />
@@ -886,7 +804,7 @@ class Page extends Component {
 												if (prevImg) {
 													this.handleNodeChange(prevImg, index, 'src');
 												} else {
-													this.addImg(null, this.props.data.nodes.indexOf(node));
+													this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index);
 												}
 											}
 											break;
@@ -936,7 +854,7 @@ class Page extends Component {
 									</div>
 									{/* <div className="action"> */}
 									<h4 className="text-center">Selected Image:</h4>
-									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node))} />
+									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index)} />
 									<h6 className="text-center">Click to change</h6>
 
 									<h3 className="action-title">Action Text: {node.data.title}</h3>
@@ -1034,7 +952,7 @@ class Page extends Component {
 										}}
 									/>
 									<div className="tab">
-										<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node))}>
+										<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node), this.props.index)}>
 											Change Image
 										</button>
 										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
@@ -1137,7 +1055,7 @@ class Page extends Component {
 										<div className="input-group">
 											<h4>Edit Page Title</h4>
 
-											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={this.handleChange} />
+											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={e => this.handleChange(e, this.props.index)} />
 										</div>
 									</form>
 									{/* ------- Config ------ */}
@@ -1156,15 +1074,16 @@ class Page extends Component {
 															</h4>
 															<a onClick={() => this.update(true, 'color')}>Apply to all</a>
 														</div>
-														<button className={`btn thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor')} style={`${this.state.backgroundCSS}`}>
-															<h5>{this.state.backgroundColor ? (this.state.backgroundColor.colorType != false ? `${this.state.backgroundColor.colorType}` : 'Add Background Color') : null}</h5>
+														<button className={`btn thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor', this.props.index)} style={`${this.props.data.backgroundCSS}`}>
+															<h5>{this.props.data.backgroundColor ? (this.props.data.backgroundColor.colorType != false ? `${this.props.data.backgroundColor.colorType}` : 'Add Background Color') : null}</h5>
 														</button>
 
 														<button
 															className="btn btn-danger"
 															onClick={() => {
-																this.setState({ backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } }, backgroundCSS: false });
-																this.update();
+																// this.setState({ backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } }, backgroundCSS: false });
+																// this.update();
+																this.colorPicker('backgroundColor', this.props.index, true);
 															}}>
 															Remove
 														</button>
@@ -1177,14 +1096,13 @@ class Page extends Component {
 															</h4>
 															<a onClick={() => this.update(true, 'img')}>Apply to all</a>
 														</div>
-														<button className="btn thumbnail" style={this.state.backgroundImg ? `background: url("${this.state.backgroundImg}")` : `background: #33333`} onClick={() => this.addImg('background')}>
+														<button className="btn thumbnail" style={this.props.data.backgroundImg ? `background: url("${this.props.data.backgroundImg}")` : `background: #33333`} onClick={() => this.addImg('background', null, this.props.index)}>
 															<h5>{typeof this.state.backgroundImg === 'string' ? 'Change Background Image' : 'Add Background Image'}</h5>
 														</button>
 														<button
 															className="btn btn-danger"
 															onClick={() => {
-																this.setState({ backgroundImg: {} });
-																this.update();
+																this.addImg('background', null, this.props.index, true);
 															}}>
 															Remove
 														</button>
@@ -1194,14 +1112,13 @@ class Page extends Component {
 														<h4 className="tag" style="width: 33%">
 															Navigation Icon:{' '}
 														</h4>
-														<button className="btn thumbnail" onClick={() => this.addImg('icon')}>
-															<h5>{this.state.iconUrl ? <span className={`glyphicon ${this.state.iconUrl}`} /> : 'Add Icon'}</h5>
+														<button className="btn thumbnail" onClick={() => this.addImg('icon', null, this.props.index)}>
+															<h5>{this.props.data.iconUrl ? <span className={`glyphicon ${this.props.data.iconUrl}`} /> : 'Add Icon'}</h5>
 														</button>
 														<button
 															className="btn btn-danger"
 															onClick={() => {
-																this.setState({ iconUrl: '' });
-																this.update();
+																this.addImg('icon', null, this.props.index, true);
 															}}>
 															Remove
 														</button>
@@ -1230,21 +1147,21 @@ class Page extends Component {
 												<button
 													className="btn btn-default add tab-toggle"
 													onClick={e => {
-														this.addNode('header');
+														this.addNode('header', this.props.index, () => this.openLast());
 													}}>
 													Add Header
 												</button>
 												<button
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
-														this.addNode('desc');
+														this.addNode('desc', this.props.index, () => this.openLast());
 													}}>
 													Add Description
 												</button>
 												<button
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
-														this.addNode('image');
+														this.addNode('image', this.props.index, () => this.openLast());
 													}}>
 													Add Image
 												</button>
@@ -1252,7 +1169,7 @@ class Page extends Component {
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
 														// this.toggleModal(this.props.index, 'actions', 'show');
-														this.addNode('action');
+														this.addNode('action', this.props.index, () => this.openLast());
 													}}>
 													Add Action Item
 												</button>

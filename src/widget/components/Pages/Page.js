@@ -139,9 +139,9 @@ class Page extends Component {
 	}
 
 	cropImg(image) {
+		if (!image) return;
 		let options = {};
 		let layout = this.props.layout;
-		console.log(this.props);
 		
 		if (layout === 0) {
 			options.width = 50;
@@ -151,7 +151,7 @@ class Page extends Component {
 			options.width = window.innerWidth;
 			options.height = options.width * 9 / 16;
 		}
-
+		
 		let cropped = buildfire.imageLib.cropImage(image, options);
 
 		return cropped;
@@ -172,7 +172,7 @@ class Page extends Component {
 
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
-		this.setState({ data: this.props.data });
+		// this.setState({ data: this.props.data });
 
 		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
 		document.addEventListener('after.lory.slide', this.getOffset.bind(this));

@@ -241,6 +241,7 @@ class Widget extends Component {
 
 		// SETS NAV LABELS
 		setTimeout(() => {
+
 			// if (this.state.navStyle === 'content') {
 			let dot_tabs = simple_dots.querySelector('.js_dots').childNodes;
 			for (let i = 0; i < dot_tabs.length; i++) {
@@ -278,8 +279,13 @@ class Widget extends Component {
 			enableMouseEvents: true
 		});
 
+	
+		console.log(slideIndex);
+		
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
-		this.slider.slideTo(parseInt(slideIndex));
+		setTimeout(() => {
+			this.slider.slideTo(parseInt(slideIndex));
+		}, 10);
 	}
 
 	// SETS UP AND RETURNS PAGE COMPONENTS
