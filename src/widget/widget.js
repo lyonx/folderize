@@ -285,7 +285,7 @@ class Widget extends Component {
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
 		setTimeout(() => {
 			this.slider.slideTo(parseInt(slideIndex));
-		}, 10);
+		}, 1);
 	}
 
 	// SETS UP AND RETURNS PAGE COMPONENTS
