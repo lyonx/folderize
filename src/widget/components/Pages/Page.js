@@ -95,18 +95,19 @@ class Page extends Component {
 				}
 				case 'action': {
 					if (!node.data) return;
+					let croppedImg = this.cropImg(node.data.iconUrl);
 					nodes.push(
 						<div className="col-sm-12">
 							<div
 								className="plugin"
 								onClick={e => {
-									console.log(node.data);
+									
 									buildfire.actionItems.execute(node.data, (err, res) => {
 										if (err) throw err;
-										console.log(res);
+										
 									});
 								}}>
-								<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." />
+								<img className="plugin-thumbnail backgroundColorTheme" src={`${croppedImg}`} alt="..." />
 								<h3 className="plugin-title">{node.data.title}</h3>
 							</div>
 						</div>
@@ -137,13 +138,32 @@ class Page extends Component {
 		return nodes;
 	}
 
+	cropImg(image) {
+		let options = {};
+		let layout = this.props.layout;
+		console.log(this.props);
+		
+		if (layout === 0) {
+			options.width = 50;
+			options.height = 50;
+		}
+		if (layout === 1 || layout === 2) {
+			options.width = window.innerWidth;
+			options.height = options.width * 9 / 16;
+		}
+
+		let cropped = buildfire.imageLib.cropImage(image, options);
+
+		return cropped;
+	}
+
 	getOffset() {
 		setTimeout(() => {
-			// console.warn(document.querySelector(`#slide${this.props.index}`).offsetLeft);
+			// 
 			let slide = document.querySelector(`#slide${this.props.index}`);
 			if (!slide) return;
 			let x = slide.getBoundingClientRect().x;
-			// console.log(this.props.index, x, window.scrollX);
+			// 
 			this.setState({
 				offset: Math.abs(x)
 			});

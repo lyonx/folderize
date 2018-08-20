@@ -11,7 +11,7 @@ class Content extends Component {
 		this.updatePage = this.updatePage.bind(this);
 		this.renderPages = this.renderPages.bind(this);
 		this.reorderPages = this.reorderPages.bind(this);
-		this.debounceSync = debounce(this.syncState, 250);
+		this.debounceSync = debounce(this.syncState, 100);
 		this.editor = {};
 		this.state = {
 			tutorials: false,
@@ -110,15 +110,27 @@ class Content extends Component {
 		let settings = this.state.settings;
 		// let pages = this.state.settings.pages;
 		settings.pages.splice(index, 1);
-
+		console.log(settings);
+		
 		this.setState({ settings });
+
 	}
 	// USED BY THE PAGES TO UPDATE THEIR DATA IN CONTENT STATE
-	updatePage(index, page) {
-		let settings = this.state.settings;
-		// let pages = this.state.settings.pages;
-		settings.pages[index] = page;
-		this.setState({ settings });
+	updatePage(index, page, updateAll) {
+		if (!updateAll) {
+			updateAll = false;
+			let settings = this.state.settings;
+			// let pages = this.state.settings.pages;
+			settings.pages[index] = page;
+			this.setState({ settings });
+		} else {
+			let settings = this.state.settings;
+			settings.pages.map(existingPage => {
+				if (page.backgroundColor) existingPage.backgroundColor = page.backgroundColor;
+				if (page.backgroundImg) existingPage.backgroundImg = page.backgroundImg;
+			});
+			this.setState({ settings });
+		}
 	}
 
 	addImg() {
@@ -153,6 +165,7 @@ class Content extends Component {
 
 	initSortable() {
 		let navigationCallback = e => {
+
 			let target = this.state.settings.pages.filter(page => {
 				return page.instanceId === e.instanceId;
 			});
@@ -163,10 +176,8 @@ class Content extends Component {
 		this.editor = new buildfire.components.pluginInstance.sortableList('#pages', [], { confirmDeleteItem: true }, false, false, { itemEditable: true, navigationCallback });
 
 		this.editor.onOrderChange = () => {
-			debugger;
 			let settings = this.state.settings;
 			settings.pages = this.editor.items;
-			//
 			this.setState({ settings });
 		};
 
@@ -269,9 +280,8 @@ class Content extends Component {
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
-
-		console.warn(this.state);
-
+		console.log(this.state.settings.pages, this.editor.items);
+		
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
 	}
@@ -280,11 +290,13 @@ class Content extends Component {
 
 	// LOOPS THROUGH AND RETURNS PAGES
 	renderPages() {
+		console.log(this.state.settings.pages);
+
 		// if (this.state.settings.pages.length < 1) return;
 		let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
 		this.state.settings.pages.map((page, index) => {
-			// debugger
+			debugger
 			pages.push(<Page index={index} tutorials={tutorials} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;

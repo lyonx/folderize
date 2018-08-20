@@ -1,10 +1,18 @@
 label {
   margin-right: 10px;
-  flex: 1
-}
-input {
   flex: 1;
+  pointer-events: none;
 }
-form {
-  display: flex;
+/* label::before {
+  pointer-events: none;
+} */
+.input-radio {
+  height: 100%;
+  pointer-events: all;
+  width: 20px;
+  margin-top: 0px !important;
+}
+
+.radio.radio-inline {
+  width: 10vw;
 }

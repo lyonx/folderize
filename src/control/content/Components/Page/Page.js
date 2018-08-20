@@ -10,6 +10,7 @@ class Page extends Component {
 		this.update = this.update.bind(this);
 		this.handleChange = this.handleChange.bind(this);
 		this.delete = this.delete.bind(this);
+		this.initEditor = this.initEditor.bind(this);
 		this.state = {
 			title: props.data.title,
 			nodes: [],
@@ -26,6 +27,8 @@ class Page extends Component {
 
 	// ON MOUNT...
 	componentDidMount() {
+		console.warn(this.state, this.props);
+		
 		// Unknown bug caused main panel to render with the wrong attributes
 		let panel = document.getElementById(`panel${this.props.index}`);
 		if (panel.getAttribute('data-toggle') === 'show') {
@@ -34,9 +37,12 @@ class Page extends Component {
 		}
 		// this.state.backgroundColor ? (this.state.backgroundColor.colorType === 'solid' ? this.setState({ backgroundCSS: this.state.backgroundColor.solid.backgroundCSS }) : this.setState({ backgroundCSS: this.state.backgroundColor.gradient.backgroundCSS })) : null;
 		// MOVE DATA TO STATE
-
+		
+		let title = '';
+		this.props.data.title.length > 0 ? title = this.props.data.title : title = "untitled";
+		
 		this.setState({
-			title: this.props.data.title,
+			title: title,
 			nodes: this.props.data.nodes,
 			backgroundColor: this.props.data.backgroundColor,
 			backgroundImg: this.props.data.backgroundImg,
@@ -44,9 +50,13 @@ class Page extends Component {
 			backgroundCSS: this.props.data.backgroundColor != false ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : false,
 			tutorials: this.props.tutorials
 		});
+		
+		this.initEditor();
+	}
 
+	initEditor() {
 		let navigationCallback = e => {
-			//
+			debugger
 			let target = this.props.data.nodes.filter(node => {
 				return node.instanceId === e.instanceId;
 			});
@@ -76,7 +86,9 @@ class Page extends Component {
 	}
 
 	componentDidUpdate() {
-		this.editor.loadItems(this.state.nodes, false);
+		console.warn(this.state, this.props);
+		
+		this.editor.loadItems(this.props.data.nodes, false);
 	}
 
 	// USED TO EDIT NODES
@@ -314,18 +326,20 @@ class Page extends Component {
 			case 'action': {
 				buildfire.actionItems.showDialog({}, { showIcon: true }, (err, res) => {
 					if (err) throw err;
+					debugger
 					let nodes = this.state.nodes;
+					let title = res.title ? res.title : 'Untitled';
 					nodes.push({
 						type: 'action',
 						instanceId: Date.now(),
-						title: `Action Item: ${res.title}`,
+						title: `Action Item: ${title}`,
 						data: res
 					});
 					this.setState({
 						nodes: nodes
 					});
 					setTimeout(() => this.openLast(), 100);
-					this.update();
+					// this.update();
 				});
 				break;
 			}
@@ -453,18 +467,36 @@ class Page extends Component {
 	}
 
 	// PIPES CURRENT STATE TO CONTROL'S STATE, UPDATES PAGE AT THIS INDEX
-	update() {
-		this.updatePage(this.props.index, {
-			title: this.props.data.title,
-			instanceId: this.props.data.instanceId,
-			images: this.props.data.images,
-			nodes: this.state.nodes,
-			show: this.props.data.show,
-			customizations: this.props.data.customizations,
-			backgroundColor: this.props.data.backgroundColor,
-			backgroundImg: this.props.data.backgroundImg,
-			iconUrl: this.props.data.iconUrl
-		});
+	update(updateAll, target) {
+		if (!updateAll) {
+			updateAll = '';
+			this.updatePage(this.props.index, {
+				title: this.state.title,
+				instanceId: this.props.data.instanceId,
+				images: this.props.data.images,
+				nodes: this.state.nodes,
+				show: this.props.data.show,
+				customizations: this.props.data.customizations,
+				backgroundColor: this.state.backgroundColor,
+				backgroundImg: this.state.backgroundImg,
+				iconUrl: this.state.iconUrl
+			});
+		} else {
+			let data = {};
+			switch (target) {
+				case 'color':
+					data.backgroundColor = this.state.backgroundColor;
+					break;
+					case 'img':
+					data.backgroundImg = this.state.backgroundImg;
+					break;
+				default:
+					return;
+			}
+			
+			this.updatePage(this.props.index, data, true
+		);
+		}
 	}
 
 	// USED TO TOGGLE MODALS OR PANELS
@@ -901,7 +933,6 @@ class Page extends Component {
 														this.update();
 													});
 											  }, 100)}
-										;
 									</div>
 									{/* <div className="action"> */}
 									<h4 className="text-center">Selected Image:</h4>
@@ -1040,7 +1071,7 @@ class Page extends Component {
 			</div>
 		);
 		return (
-			<div>
+			<div id={Date.now()}>
 				<div className="panel panel-default no-border">
 					<div className="panel-heading tab panel-hide">
 						<div className="toggle-group">
@@ -1088,14 +1119,15 @@ class Page extends Component {
 									}}>
 									Show tutorials
 								</a>
-								// <a
-								// 	style={'position: absolute; right: 15px; z-index: 10000'}
-								// 	onClick={e => {
-								// 		this.toggleTutorials('on');
-								// 	}}>
-								// 	Show tutorials
-								// </a>
-							)}
+							)
+							// <a
+							// 	style={'position: absolute; right: 15px; z-index: 10000'}
+							// 	onClick={e => {
+							// 		this.toggleTutorials('on');
+							// 	}}>
+							// 	Show tutorials
+							// </a>
+							}
 							<div className="container">
 								<div className="row">
 									<div className="info">{this.state.tutorials ? pageTutorialTop : false}</div>
@@ -1108,38 +1140,30 @@ class Page extends Component {
 											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={this.handleChange} />
 										</div>
 									</form>
+									{/* ------- Config ------ */}
 									<div className="col-sm-12">
 										{/* <button className="btn btn-deafult tab-toggle" id={`page${this.props.index}addnodesbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'addnodes')}>
 											Add Nodes
 										</button> */}
-										{/* ------- Config ------ */}
 										<div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}options`}>
 											<div className="backdrop" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
 												<div className="panel-body nodepanel" data-toggle="hide">
 													<br />
 													<div className="tab">
-														<h4 className="tag" style="width: 33%">
-															Background Color:{' '}
-														</h4>
+														<div>
+															<h4 className="tag" style="width: 33%">
+																Background Color:{' '}
+															</h4>
+															<a onClick={() => this.update(true, 'color')}>Apply to all</a>
+														</div>
 														<button className={`btn thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor')} style={`${this.state.backgroundCSS}`}>
-															{this.state.backgroundColor ? (this.state.backgroundColor.colorType != false ? `${this.state.backgroundColor.colorType}` : 'Add Background Color') : null}
+															<h5>{this.state.backgroundColor ? (this.state.backgroundColor.colorType != false ? `${this.state.backgroundColor.colorType}` : 'Add Background Color') : null}</h5>
 														</button>
 
 														<button
 															className="btn btn-danger"
 															onClick={() => {
-																this.setState({
-																	backgroundColor: {
-																		colorType: false,
-																		solid: {
-																			backgroundCSS: ''
-																		},
-																		gradient: {
-																			backgroundCSS: ''
-																		}
-																	},
-																	backgroundCSS: false
-																});
+																this.setState({ backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } }, backgroundCSS: false });
 																this.update();
 															}}>
 															Remove
@@ -1147,11 +1171,14 @@ class Page extends Component {
 													</div>
 													<br />
 													<div className="tab">
-														<h4 className="tag" style="width: 33%">
-															Background Image:{' '}
-														</h4>
+														<div>
+															<h4 className="tag" style="width: 33%">
+																Background Image:{' '}
+															</h4>
+															<a onClick={() => this.update(true, 'img')}>Apply to all</a>
+														</div>
 														<button className="btn thumbnail" style={this.state.backgroundImg ? `background: url("${this.state.backgroundImg}")` : `background: #33333`} onClick={() => this.addImg('background')}>
-															{typeof this.state.backgroundImg === 'string' ? 'Change Background Image' : 'Add Background Image'}
+															<h5>{typeof this.state.backgroundImg === 'string' ? 'Change Background Image' : 'Add Background Image'}</h5>
 														</button>
 														<button
 															className="btn btn-danger"
@@ -1168,7 +1195,7 @@ class Page extends Component {
 															Navigation Icon:{' '}
 														</h4>
 														<button className="btn thumbnail" onClick={() => this.addImg('icon')}>
-															{this.state.iconUrl ? <span className={`glyphicon ${this.state.iconUrl}`} /> : 'Add Icon'}
+															<h5>{this.state.iconUrl ? <span className={`glyphicon ${this.state.iconUrl}`} /> : 'Add Icon'}</h5>
 														</button>
 														<button
 															className="btn btn-danger"

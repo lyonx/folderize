@@ -100,6 +100,8 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
+			console.log(message);
+			
 			if (this.state.settings.pages.length === 0) return;
 			this.slider.slideTo(message.index);
 		};
@@ -159,13 +161,19 @@ class Widget extends Component {
 	}
 	getLayouts() {
 		let layout = this.state.settings.options.layout;
-		if (layout > 0) {
-			let slider = document.querySelector('.js_simple_dots');
-			slider.classList.add(`layout${layout}`);
-		}
+		let slider = document.querySelector('.js_simple_dots');
+
+		let currentClassList = slider.classList;
+		// let index = currentClassList.indexOf('layout');
+			if (currentClassList.item(currentClassList.length - 1).includes('layout')) {
+				slider.classList.replace(currentClassList.item(currentClassList.length - 1), `layout${layout}`)
+			} else {
+				slider.classList.add(`layout${layout}`);
+			}	
 	}
 	// REINITIALIZES THE SLIDER AND NAV ON INIT OR AFTER DOM CHANGE
 	loryFormat() {
+		console.count('lory format');
 		this.dot_container = document.querySelector('.js_simple_dots').querySelector('.js_dots');
 		// PREVENT ACCIDENTAL FORMATS
 		if (this.state.settings.pages === 0) return;
@@ -244,9 +252,11 @@ class Widget extends Component {
 					let url = this.state.settings.pages[i].iconUrl.split(' ');
 					icon.classList.add(`${url[0]}`);
 					icon.classList.add(`${url[1]}`);
+					icon.classList.add(`glyphicon`);
 					dot_tabs[i].appendChild(icon);
 					// OTHERWISE SET TITLE
 				} else {
+					dot_tabs[i].classList.add(`titleBarTextAndIcons`);
 					dot_tabs[i].innerHTML = this.state.settings.pages[i].title;
 				}
 			}
@@ -295,7 +305,7 @@ class Widget extends Component {
 			// INTERPRET BG COLOR, PASS ONLY BG CSS
 			page.backgroundColor.colorType === 'solid' ? (page.backgroundColor = page.backgroundColor.solid.backgroundCSS) : (page.backgroundColor = page.backgroundColor.gradient.backgroundCSS);
 			// PASS PROPS TO PAGE AND PUSH
-			pages.push(<Page index={this.state.settings.pages.indexOf(page)} data={page} />);
+			pages.push(<Page index={this.state.settings.pages.indexOf(page)} layout={this.state.settings.options.layout} data={page} />);
 		});
 
 		// FORMAT THE PAGES AND NAV AFTER RETURN STATEMENT
@@ -304,6 +314,8 @@ class Widget extends Component {
 	}
 	// OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
+		console.log(this.state);
+		
 		this.getLayouts();
 		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
 		if (document.querySelector('.hero-img')) {
@@ -312,7 +324,7 @@ class Widget extends Component {
 	}
 
 	render() {
-		let dotNav = <ul key={Date.now()} className="dots js_dots sticky titleBar" id="dot-nav" />;
+		let dotNav = <ul key={Date.now()} className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" />;
 		return (
 			<div key={Date.now()} className="backgroundColor" id="container foo backgroundColor">
 				<div id="cover" className="hide-cover">

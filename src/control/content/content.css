@@ -52,7 +52,7 @@ span {
 .panel-hide {
 	display: none;
 	animation-name: slide-out;
-	animation-duration: 1s;
+	animation-duration: .5s;
 	animation-direction: normal;
 	animation-fill-mode: forwards;
 }
@@ -60,7 +60,7 @@ span {
 .panel-show {
 	display: block;
 	animation-name: slide-in;
-	animation-duration: 1s;
+	animation-duration: .5s;
 	animation-direction: normal;
 	animation-fill-mode: forwards;
 }
@@ -68,9 +68,11 @@ span {
 @keyframes slide-in {
 	from {
 		transform: translate(-100%, 0%);
+		opacity: 0;
 	}
 	to {
 		transform: translate(0%, 0%);
+		opacity: 1;
 	}
 }
 
@@ -255,4 +257,13 @@ html {
 
 .tab > .thumbnail {
 	margin-right: 10px;
+}
+
+.thumbnail h5 {
+	background: white;
+	width: fit-content;
+	border-radius: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: auto;
 }
