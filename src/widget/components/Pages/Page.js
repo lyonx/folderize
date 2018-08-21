@@ -33,9 +33,12 @@ class Page extends Component {
 			if (!node) return;
 			switch (node.type) {
 				case 'header': {
+					let border;
+					node.data.border ? border = '' : border = `border-bottom: 0px !important;`;
 					nodes.push(
-						<div className="col-sm-12">
-							<div className="page-header">
+						// <div className={`col-sm-12  node-layout${node.data.layout}`}>
+						<div className='col-sm-12'>
+							<div className='page-header' style={border}>
 								<h1>{node.data.text}</h1>
 							</div>
 						</div>
@@ -92,16 +95,19 @@ class Page extends Component {
 				}
 				case 'action': {
 					if (!node.data) return;
+					let croppedImg = this.cropImg(node.data.iconUrl);
 					nodes.push(
 						<div className="col-sm-12">
 							<div
 								className="plugin"
 								onClick={e => {
+									
 									buildfire.actionItems.execute(node.data, (err, res) => {
 										if (err) throw err;
+										
 									});
 								}}>
-								<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." />
+								<img className="plugin-thumbnail backgroundColorTheme" src={`${croppedImg}`} alt="..." />
 								<h3 className="plugin-title">{node.data.title}</h3>
 							</div>
 						</div>
@@ -132,13 +138,32 @@ class Page extends Component {
 		return nodes;
 	}
 
+	cropImg(image) {
+		if (!image) return;
+		let options = {};
+		let layout = this.props.layout;
+		
+		if (layout === 0) {
+			options.width = 50;
+			options.height = 50;
+		}
+		if (layout === 1 || layout === 2) {
+			options.width = window.innerWidth;
+			options.height = options.width * 9 / 16;
+		}
+		
+		let cropped = buildfire.imageLib.cropImage(image, options);
+
+		return cropped;
+	}
+
 	getOffset() {
 		setTimeout(() => {
-			// console.warn(document.querySelector(`#slide${this.props.index}`).offsetLeft);
+			// 
 			let slide = document.querySelector(`#slide${this.props.index}`);
 			if (!slide) return;
 			let x = slide.getBoundingClientRect().x;
-			// console.log(this.props.index, x, window.scrollX);
+			// 
 			this.setState({
 				offset: Math.abs(x)
 			});
@@ -147,10 +172,10 @@ class Page extends Component {
 
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
-		this.setState({ data: this.props.data });
+		// this.setState({ data: this.props.data });
 
-		// document.removeEventListener('after.lory.slide', getOffset);
-		document.addEventListener('after.lory.slide', this.getOffset);
+		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
+		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
 	}
 
 	componentWillUnmount() {
