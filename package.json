@@ -37,6 +37,7 @@
   "dependencies": {
     "lodash.debounce": "^4.0.8",
     "react": "^16.4.2",
-    "react-lazy-load": "^3.0.13"
+    "react-lazy-load": "^3.0.13",
+    "url-parse": "^1.4.3"
   }
 }
