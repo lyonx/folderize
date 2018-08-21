@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import React, { Component } from '../../node_modules/react';
 import Page from './components/Pages/Page';
 
 buildfire.spinner.show();
@@ -7,30 +6,27 @@ class Widget extends Component {
 	constructor(props) {
 		super(props);
 		this.renderPages = this.renderPages.bind(this);
-		this.dot_container = null;
 		this.handleDotEvent = this.handleDotEvent.bind(this);
+		this.dot_container = null;
 		this.slider = null;
-		// this.myRef = React.createRef();
 		this.state = {
 			plugins: [],
 			settings: {
 				pages: [],
-				styleOverrides: [],
 				options: {
 					navPosition: 'top',
-					renderTitlebar: false,
-					colorOverrides: []
+					renderTitlebar: false
 				}
 			},
 			currentSlide: null
 		};
 	}
-	// ------------------------- DATA HANDLING ------------------------- //
 
-	// ON MOUNT...
+	// ----------------------- LIFECYCLE METHODS ----------------------- //
+
+	// ON MOUNT FETCHES DATA AND INITIALIZES DB LISTENERS
 	componentDidMount() {
 		// GET ANY PREVIOUSLY STORED DATA
-		//  ----------------------- IMPORTANT! IN PROD MUST BE UNCOMMENTED!!! -------------------------------------- //
 		this.fetch();
 		// INITIALIZE THE DB LISTENER
 		this.listener();
@@ -82,6 +78,16 @@ class Widget extends Component {
 		// });
 		// --------------------------------------------------------------------- //
 	}
+	// GETS LAYOUTS AND OPTIONALLY RENDERS BUILDFIRE TITLEBAR
+	componentDidUpdate() {
+		this.getLayouts();
+		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
+		if (document.querySelector('.hero-img')) {
+			this.state.settings.pages.length === 1 ? document.querySelector('.hero-img').classList.add('full') : null;
+		}
+	}
+
+	// ------------------------- DATA HANDLING ------------------------- //
 
 	// UPDATES THE STATE WHEN DB UPDATES
 	listener() {
@@ -100,13 +106,10 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
-			console.log(message);
-			
 			if (this.state.settings.pages.length === 0) return;
 			this.slider.slideTo(message.index);
 		};
 	}
-
 	// FETCHES DATA FROM DB, IMPORTANT WHEN WIDGET IS DEPLOYED
 	fetch() {
 		buildfire.datastore.get('data', (err, response) => {
@@ -122,6 +125,7 @@ class Widget extends Component {
 
 	// --------------------------- RENDERING --------------------------- //
 
+	// BOUND EVENT HANDLER, CONTROLS DOT NAVIGATION
 	handleDotEvent(e) {
 		let dot_list_item = document.createElement('li');
 		let dot_count = this.state.settings.pages.length;
@@ -148,7 +152,9 @@ class Widget extends Component {
 			for (let i = 0, len = this.dot_container.childNodes.length; i < len; i++) {
 				this.dot_container.childNodes[i].classList.remove('active');
 			}
-			this.dot_container.childNodes[e.detail.currentSlide].classList.add('active');
+			let target = this.dot_container.childNodes[e.detail.currentSlide];
+			if (!target) return;
+			target.classList.add('active');
 			localStorage.setItem('currentSlide', e.detail.currentSlide);
 		}
 		if (e.type === 'on.lory.resize') {
@@ -159,21 +165,19 @@ class Widget extends Component {
 			this.dot_container.childNodes[0].classList.add('active');
 		}
 	}
+	// GETS AND APPLYS LAYOUT STYLING
 	getLayouts() {
 		let layout = this.state.settings.options.layout;
 		let slider = document.querySelector('.js_simple_dots');
-
 		let currentClassList = slider.classList;
-		// let index = currentClassList.indexOf('layout');
-			if (currentClassList.item(currentClassList.length - 1).includes('layout')) {
-				slider.classList.replace(currentClassList.item(currentClassList.length - 1), `layout${layout}`)
-			} else {
-				slider.classList.add(`layout${layout}`);
-			}	
+		if (currentClassList.item(currentClassList.length - 1).includes('layout')) {
+			slider.classList.replace(currentClassList.item(currentClassList.length - 1), `layout${layout}`);
+		} else {
+			slider.classList.add(`layout${layout}`);
+		}
 	}
 	// REINITIALIZES THE SLIDER AND NAV ON INIT OR AFTER DOM CHANGE
 	loryFormat() {
-		console.count('lory format');
 		this.dot_container = document.querySelector('.js_simple_dots').querySelector('.js_dots');
 		// PREVENT ACCIDENTAL FORMATS
 		if (this.state.settings.pages === 0) return;
@@ -231,8 +235,8 @@ class Widget extends Component {
 			simple_dots.removeEventListener('on.lory.resize', this.handleDotEvent);
 
 			simple_dots.addEventListener('before.lory.init', this.handleDotEvent);
-			simple_dots.addEventListener('after.lory.init',this.handleDotEvent);
-			simple_dots.addEventListener('after.lory.slide',this.handleDotEvent);
+			simple_dots.addEventListener('after.lory.init', this.handleDotEvent);
+			simple_dots.addEventListener('after.lory.slide', this.handleDotEvent);
 			simple_dots.addEventListener('on.lory.resize', this.handleDotEvent);
 		} else {
 			dot_container.classList.add('hide');
@@ -241,7 +245,6 @@ class Widget extends Component {
 
 		// SETS NAV LABELS
 		setTimeout(() => {
-
 			// if (this.state.navStyle === 'content') {
 			let dot_tabs = simple_dots.querySelector('.js_dots').childNodes;
 			for (let i = 0; i < dot_tabs.length; i++) {
@@ -279,15 +282,11 @@ class Widget extends Component {
 			enableMouseEvents: true
 		});
 
-	
-		console.log(slideIndex);
-		
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
 		setTimeout(() => {
 			this.slider.slideTo(parseInt(slideIndex));
 		}, 1);
 	}
-
 	// SETS UP AND RETURNS PAGE COMPONENTS
 	renderPages() {
 		// PREVENT ACCIDENTAL RENDERS
@@ -317,16 +316,6 @@ class Widget extends Component {
 		// FORMAT THE PAGES AND NAV AFTER RETURN STATEMENT
 		setTimeout(() => this.loryFormat(), 1);
 		return pages;
-	}
-	// OPTIONALLY RENDERS BUILDFIRE TITLEBAR
-	componentDidUpdate() {
-		console.log(this.state);
-		
-		this.getLayouts();
-		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
-		if (document.querySelector('.hero-img')) {
-			this.state.settings.pages.length === 1 ? document.querySelector('.hero-img').classList.add('full') : null;
-		}
 	}
 
 	render() {

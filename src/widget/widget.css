@@ -1,45 +1,4 @@
-.frame {
-	width: 100vw;
-	position: relative;
-	font-size: 24px;
-	/* padding-top: 10vh; */
-}
-
-.slides {
-	display: inline-block;
-	display: flex;
-	padding-left: 0px;
-}
-
-.js_slide {
-	/* background: #eef0f0; */
-	overflow-x: hidden !important;
-	overflow-y: scroll !important;
-	flex: 1;
-	height: 90vh;
-	min-width: 100vw;
-	background-size: cover !important;
-	background-position: center !important;
-}
-
-.slide-img {
-	width: 100%;
-}
-
-li {
-	position: relative;
-	display: inline-block;
-	width: 100vw;
-}
-
-#container {
-	overflow-x: hidden !important;
-	overflow-y: hidden !important;
-}
-
-ul {
-	margin-bottom: 0px;
-}
+/* ANIMATIONS */
 
 @keyframes fadeout {
 	from {
@@ -59,38 +18,28 @@ ul {
 	}
 }
 
-.hide-cover {
-	animation-name: fadeout;
-	animation-duration: 0.5s;
-	animation-fill-mode: forwards;
-	z-index: 9000;
-	height: 100vh;
-	position: absolute;
-	width: 100vw;
-	background: rgb(0, 0, 0);
-	pointer-events: none;
+@-webkit-keyframes spin {
+	0% {
+		-webkit-transform: rotate(0deg);
+	}
+	100% {
+		-webkit-transform: rotate(360deg);
+	}
 }
 
-.show-cover {
-	animation-name: fadein;
-	animation-duration: 0.1s;
-	animation-fill-mode: forwards;
-	z-index: 9000;
-	height: 100vh;
-	position: absolute;
-	width: 100vw;
-	background: rgb(0, 0, 0);
-	pointer-events: none;
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
 }
+
+/* DOT NAVIGATION */
 
 #dot-nav > .active {
 	opacity: 1;
-	/* color: black; */
-	/* flex: 1; */
-	/* font-size: 24px; */
-	/* animation-name: test; */
-	/* animation-duration: 0.25s; */
-	/* animation-fill-mode: forwards; */
 }
 
 #dot-nav > li {
@@ -99,8 +48,6 @@ ul {
 	line-height: 10vh;
 	font-size: 20px;
 	opacity: 0.5;
-	/* color: #ffffff; */
-	/* background: #333333; */
 }
 
 #dot-nav {
@@ -111,16 +58,50 @@ ul {
 	margin: 0px;
 }
 
-#hero {
+/* SLIDES AND FRAMEWORK */
+
+.frame {
+	width: 100vw;
 	position: relative;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	font-size: 40px;
-	text-align: center;
-	color: white;
+	font-size: 24px;
 }
 
+.slides {
+	display: inline-block;
+	display: flex;
+	padding-left: 0px;
+}
+
+.js_slide {
+	overflow-x: hidden !important;
+	overflow-y: scroll !important;
+	flex: 1;
+	height: 90vh;
+	min-width: 100vw;
+	background-size: cover !important;
+	background-position: center !important;
+}
+
+.slide-img {
+	width: 100%;
+}
+
+ul {
+	margin-bottom: 0px;
+}
+
+li {
+	position: relative;
+	display: inline-block;
+	width: 100vw;
+}
+
+#container {
+	overflow-x: hidden !important;
+	overflow-y: hidden !important;
+}
+
+/* SLIDE CONTENT */
 .slide-col {
 	height: 100% !important;
 	padding: 0px !important;
@@ -154,7 +135,7 @@ h6 {
 }
 
 .images {
-	height: 200px;
+	height: 100%;
 	margin-bottom: 15px;
 	width: 100vw;
 	background-size: cover !important;
@@ -189,6 +170,15 @@ h6 {
 	border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
 	display: flex;
 }
+#hero {
+	position: relative;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 40px;
+	text-align: center;
+	color: white;
+}
 
 .loader {
 	position: relative;
@@ -211,15 +201,6 @@ h6 {
 span {
 	pointer-events: none;
 }
-
-.hide {
-	display: none;
-}
-
-.full {
-	height: 100vh !important;
-}
-
 .hero {
 	margin-right: -15px;
 	margin-left: -15px;
@@ -239,23 +220,36 @@ span {
 	color: white;
 }
 
-/* Safari */
-@-webkit-keyframes spin {
-	0% {
-		-webkit-transform: rotate(0deg);
-	}
-	100% {
-		-webkit-transform: rotate(360deg);
-	}
+.hide-cover {
+	animation-name: fadeout;
+	animation-duration: 0.5s;
+	animation-fill-mode: forwards;
+	z-index: 9000;
+	height: 100vh;
+	position: absolute;
+	width: 100vw;
+	background: rgb(0, 0, 0);
+	pointer-events: none;
 }
 
-@keyframes spin {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
-	}
+.show-cover {
+	animation-name: fadein;
+	animation-duration: 0.1s;
+	animation-fill-mode: forwards;
+	z-index: 9000;
+	height: 100vh;
+	position: absolute;
+	width: 100vw;
+	background: rgb(0, 0, 0);
+	pointer-events: none;
+}
+
+.hide {
+	display: none;
+}
+
+.full {
+	height: 100vh !important;
 }
 
 ::-webkit-scrollbar {
@@ -265,31 +259,13 @@ span {
 
 /* layouts */
 
-.layout1 .plugin {
-	padding: 0px;
-	display: inherit;
-}
-
-.node-layout1 .page-header {
-	border-bottom: 0px !important; 
-}
-
+/* 1 */
 .layout1 .plugin-thumbnail {
-	max-width: 100vw;
-	position: relative;
-	padding-bottom: 10px;
-	width: 100vw;
-	border-radius: 0px;
-	height: 30vh;
+	border-radius: 50%;
 }
 
-.layout1 .plugin-title {
-	position: absolute;
-	width: 100vw;
-	background: #3339;
-	bottom: 0px;
-}
 
+/* 2 */
 .node-layout2 .page-header {
 	text-align: center;
 }
@@ -314,19 +290,103 @@ span {
 }
 
 .layout2 .plugin-title {
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    text-align: center;
-    top: 50%;
-    min-height: 56vw;
-    line-height: 56vw;
-    max-height: 56vw;
-    left: 50%;
-    background: #33333380;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	text-align: center;
+	top: 50%;
+	min-height: 56vw;
+	line-height: 56vw;
+	max-height: 56vw;
+	left: 50%;
+	background: #33333380;
+}
+/* 3 */
+.layout5 .plugin {
+	position: relative;
+	min-height: 56vw;
+	padding: 0px;
+	margin-right: -15px;
+	max-height: 56vw;
+	overflow: hidden;
+}
+
+.layout5 .plugin-thumbnail {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border-radius: 0px;
+	width: 100vw;
+	max-width: 100vw;
+	height: 41vw;
+}
+
+.layout5 .plugin-title {
+	position: absolute;
+	width: 100vw;
+	background: #3339;
+	bottom: 0px;
+}
+/* .layout4 .page-header {
+	text-align: center;
+	border-bottom: 0px !important;
+} */
+/* 4 */
+.layout4 .plugin {
+	padding: 0px;
+	display: inherit;
+}
+
+.node-layout4 .page-header {
+	border-bottom: 0px !important;
+}
+
+.layout4 .plugin-thumbnail {
+	max-width: 100vw;
+	position: relative;
+	padding-bottom: 10px;
+	width: 100vw;
+	border-radius: 0px;
+	height: 30vh;
+}
+
+.layout4 .plugin-title {
+	position: absolute;
+	width: 100vw;
+	background: #3339;
+	bottom: 0px;
+}
+/* 5 */
+.layout3 .plugin {
+	position: relative;
+	padding: 0px;
+	margin-right: -15px;
+	min-height: 23.5vw;
+    max-height: 23.5vw;
+	overflow: hidden;
 }
 
 .node-layout3 .page-header {
+	border-bottom: 0px !important;
+}
+
+.layout3 .plugin-thumbnail {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border-radius: 0px;
+	width: 100vw;
+	max-width: 100vw;
+	height: 100%;
+}
+
+.layout3 .plugin-title {
+	width: 100%;
+	height: 100%;
+	z-index: 1;
 	text-align: center;
-	border-bottom: 0px !important; 
+	top: 50%;
+	line-height: 23.5vw;
+	left: 50%;
+	background: #33333380;
 }

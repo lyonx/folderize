@@ -14,6 +14,21 @@ class Page extends Component {
 			backgroundImg: ''
 		};
 	}
+	// ----------------------- LIFECYCLE METHODS ----------------------- //
+
+	// ON MOUNT, MOVE DATA TO STATE
+	componentDidMount() {
+		// this.setState({ data: this.props.data });
+
+		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
+		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('after.lory.slide', this.getOffset);
+	}
+
+	// ------------------------- DATA HANDLING ------------------------- //
 
 	// PLUGIN NAVIGATION HANDLER
 	pluginNav(node) {
@@ -24,6 +39,63 @@ class Page extends Component {
 			title: node.data.title
 		});
 	}
+	// CROPS IMAGES BASED ON LAYOUT
+	cropImg(image, isAction) {
+		if (!image) return;
+		let cropped;
+		let options = {};
+		if (isAction) {
+			let layout = this.props.layout;
+
+			if (layout === 0) {
+				options.width = 50;
+				options.height = 50;
+			}
+			if (layout === 1) {
+				options.width = 50;
+				options.height = 50;
+			}
+			if (layout === 2) {
+				options.width = window.innerWidth;
+				options.height = options.width * 0.54;
+			}
+			if (layout === 4) {
+				options.width = window.innerWidth;
+				options.height = window.innerHeight * 0.3;
+			}
+			if (layout === 3) {
+				options.width = window.innerWidth;
+				options.height = options.width * 0.235;
+			}
+			if (layout === 5) {
+				options.width = window.innerWidth;
+				options.height = options.width * 0.41;
+			}
+			console.warn(layout, options);
+			
+			cropped = buildfire.imageLib.cropImage(image, options);
+		} else {
+			options.width = window.innerWidth;
+			options.height = options.width * 0.54;
+			cropped = buildfire.imageLib.cropImage(image, options);
+		}
+		return cropped;
+	}
+	// HORIZONTAL LAZY LOADING FOR PAGES
+	getOffset() {
+		setTimeout(() => {
+			//
+			let slide = document.querySelector(`#slide${this.props.index}`);
+			if (!slide) return;
+			let x = slide.getBoundingClientRect().x;
+			//
+			this.setState({
+				offset: Math.abs(x)
+			});
+		}, 250);
+	}
+
+	// -------------------------- RENDERING -------------------------- //
 
 	// LOOPS THROUGH THE NODES AND RETURNS ELEMENTS OF THE CORRESPONDING TYPE
 	renderNodes() {
@@ -34,11 +106,11 @@ class Page extends Component {
 			switch (node.type) {
 				case 'header': {
 					let border;
-					node.data.border ? border = '' : border = `border-bottom: 0px !important;`;
+					node.data.border ? (border = '') : (border = `border-bottom: 0px !important;`);
 					nodes.push(
 						// <div className={`col-sm-12  node-layout${node.data.layout}`}>
-						<div className='col-sm-12'>
-							<div className='page-header' style={border}>
+						<div className="col-sm-12">
+							<div className="page-header" style={border}>
 								<h1>{node.data.text}</h1>
 							</div>
 						</div>
@@ -72,8 +144,8 @@ class Page extends Component {
 						nodes.push(
 							<div className="col-sm-12">
 								<div className="image-wrap">
-									<Lazyload offsetHorizontal={50} height={200}>
-										<div className="images" style={`background: url(${node.data.src})`} />
+									<Lazyload offsetHorizontal={50} height={window.innerWidth * 0.54}>
+										<div className="images" style={`background: url(${this.cropImg(node.data.src, false)})`} />
 									</Lazyload>
 								</div>
 							</div>
@@ -95,19 +167,17 @@ class Page extends Component {
 				}
 				case 'action': {
 					if (!node.data) return;
-					let croppedImg = this.cropImg(node.data.iconUrl);
+					let croppedImg = this.cropImg(node.data.iconUrl, true);
 					nodes.push(
 						<div className="col-sm-12">
 							<div
 								className="plugin"
 								onClick={e => {
-									
 									buildfire.actionItems.execute(node.data, (err, res) => {
 										if (err) throw err;
-										
 									});
 								}}>
-								<img className="plugin-thumbnail backgroundColorTheme" src={`${croppedImg}`} alt="..." />
+								<img className="plugin-thumbnail" src={`${croppedImg}`} alt="..." />
 								<h3 className="plugin-title">{node.data.title}</h3>
 							</div>
 						</div>
@@ -138,50 +208,6 @@ class Page extends Component {
 		return nodes;
 	}
 
-	cropImg(image) {
-		if (!image) return;
-		let options = {};
-		let layout = this.props.layout;
-		
-		if (layout === 0) {
-			options.width = 50;
-			options.height = 50;
-		}
-		if (layout === 1 || layout === 2) {
-			options.width = window.innerWidth;
-			options.height = options.width * 9 / 16;
-		}
-		
-		let cropped = buildfire.imageLib.cropImage(image, options);
-
-		return cropped;
-	}
-
-	getOffset() {
-		setTimeout(() => {
-			// 
-			let slide = document.querySelector(`#slide${this.props.index}`);
-			if (!slide) return;
-			let x = slide.getBoundingClientRect().x;
-			// 
-			this.setState({
-				offset: Math.abs(x)
-			});
-		}, 250);
-	}
-
-	// ON MOUNT, MOVE DATA TO STATE
-	componentDidMount() {
-		// this.setState({ data: this.props.data });
-
-		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
-		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
-	}
-
-	componentWillUnmount() {
-		document.removeEventListener('after.lory.slide', this.getOffset);
-	}
-
 	render() {
 		let content = (
 			<div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
@@ -190,7 +216,7 @@ class Page extends Component {
 		);
 		return (
 			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={this.props.data.backgroundImg ? `background: url("${this.props.data.backgroundImg}")` : null}>
-			{/* if the page is not next up or not currently in the viewport, dont render its content */}
+				{/* if the page is not next up or not currently in the viewport, dont render its content */}
 				{this.state.offset > window.innerWidth + 100 ? null : content}
 			</li>
 		);

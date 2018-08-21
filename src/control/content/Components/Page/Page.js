@@ -39,13 +39,10 @@ class Page extends Component {
 		};
 	}
 
-	// ------------------------- DATA HANDLING ------------------------- //
+	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
-	// ON MOUNT...
+	// ON MOUNT INIT SORTABLE NODE LIST 
 	componentDidMount() {
-		console.count(`page ${this.props.index} MOUNT`);
-		console.warn(this.state, this.props);
-
 		// Unknown bug caused main panel to render with the wrong attributes
 		let panel = document.getElementById(`panel${this.props.index}`);
 		if (panel.getAttribute('data-toggle') === 'show') {
@@ -53,24 +50,20 @@ class Page extends Component {
 			panel.classList.replace('panel-show', 'panel-hide');
 		}
 
-
 		let title = '';
 		this.props.data.title.length > 0 ? (title = this.props.data.title) : (title = 'untitled');
 
-		this.setState({
-			// index: this.props.index,
-			// title: title,
-			// nodes: this.props.data.nodes,
-			// backgroundColor: this.props.data.backgroundColor,
-			// backgroundImg: this.props.data.backgroundImg,
-			// iconUrl: this.props.data.iconUrl,
-			// backgroundCSS: this.props.data.backgroundColor != false ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : false,
-			tutorials: this.props.tutorials
-		});
-
+		this.setState({ tutorials: this.props.tutorials });
 		this.initEditor();
 	}
+	// ON UPDATE, REFRESH THE SORTABLE NODE LIST'S DATA
+	componentDidUpdate() {
+		this.editor.loadItems(this.props.data.nodes, false);
+	}
 
+	// ------------------------- DATA HANDLING ------------------------- //
+
+	// SET UP THE SORTABLE NODE LIST
 	initEditor() {
 		let navigationCallback = e => {
 			let target = this.props.data.nodes.filter(node => {
@@ -94,193 +87,11 @@ class Page extends Component {
 			this.reorderNodes(this.props.index, this.editor.items);
 		};
 	}
-
-	componentDidUpdate() {
-		console.warn(this.state, this.props);
-		console.log(this.props.data.title, this.state.title);
-		this.editor.loadItems(this.props.data.nodes, false);
-	}
-
-	// USED TO EDIT NODES
-	// handleNodeChange(event, index, attr, type) {
-	// 	if (!type) type = 'none';
-	// 	let nodes = this.props.data.nodes;
-	// 	let node = this.props.data.nodes[index];
-	// 	switch (attr) {
-	// 		case 'text': {
-	// 			node.data.text = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'src': {
-	// 			switch (node.type) {
-	// 				case 'plugin': {
-	// 					node.data.iconUrl = event;
-	// 					break;
-	// 				}
-	// 				case 'image': {
-	// 					node.data.src = event;
-	// 					break;
-	// 				}
-	// 				case 'hero': {
-	// 					node.data.src = event;
-	// 					break;
-	// 				}
-	// 				case 'action': {
-	// 					node.data.iconUrl = event;
-	// 					break;
-	// 				}
-	// 				default:
-	// 					return;
-	// 			}
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'delete': {
-	// 			// let confirm = window.confirm("Are you sure? Item will be lost!");
-
-	// 			buildfire.notifications.confirm(
-	// 				{
-	// 					title: 'Remove Node',
-	// 					message: 'Are you sure? Node will be lost!'
-	// 					// buttonLabels: ['delete', 'cancel']
-	// 				},
-	// 				(err, result) => {
-	// 					if (err) {
-	// 						if (typeof err == 'boolean') {
-	// 							nodes.splice(index, 1);
-	// 							this.setState({
-	// 								nodes
-	// 							});
-	// 							setTimeout(() => {
-	// 								document.querySelector(`#page${this.props.index}node${index}`).click();
-	// 							}, 100);
-	// 							this.update();
-	// 						} else {
-	// 							throw err;
-	// 						}
-	// 					} else {
-	// 						if (result.selectedButton.key === 'confirm') {
-	// 							nodes.splice(index, 1);
-	// 							this.setState({
-	// 								nodes
-	// 							});
-	// 							setTimeout(() => {
-	// 								document.querySelector(`#page${this.props.index}node${index}`).click();
-	// 							}, 1000);
-	// 							this.update();
-	// 						}
-	// 					}
-	// 				}
-	// 			);
-	// 			break;
-	// 		}
-	// 		case 'plugin': {
-	// 			node.data.title = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'action': {
-	// 			node.data.title = `Action Item: ${event.target.value}`;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'icon': {
-	// 			node.data.iconUrl = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'hero-header': {
-	// 			node.data.header = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'hero-subtext': {
-	// 			node.data.subtext = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'hero-button': {
-	// 			//
-	// 			node.data.showButton = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'layout': {
-	// 			node.data.layout = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'header': {
-	// 			switch (type) {
-	// 				case 'border':
-	// 					node.data.border = event.target.checked;
-	// 					nodes[index] = node;
-	// 					this.setState({
-	// 						nodes
-	// 					});
-	// 					this.update();
-	// 					break;
-	// 				// case 'fontSize': {
-	// 				// 	node.data.fontSize = event.target.value;
-	// 				// nodes[index] = node;
-	// 				// this.setState({
-	// 				// 	nodes
-	// 				// });
-	// 				// this.update();
-	// 				// 	break;
-	// 				// }
-	// 				default:
-	// 					break;
-	// 			}
-	// 			break;
-	// 		}
-	// 		default:
-	// 			return;
-	// 	}
-	// }
-
+	// OPEN THE LAST NODE ADDED
 	openLast() {
 		let n = this.props.data.nodes.length - 1;
 		document.querySelector(`#page${this.props.index}node${n}`).click();
 	}
-
 	// DELETES THIS PAGE
 	delete() {
 		buildfire.notifications.confirm(
@@ -297,6 +108,7 @@ class Page extends Component {
 						throw err;
 					}
 				} else {
+					if (!result) return;
 					if (result.selectedButton.key === 'confirm') {
 						this.deletePage(this.props.index);
 					}
@@ -304,7 +116,6 @@ class Page extends Component {
 			}
 		);
 	}
-
 	// PIPES CURRENT STATE TO CONTROL'S STATE, UPDATES PAGE AT THIS INDEX
 	update(updateAll, target) {
 		if (!updateAll) {
@@ -336,7 +147,6 @@ class Page extends Component {
 			this.updatePage(this.props.index, data, true);
 		}
 	}
-
 	// USED TO TOGGLE MODALS OR PANELS
 	toggle(e, type) {
 		if (!e.target.id) return;
@@ -383,7 +193,6 @@ class Page extends Component {
 				break;
 		}
 	}
-
 	// USED TO TOGGLE A SPECIAL MODAL FOR PLUGINS AND ACTION NODE CREATION
 	toggleModal(index, target, toggle) {
 		if (toggle === 'show') {
@@ -392,7 +201,7 @@ class Page extends Component {
 			document.getElementById(`${target}${index}`).classList.replace('panel-show', 'panel-hide');
 		}
 	}
-
+	// HANDLES TUTORIAL DISPLAY
 	toggleTutorials(control) {
 		switch (control) {
 			case 'on':
@@ -583,11 +392,7 @@ class Page extends Component {
 									<div className="tab">
 										<label>Full screen {'  '}</label>
 
-										<input
-											type="checkbox"
-											id={`${node.instanceId}`}
-											onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)}
-										/>
+										<input type="checkbox" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} />
 									</div>
 									<div className="panel-hide">
 										{setTimeout(() => {
