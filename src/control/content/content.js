@@ -10,6 +10,7 @@ class Content extends Component {
 		this.deletePage = this.deletePage.bind(this);
 		this.updatePage = this.updatePage.bind(this);
 		this.handleChange = this.handleChange.bind(this);
+		this.handleNodeChange = this.handleNodeChange.bind(this);
 		this.addNode = this.addNode.bind(this);
 		this.addImg = this.addImg.bind(this);
 		this.colorPicker = this.colorPicker.bind(this);
@@ -101,13 +102,9 @@ class Content extends Component {
 	// USED BY THE PAGES TO DELETE THEMSELVES
 	deletePage(index) {
 		let settings = this.state.settings;
-		// let pages = this.state.settings.pages;
 		settings.pages.splice(index, 1);
-		console.log(settings);
-
-		this.setState({
-			settings
-		});
+		document.querySelector(`#tab${index}`).click();
+		this.setState({ settings });
 	}
 	// USED BY THE PAGES TO UPDATE THEIR DATA IN CONTENT STATE
 	updatePage(index, page, updateAll) {
@@ -259,6 +256,164 @@ class Content extends Component {
 		});
 	}
 
+	handleNodeChange(event, index, attr, type, pageIndex) {
+		if (!type) type = 'none';
+		let settings = this.state.settings;
+		let page = settings.pages[pageIndex];
+		let nodes = page.nodes;
+		let node = nodes[index];
+		switch (attr) {
+			case 'text': {
+				node.data.text = event.target.value;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			// combine these
+			case 'src': {
+				switch (node.type) {
+					case 'plugin': {
+						node.data.iconUrl = event;
+						this.setState({	settings });
+						break;
+					}
+					case 'image': {
+						node.data.src = event;
+						this.setState({	settings });
+						break;
+					}
+					case 'hero': {
+						node.data.src = event;
+						this.setState({	settings });
+						break;
+					}
+					case 'action': {
+						node.data.iconUrl = event;
+						this.setState({	settings });
+						break;
+					}
+					default:
+						return;
+				}
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'img': {
+				if (event.target.checked) {
+					node.format = 'hero';
+					node.data.header = node.data.header || 'header';
+					node.data.subtext = node.data.subtext || 'subtext';
+					nodes[index] = node;
+					this.setState({	settings });
+				} else {
+					node.format = 'image';
+					nodes[index] = node;
+					this.setState({	settings });
+				}
+				break;
+			}
+			case 'delete': {
+				// let confirm = window.confirm("Are you sure? Item will be lost!");
+
+				buildfire.notifications.confirm(
+					{
+						title: 'Remove Node',
+						message: 'Are you sure? Node will be lost!'
+						// buttonLabels: ['delete', 'cancel']
+					},
+					(err, result) => {
+						if (err) {
+							if (typeof err == 'boolean') {
+								nodes.splice(index, 1);
+								this.setState({	settings });
+								// setTimeout(() => {
+									// document.querySelector(`#page${pageIndex}node${index}`).click();
+								// }, 100);
+							} else {
+								throw err;
+							}
+						} else {
+							if (result.selectedButton.key === 'confirm') {
+								nodes.splice(index, 1);
+								this.setState({	settings });
+								// setTimeout(() => {
+								// 	document.querySelector(`#page${pageIndex}node${index}`).click();
+								// }, 1000);
+							}
+						}
+					}
+				);
+				break;
+			}
+			case 'plugin': {
+				node.data.title = event.target.value;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'action': {
+				node.data.title = `Action Item: ${event.target.value}`;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'icon': {
+				node.data.iconUrl = event.target.value;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'hero-header': {
+				node.data.header = event.target.value;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'hero-subtext': {
+				node.data.subtext = event.target.value;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'hero-button': {
+				node.data.showButton = event.target.value;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'layout': {
+				node.data.layout = event.target.value;
+				nodes[index] = node;
+				this.setState({	settings });
+				break;
+			}
+			case 'header': {
+				switch (type) {
+					case 'border':
+						node.data.border = event.target.checked;
+						nodes[index] = node;
+						this.setState({	settings });
+						break;
+					// case 'fontSize': {
+					// 	node.data.fontSize = event.target.value;
+					// nodes[index] = node;
+					// this.setState({
+					// 	nodes
+					// });
+					// this.update();
+					// 	break;
+					// }
+					default:
+						break;
+				}
+				break;
+			}
+			default:
+				return;
+		}
+	}
+
 	// OPENS IMAGELIB DIALOG WITH SPECIFIC TARGET
 	addImg(control, nodeIndex, pageIndex, remove) {
 		if (!remove) remove = false;
@@ -300,7 +455,7 @@ class Content extends Component {
 			}
 			case 'icon': {
 				if (remove) {
-					settings.pages[pageIndex].iconUrl = "";
+					settings.pages[pageIndex].iconUrl = '';
 					this.setState({ settings });
 					return;
 				}
@@ -425,7 +580,7 @@ class Content extends Component {
 			case 'action': {
 				buildfire.actionItems.showDialog({}, { showIcon: true }, (err, res) => {
 					if (err) throw err;
-					
+
 					// let nodes = this.state.nodes;
 					let title = res.title ? res.title : 'Untitled';
 					nodes.push({
@@ -541,7 +696,7 @@ class Content extends Component {
 		let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
 		this.state.settings.pages.map((page, index) => {
-			pages.push(<Page key={index} index={index} tutorials={tutorials} handleChange={this.handleChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
+			pages.push(<Page key={index} index={index} tutorials={tutorials} handleChange={this.handleChange} handleNodeChange={this.handleNodeChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
 

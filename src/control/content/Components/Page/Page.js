@@ -10,6 +10,7 @@ class Page extends Component {
 		this.update = this.update.bind(this);
 		this.reorderNodes = props.reorderNodes;
 		this.handleChange = props.handleChange;
+		this.handleNodeChange = props.handleNodeChange;
 		this.colorPicker = props.colorPicker;
 		this.delete = this.delete.bind(this);
 		this.initEditor = this.initEditor.bind(this);
@@ -51,20 +52,19 @@ class Page extends Component {
 			panel.setAttribute('data-toggle', 'hide');
 			panel.classList.replace('panel-show', 'panel-hide');
 		}
-		// this.state.backgroundColor ? (this.state.backgroundColor.colorType === 'solid' ? this.setState({ backgroundCSS: this.state.backgroundColor.solid.backgroundCSS }) : this.setState({ backgroundCSS: this.state.backgroundColor.gradient.backgroundCSS })) : null;
-		// MOVE DATA TO STATE
+
 
 		let title = '';
 		this.props.data.title.length > 0 ? (title = this.props.data.title) : (title = 'untitled');
 
 		this.setState({
-			index: this.props.index,
-			title: title,
-			nodes: this.props.data.nodes,
-			backgroundColor: this.props.data.backgroundColor,
-			backgroundImg: this.props.data.backgroundImg,
-			iconUrl: this.props.data.iconUrl,
-			backgroundCSS: this.props.data.backgroundColor != false ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : false,
+			// index: this.props.index,
+			// title: title,
+			// nodes: this.props.data.nodes,
+			// backgroundColor: this.props.data.backgroundColor,
+			// backgroundImg: this.props.data.backgroundImg,
+			// iconUrl: this.props.data.iconUrl,
+			// backgroundCSS: this.props.data.backgroundColor != false ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : false,
 			tutorials: this.props.tutorials
 		});
 
@@ -102,264 +102,184 @@ class Page extends Component {
 	}
 
 	// USED TO EDIT NODES
-	handleNodeChange(event, index, attr, type) {
-		if (!type) type = 'none';
-		let nodes = this.props.data.nodes;
-		let node = this.props.data.nodes[index];
-		switch (attr) {
-			case 'text': {
-				node.data.text = event.target.value;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'src': {
-				switch (node.type) {
-					case 'plugin': {
-						node.data.iconUrl = event;
-						break;
-					}
-					case 'image': {
-						node.data.src = event;
-						break;
-					}
-					case 'hero': {
-						node.data.src = event;
-						break;
-					}
-					case 'action': {
-						node.data.iconUrl = event;
-						break;
-					}
-					default:
-						return;
-				}
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'delete': {
-				// let confirm = window.confirm("Are you sure? Item will be lost!");
-
-				buildfire.notifications.confirm(
-					{
-						title: 'Remove Node',
-						message: 'Are you sure? Node will be lost!'
-						// buttonLabels: ['delete', 'cancel']
-					},
-					(err, result) => {
-						if (err) {
-							if (typeof err == 'boolean') {
-								nodes.splice(index, 1);
-								this.setState({
-									nodes
-								});
-								setTimeout(() => {
-									document.querySelector(`#page${this.props.index}node${index}`).click();
-								}, 100);
-								this.update();
-							} else {
-								throw err;
-							}
-						} else {
-							if (result.selectedButton.key === 'confirm') {
-								nodes.splice(index, 1);
-								this.setState({
-									nodes
-								});
-								setTimeout(() => {
-									document.querySelector(`#page${this.props.index}node${index}`).click();
-								}, 1000);
-								this.update();
-							}
-						}
-					}
-				);
-				break;
-			}
-			case 'plugin': {
-				node.data.title = event.target.value;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'action': {
-				node.data.title = `Action Item: ${event.target.value}`;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'icon': {
-				node.data.iconUrl = event.target.value;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'hero-header': {
-				node.data.header = event.target.value;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'hero-subtext': {
-				node.data.subtext = event.target.value;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'hero-button': {
-				//
-				node.data.showButton = event.target.value;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'layout': {
-				node.data.layout = event.target.value;
-				nodes[index] = node;
-				this.setState({
-					nodes
-				});
-				this.update();
-				break;
-			}
-			case 'header': {
-				switch (type) {
-					case 'border':
-						node.data.border = event.target.checked;
-						nodes[index] = node;
-						this.setState({
-							nodes
-						});
-						this.update();
-						break;
-					// case 'fontSize': {
-					// 	node.data.fontSize = event.target.value;
-					// nodes[index] = node;
-					// this.setState({
-					// 	nodes
-					// });
-					// this.update();
-					// 	break;
-					// }
-					default:
-						break;
-				}
-				break;
-			}
-			default:
-				return;
-		}
-	}
-
-	openLast() {
-		let n = this.state.nodes.length - 1;
-		document.querySelector(`#page${this.props.index}node${n}`).click();
-	}
-
-	// // OPENS IMAGELIB DIALOG WITH SPECIFIC TARGET
-	// addImg(control, index) {
-	// 	switch (control) {
-	// 		case 'background': {
-	// 			buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-	// 				if (err) throw err;
-	// 				this.setState({ backgroundImg: res.selectedFiles[0] });
-	// 				this.update();
+	// handleNodeChange(event, index, attr, type) {
+	// 	if (!type) type = 'none';
+	// 	let nodes = this.props.data.nodes;
+	// 	let node = this.props.data.nodes[index];
+	// 	switch (attr) {
+	// 		case 'text': {
+	// 			node.data.text = event.target.value;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
 	// 			});
+	// 			this.update();
+	// 			break;
+	// 		}
+	// 		case 'src': {
+	// 			switch (node.type) {
+	// 				case 'plugin': {
+	// 					node.data.iconUrl = event;
+	// 					break;
+	// 				}
+	// 				case 'image': {
+	// 					node.data.src = event;
+	// 					break;
+	// 				}
+	// 				case 'hero': {
+	// 					node.data.src = event;
+	// 					break;
+	// 				}
+	// 				case 'action': {
+	// 					node.data.iconUrl = event;
+	// 					break;
+	// 				}
+	// 				default:
+	// 					return;
+	// 			}
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
+	// 			});
+	// 			this.update();
+	// 			break;
+	// 		}
+	// 		case 'delete': {
+	// 			// let confirm = window.confirm("Are you sure? Item will be lost!");
+
+	// 			buildfire.notifications.confirm(
+	// 				{
+	// 					title: 'Remove Node',
+	// 					message: 'Are you sure? Node will be lost!'
+	// 					// buttonLabels: ['delete', 'cancel']
+	// 				},
+	// 				(err, result) => {
+	// 					if (err) {
+	// 						if (typeof err == 'boolean') {
+	// 							nodes.splice(index, 1);
+	// 							this.setState({
+	// 								nodes
+	// 							});
+	// 							setTimeout(() => {
+	// 								document.querySelector(`#page${this.props.index}node${index}`).click();
+	// 							}, 100);
+	// 							this.update();
+	// 						} else {
+	// 							throw err;
+	// 						}
+	// 					} else {
+	// 						if (result.selectedButton.key === 'confirm') {
+	// 							nodes.splice(index, 1);
+	// 							this.setState({
+	// 								nodes
+	// 							});
+	// 							setTimeout(() => {
+	// 								document.querySelector(`#page${this.props.index}node${index}`).click();
+	// 							}, 1000);
+	// 							this.update();
+	// 						}
+	// 					}
+	// 				}
+	// 			);
 	// 			break;
 	// 		}
 	// 		case 'plugin': {
-	// 			buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-	// 				if (err) throw err;
-	// 				// this.setState({ backgroundImg: res.selectedFiles[0] });
-	// 				// this.update();
-	// 				this.handleNodeChange(res.selectedFiles[0], index, 'src');
+	// 			node.data.title = event.target.value;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
 	// 			});
+	// 			this.update();
 	// 			break;
 	// 		}
 	// 		case 'action': {
-	// 			buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-	// 				if (err) throw err;
-	// 				// this.setState({ backgroundImg: res.selectedFiles[0] });
-	// 				// this.update();
-	// 				this.handleNodeChange(res.selectedFiles[0], index, 'src');
+	// 			node.data.title = `Action Item: ${event.target.value}`;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
 	// 			});
+	// 			this.update();
 	// 			break;
 	// 		}
 	// 		case 'icon': {
-	// 			buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
-	// 				if (err) throw err;
-	// 				this.setState({ iconUrl: res.selectedIcons[0] });
-
-	// 				this.update();
-	// 				// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
+	// 			node.data.iconUrl = event.target.value;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
 	// 			});
+	// 			this.update();
 	// 			break;
 	// 		}
-	// 		case 'hero': {
-	// 			buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
-	// 				if (err) throw err;
-	// 				// this.setState({ iconUrl: res.selectedIcons[0] });
-	// 				this.handleNodeChange(res.selectedFiles[0], index, 'src');
+	// 		case 'hero-header': {
+	// 			node.data.header = event.target.value;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
+	// 			});
+	// 			this.update();
+	// 			break;
+	// 		}
+	// 		case 'hero-subtext': {
+	// 			node.data.subtext = event.target.value;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
+	// 			});
+	// 			this.update();
+	// 			break;
+	// 		}
+	// 		case 'hero-button': {
+	// 			//
+	// 			node.data.showButton = event.target.value;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
+	// 			});
+	// 			this.update();
+	// 			break;
+	// 		}
+	// 		case 'layout': {
+	// 			node.data.layout = event.target.value;
+	// 			nodes[index] = node;
+	// 			this.setState({
+	// 				nodes
+	// 			});
+	// 			this.update();
+	// 			break;
+	// 		}
+	// 		case 'header': {
+	// 			switch (type) {
+	// 				case 'border':
+	// 					node.data.border = event.target.checked;
+	// 					nodes[index] = node;
+	// 					this.setState({
+	// 						nodes
+	// 					});
+	// 					this.update();
+	// 					break;
+	// 				// case 'fontSize': {
+	// 				// 	node.data.fontSize = event.target.value;
+	// 				// nodes[index] = node;
+	// 				// this.setState({
+	// 				// 	nodes
+	// 				// });
 	// 				// this.update();
-	// 				// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
-	// 			});
+	// 				// 	break;
+	// 				// }
+	// 				default:
+	// 					break;
+	// 			}
 	// 			break;
 	// 		}
-	// 		default: {
-	// 			let target = this.props.data.nodes[index];
-	// 			buildfire.imageLib.showDialog({}, (err, result) => {
-	// 				if (err) throw err;
-	// 				if (result.selectedFiles.length === 0) return;
-	// 				this.handleNodeChange(result.selectedFiles[0], index, 'src');
-	// 			});
-	// 		}
+	// 		default:
+	// 			return;
 	// 	}
 	// }
 
-	// OPENS COLOR PICKER WITH SPECIFIC TARGET
-	// colorPicker(attr) {
-	// 	buildfire.colorLib.showDialog(this.state.backgroundColor, {}, null, (err, res) => {
-	// 		if (err) throw err;
-	// 		let bgCSS;
-	// 		switch (res.colorType) {
-	// 			case 'solid': {
-	// 				bgCSS = res.solid.backgroundCSS;
-	// 				break;
-	// 			}
-	// 			case 'gradient': {
-	// 				bgCSS = res.gradient.backgroundCSS;
-	// 				break;
-	// 			}
-	// 		}
-	// 		this.setState({ [attr]: res, backgroundCSS: bgCSS });
-	// 		this.update();
-	// 	});
-	// }
+	openLast() {
+		let n = this.props.data.nodes.length - 1;
+		document.querySelector(`#page${this.props.index}node${n}`).click();
+	}
 
 	// DELETES THIS PAGE
 	delete() {
@@ -536,7 +456,7 @@ class Page extends Component {
 								<div className="panel-body nodepanel">
 									<h4>Header Text</h4>
 									<div className="input-group">
-										<input type="text" className="form-control" name="heading" aria-describedby="sizing-addon2" value={node.data.text} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text')} />
+										<input type="text" className="form-control" name="heading" aria-describedby="sizing-addon2" value={node.data.text} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text', false, this.props.index)} />
 									</div>
 									{/* <form>
 										<input
@@ -553,7 +473,7 @@ class Page extends Component {
 											type="checkbox"
 											name="show-border"
 											onChange={e => {
-												this.handleNodeChange(e, index, 'header', 'border');
+												this.handleNodeChange(e, index, 'header', 'border', this.props.index);
 											}}
 											checked={node.data.border}
 										/>
@@ -566,7 +486,7 @@ class Page extends Component {
 											{'  '}
 											Done
 										</button>
-										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete', false, this.props.index)}>
 											<span className="glyphicon glyphicon-alert" />
 											{'  '}
 											Remove
@@ -611,7 +531,7 @@ class Page extends Component {
 											name="desc"
 											aria-describedby="sizing-addon2"
 											value={node.data.text}
-											onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text')}
+											onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'text', false, this.props.index)}
 										/>
 									</div>
 									<div className="tab">
@@ -621,7 +541,7 @@ class Page extends Component {
 											{'  '}
 											Done
 										</button>
-										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete', false, this.props.index)}>
 											<span className="glyphicon glyphicon-alert" />
 											{'  '}
 											Remove
@@ -666,33 +586,7 @@ class Page extends Component {
 										<input
 											type="checkbox"
 											id={`${node.instanceId}`}
-											onChange={e => {
-												//
-												if (e.target.checked) {
-													let nodes = this.state.nodes;
-													// node.type = 'hero';
-													// node.title = 'hero';
-													node.format = 'hero';
-													node.data.header = node.data.header || 'header';
-													node.data.subtext = node.data.subtext || 'subtext';
-													//
-													nodes[this.state.nodes.indexOf(node)] = node;
-													this.setState({ nodes });
-													this.update();
-													// this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete');
-												} else {
-													let nodes = this.state.nodes;
-													// node.type = 'hero';
-													// node.title = 'hero';
-													node.format = 'image';
-													// node.data.header = '';
-													// node.data.subtext = '';
-													//
-													nodes[this.state.nodes.indexOf(node)] = node;
-													this.setState({ nodes });
-													this.update();
-												}
-											}}
+											onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)}
 										/>
 									</div>
 									<div className="panel-hide">
@@ -707,10 +601,10 @@ class Page extends Component {
 									{node.format === 'hero' ? (
 										<div>
 											<div className="input-group">
-												<input type="text" className="form-control" name="header" aria-describedby="sizing-addon2" value={node.data.header} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-header')} />
+												<input type="text" className="form-control" name="header" aria-describedby="sizing-addon2" value={node.data.header} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-header', false, this.props.index)} />
 											</div>
 											<div className="input-group">
-												<input type="text" className="form-control" name="subtext" aria-describedby="sizing-addon2" value={node.data.subtext} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-subtext')} />
+												<input type="text" className="form-control" name="subtext" aria-describedby="sizing-addon2" value={node.data.subtext} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-subtext', false, this.props.index)} />
 											</div>
 										</div>
 									) : (
@@ -724,7 +618,7 @@ class Page extends Component {
 											Done
 										</button>
 
-										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete', false, this.props.index)}>
 											<span className="glyphicon glyphicon-alert" />
 											{'  '}
 											Remove
@@ -757,7 +651,7 @@ class Page extends Component {
 									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg(null, this.props.data.nodes.indexOf(node), this.props.index)} />
 									{/* <h3 className="plugin-title">{node.data.title}</h3> */}
 									<div className="input-group tab-toggle" style="margin-left:15px;">
-										<input type="text" className="plugin-title form-control" name="plugin" aria-describedby="sizing-addon2" value={node.data.title} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'plugin')} />
+										<input type="text" className="plugin-title form-control" name="plugin" aria-describedby="sizing-addon2" value={node.data.title} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'plugin', false, this.props.index)} />
 									</div>
 								</div>
 								<hr />
@@ -765,7 +659,7 @@ class Page extends Component {
 									<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 										{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
 									</button>
-									<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, index, 'delete')}>
+									<button className="btn btn-danger tab-toggle" onClick={e => this.handleNodeChange(e, index, 'delete', false, this.props.index)}>
 										<span className="glyphicon glyphicon-alert" />
 										{'  '}
 										Remove
@@ -802,7 +696,7 @@ class Page extends Component {
 												let prevImg = localStorage.getItem(`prevImg${node.instanceId}`);
 
 												if (prevImg) {
-													this.handleNodeChange(prevImg, index, 'src');
+													this.handleNodeChange(prevImg, index, 'src', false, this.props.index);
 												} else {
 													this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index);
 												}
@@ -890,73 +784,10 @@ class Page extends Component {
 											{'  '}
 											Edit
 										</button>
-										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, index, 'delete')}>
+										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, index, 'delete', false, this.props.index)}>
 											<span className="glyphicon glyphicon-alert" />
 											{'  '}
 											Remove
-										</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					);
-					break;
-				}
-				case 'hero': {
-					nodes.push(
-						<div>
-							<div className="panel panel-default" style={'display:none'}>
-								<div className="panel-heading tab">
-									<h3 className="panel-title tab-title">Hero</h3>
-									<div className="toggle-group">
-										<button className="btn btn-success tab-toggle" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
-											{document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'}
-										</button>
-									</div>
-								</div>
-							</div>
-							<div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}nodepanel${index}`}>
-								<div
-									className="backdrop"
-									id={`page${this.props.index}node${index}`}
-									index={`${index}`}
-									page={`${this.props.index}`}
-									onClick={e => {
-										this.toggle(e, 'node');
-									}}
-								/>
-								<div className="panel-body nodepanel" data-toggle="hide" id={`page${this.props.index}nodepanel${index}`}>
-									<div className="input-group">
-										<input type="text" className="form-control" name="header" aria-describedby="sizing-addon2" value={node.data.header} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-header')} />
-									</div>
-									<div className="input-group">
-										<input type="text" className="form-control" name="subtext" aria-describedby="sizing-addon2" value={node.data.subtext} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'hero-subtext')} />
-									</div>
-									<input
-										type="checkbox"
-										id={`${node.instanceId}`}
-										onChange={e => {
-											//
-											if (e.target.checked) {
-												let nodes = this.state.nodes;
-												node.type = 'hero';
-												node.title = 'hero';
-												node.data.header = 'header';
-												node.data.subtext = 'subtext';
-												//
-												nodes[this.state.nodes.indexOf(node)] = node;
-												this.setState({ nodes });
-												this.update();
-												// this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete');
-											}
-										}}
-									/>
-									<div className="tab">
-										<button className="btn btn-success tab-toggle" onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node), this.props.index)}>
-											Change Image
-										</button>
-										<button className="btn btn-danger" onClick={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'delete')}>
-											X
 										</button>
 									</div>
 								</div>
@@ -1081,8 +912,6 @@ class Page extends Component {
 														<button
 															className="btn btn-danger"
 															onClick={() => {
-																// this.setState({ backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } }, backgroundCSS: false });
-																// this.update();
 																this.colorPicker('backgroundColor', this.props.index, true);
 															}}>
 															Remove
