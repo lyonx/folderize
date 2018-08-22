@@ -319,9 +319,9 @@ class Widget extends Component {
 	}
 
 	render() {
-		let dotNav = <ul key={Date.now()} className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" />;
+		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" />;
 		return (
-			<div key={Date.now()} className="backgroundColor" id="container foo backgroundColor">
+			<div className="backgroundColor" id="container foo backgroundColor">
 				<div id="cover" className="hide-cover">
 					<div className="loader" />
 				</div>

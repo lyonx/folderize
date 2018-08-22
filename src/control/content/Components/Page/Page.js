@@ -98,7 +98,7 @@ class Page extends Component {
 			{
 				title: 'Remove Page',
 				message: 'Are you sure? Page will be lost!',
-				buttonLabels: ['cancel', 'delete']
+				buttonLabels: ['delete', 'cancel']
 			},
 			(err, result) => {
 				if (err) {
@@ -625,7 +625,7 @@ class Page extends Component {
 			</div>
 		);
 		return (
-			<div id={Date.now()}>
+			<div>
 				<div className="panel panel-default no-border">
 					<div className="panel-heading tab panel-hide">
 						<div className="toggle-group">
