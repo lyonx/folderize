@@ -22,10 +22,12 @@ class Content extends Component {
 
 		this.editor = {};
 		this.state = {
-			tutorials: false,
+			// tutorials: false,
 			settings: {
 				pages: [],
 				options: {
+					backgroundImg: '',
+					backgroundLrg: '',
 					renderTitlebar: true,
 					navPosition: 'top',
 					layout: 0
@@ -38,6 +40,8 @@ class Content extends Component {
 
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
+		// this.debugDB();
+		// debugger
 		this.initSortable();
 
 		// this.debugDB();
@@ -48,39 +52,40 @@ class Content extends Component {
 			//
 
 			if (!response.id) {
-				this.setState({
-					settings: {
-						pages: [
-							{
-								title: 'new page',
-								id: Date.now(),
-								customizations: [],
-								backgroundColor: {
-									colorType: false,
-									solid: {
-										backgroundCSS: ''
-									},
-									gradient: {
-										backgroundCSS: ''
-									}
-								},
-								nodes: [
-									{
-										type: 'header',
-										data: {
-											text: 'new page'
-										}
-									}
-								]
-							}
-						],
-						options: {
-							showTitleBar: false,
-							navPosition: 'top',
-							colorOverrides: []
-						}
-					}
-				});
+				this.addPage();
+				// this.setState({
+				// 	settings: {
+				// 		pages: [
+				// 			{
+				// 				title: 'new page',
+				// 				id: Date.now(),
+				// 				customizations: [],
+				// 				backgroundColor: {
+				// 					colorType: false,
+				// 					solid: {
+				// 						backgroundCSS: ''
+				// 					},
+				// 					gradient: {
+				// 						backgroundCSS: ''
+				// 					}
+				// 				},
+				// 				nodes: [
+				// 					{
+				// 						type: 'header',
+				// 						data: {
+				// 							text: 'new page'
+				// 						}
+				// 					}
+				// 				]
+				// 			}
+				// 		],
+				// 		options: {
+				// 			showTitleBar: false,
+				// 			navPosition: 'top',
+				// 			colorOverrides: []
+				// 		}
+				// 	}
+				// });
 			} else {
 				// otherwise, if all pages have been removed, insert default data
 				if (response.data.settings.pages.length === 0) {
@@ -96,28 +101,134 @@ class Content extends Component {
 				}
 			}
 		});
-		let tutorials = localStorage.getItem('tutorial');
-		if (tutorials === 'true') {
-			let tutorials = this.state.tutorials;
-			tutorials = true;
-			this.setState({
-				tutorials
-			});
-		} else {
-			let tutorials = this.state.tutorials;
-			tutorials = false;
-			this.setState({
-				tutorials
-			});
-		}
+		// let tutorials = localStorage.getItem('tutorial');
+		// if (tutorials === 'true') {
+		// 	let tutorials = this.state.tutorials;
+		// 	tutorials = true;
+		// 	this.setState({
+		// 		tutorials
+		// 	});
+		// } else {
+		// 	let tutorials = this.state.tutorials;
+		// 	tutorials = false;
+		// 	this.setState({
+		// 		tutorials
+		// 	});
+		// }
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
+	
 		
 
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
+	}
+	// ------------------------- DATA HANDLING ------------------------- //
+
+	// SYNCS THE CONTENT STATE WITH THE DB
+	syncState() {
+		buildfire.datastore.get('data', (err, response) => {
+			if (err) throw err;
+
+			if (!response.id) {
+				buildfire.datastore.insert(
+					{
+						settings: this.state.settings
+					},
+					'data',
+					true,
+					(err, status) => {
+						if (err) throw err;
+						
+					}
+				);
+				return;
+			} else {
+				// insert pages into db
+				buildfire.datastore.update(
+					response.id,
+					{
+						settings: this.state.settings
+					},
+					'data',
+					(err, status) => {
+						if (err) {
+							throw err;
+						}
+					}
+				);
+			}
+		});
+	}
+	// SETS UP THE SORTABLE LIST OF PAGES
+	initSortable() {
+		let navigationCallback = e => {
+			let target = this.state.settings.pages.filter(page => {
+				return page.instanceId === e.instanceId;
+			});
+			let index = this.state.settings.pages.indexOf(target[0]);
+			buildfire.messaging.sendMessageToWidget({
+				index
+			});
+			document.querySelector(`#tab${index}`).click();
+		};
+		this.editor = new buildfire.components.pluginInstance.sortableList(
+			'#pages',
+			[],
+			{
+				confirmDeleteItem: true
+			},
+			false,
+			false,
+			{
+				itemEditable: true,
+				navigationCallback
+			}
+		);
+
+		this.editor.onOrderChange = () => {
+			let settings = this.state.settings;
+			settings.pages = this.editor.items;
+			this.setState({
+				settings
+			});
+		};
+
+		this.editor.onAddItems = e => {};
+
+		this.editor.onDeleteItem = () => {
+			let settings = this.state.settings;
+			settings.pages = this.editor.items;
+			//
+			this.setState({
+				settings
+			});
+		};
+	}
+	// (DEV ONLY) MUST BE RUN ONCE WHEN DATA STRUCTURE CHANGES
+	debugDB() {
+		(() => {
+			buildfire.datastore.get('data', (err, response) => {
+				if (err) throw err;
+				//
+
+				// insert pages into db
+				buildfire.datastore.update(
+					response.id,
+					{
+						settings: this.state.settings
+					},
+					'data',
+					(err, status) => {
+						if (err) {
+							throw err;
+						}
+					}
+				);
+			});
+		})();
 	}
 
 	// ----------------- PAGE CONFIGURATION AND METHODS ---------------- //
@@ -125,24 +236,24 @@ class Content extends Component {
 	// ADDS A NEW PAGE TO THE STATE
 	addPage() {
 		if (this.state.settings.pages.length === 0) {
-			if (localStorage.getItem('tutorial') === 'true') {
-				localStorage.setItem('tutorial', false);
+			// if (localStorage.getItem('tutorial') === 'true') {
+				// localStorage.setItem('tutorial', false);
 				// let tutorials = this.state.tutorials;
 				// tutorials = false;
 				// this.setState({ tutorials });
 				// return;
 			}
 
-			localStorage.setItem('tutorial', true);
+			// localStorage.setItem('tutorial', true);
 			// let tutorials = this.state.tutorials;
 			// tutorials = true;
 			// this.setState({ tutorials });
-		} else {
-			localStorage.setItem('tutorial', false);
+		// } else {
+			// localStorage.setItem('tutorial', false);
 			// let tutorials = this.state.tutorials;
 			// tutorials = false;
 			// this.setState({ tutorials });
-		}
+		// }
 
 		let newPage = {
 			title: 'New Page',
@@ -365,8 +476,8 @@ class Content extends Component {
 				buildfire.notifications.confirm(
 					{
 						title: 'Remove Node',
-						message: 'Are you sure? Node will be lost!'
-						// buttonLabels: ['delete', 'cancel']
+						message: 'Are you sure? Node will be lost!',
+						buttonLabels: ['delete', 'cancel']
 					},
 					(err, result) => {
 						if (err) {
@@ -571,110 +682,6 @@ class Content extends Component {
 		this.setState({ settings });
 	}
 
-	// ------------------------- DATA HANDLING ------------------------- //
-
-	// SYNCS THE CONTENT STATE WITH THE DB
-	syncState() {
-		buildfire.datastore.get('data', (err, response) => {
-			if (err) throw err;
-
-			if (!response.id) {
-				buildfire.datastore.insert(
-					{
-						settings: this.state.settings
-					},
-					'data',
-					true,
-					(err, status) => {
-						if (err) throw err;
-					}
-				);
-				return;
-			} else {
-				// insert pages into db
-				buildfire.datastore.update(
-					response.id,
-					{
-						settings: this.state.settings
-					},
-					'data',
-					(err, status) => {
-						if (err) {
-							throw err;
-						}
-					}
-				);
-			}
-		});
-	}
-	// SETS UP THE SORTABLE LIST OF PAGES
-	initSortable() {
-		let navigationCallback = e => {
-			let target = this.state.settings.pages.filter(page => {
-				return page.instanceId === e.instanceId;
-			});
-			let index = this.state.settings.pages.indexOf(target[0]);
-			buildfire.messaging.sendMessageToWidget({
-				index
-			});
-			document.querySelector(`#tab${index}`).click();
-		};
-		this.editor = new buildfire.components.pluginInstance.sortableList(
-			'#pages',
-			[],
-			{
-				confirmDeleteItem: true
-			},
-			false,
-			false,
-			{
-				itemEditable: true,
-				navigationCallback
-			}
-		);
-
-		this.editor.onOrderChange = () => {
-			let settings = this.state.settings;
-			settings.pages = this.editor.items;
-			this.setState({
-				settings
-			});
-		};
-
-		this.editor.onAddItems = e => {};
-
-		this.editor.onDeleteItem = () => {
-			let settings = this.state.settings;
-			settings.pages = this.editor.items;
-			//
-			this.setState({
-				settings
-			});
-		};
-	}
-	// (DEV ONLY) MUST BE RUN ONCE WHEN DATA STRUCTURE CHANGES
-	debugDB() {
-		(() => {
-			buildfire.datastore.get('data', (err, response) => {
-				if (err) throw err;
-				//
-
-				// insert pages into db
-				buildfire.datastore.update(
-					response.id,
-					{
-						settings: this.state.settings
-					},
-					'data',
-					(err, status) => {
-						if (err) {
-							throw err;
-						}
-					}
-				);
-			});
-		})();
-	}
 
 	// --------------------------- RENDERING --------------------------- //
 
@@ -683,10 +690,10 @@ class Content extends Component {
 		
 
 		// if (this.state.settings.pages.length < 1) return;
-		let tutorials = JSON.parse(localStorage.getItem('tutorial'));
+		// let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
 		this.state.settings.pages.map((page, index) => {
-			pages.push(<Page key={index} index={index} tutorials={tutorials} handleChange={this.handleChange} handleNodeChange={this.handleNodeChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
+			pages.push(<Page key={index} index={index} handleChange={this.handleChange} handleNodeChange={this.handleNodeChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
 

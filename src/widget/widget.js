@@ -14,6 +14,8 @@ class Widget extends Component {
 			settings: {
 				pages: [],
 				options: {
+					backgroundImg: '',
+					backgroundLrg: '',
 					navPosition: 'top',
 					renderTitlebar: false
 				}
@@ -80,6 +82,8 @@ class Widget extends Component {
 	}
 	// GETS LAYOUTS AND OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
+		console.warn(this.state);
+
 		this.getLayouts();
 		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
 		if (document.querySelector('.hero-img')) {
@@ -122,9 +126,6 @@ class Widget extends Component {
 			this.setState({ settings: response.data.settings });
 		});
 	}
-
-	// --------------------------- RENDERING --------------------------- //
-
 	// BOUND EVENT HANDLER, CONTROLS DOT NAVIGATION
 	handleDotEvent(e) {
 		let dot_list_item = document.createElement('li');
@@ -228,6 +229,7 @@ class Widget extends Component {
 
 		// IF THERE IS ONLY ONE PAGE, DONT BIND EVENT HANDLERS AND HIDE NAVBAR
 		if (pages.length > 1) {
+			dot_container.classList.remove('hide');
 			// BIND HANDLERS
 			simple_dots.removeEventListener('before.lory.init', this.handleDotEvent);
 			simple_dots.removeEventListener('after.lory.init', this.handleDotEvent);
@@ -287,6 +289,24 @@ class Widget extends Component {
 			this.slider.slideTo(parseInt(slideIndex));
 		}, 1);
 	}
+
+	getBG() {
+		let width = window.innerWidth;
+		let BG;
+		switch (width > 500) {
+			case true:
+				BG = this.state.settings.options.backgroundLrg;
+				break;
+		
+			default:
+			BG = this.state.settings.options.backgroundImg;
+				break;
+		}
+		return `background: url("${BG}")`;
+	}
+
+	// --------------------------- RENDERING --------------------------- //
+
 	// SETS UP AND RETURNS PAGE COMPONENTS
 	renderPages() {
 		// PREVENT ACCIDENTAL RENDERS
@@ -321,7 +341,7 @@ class Widget extends Component {
 	render() {
 		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" />;
 		return (
-			<div className="backgroundColor" id="container foo backgroundColor">
+			<div className="backgroundColor" style={this.getBG()} id="container foo backgroundColor">
 				<div id="cover" className="hide-cover">
 					<div className="loader" />
 				</div>

@@ -71,7 +71,7 @@ class Page extends Component {
 				options.width = window.innerWidth;
 				options.height = options.width * 0.41;
 			}
-			console.warn(layout, options);
+			
 			
 			cropped = buildfire.imageLib.cropImage(image, options);
 		} else {

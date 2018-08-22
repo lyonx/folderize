@@ -244,12 +244,17 @@ span {
 	pointer-events: none;
 }
 
+/* utils */
 .hide {
 	display: none;
 }
 
 .full {
 	height: 100vh !important;
+}
+
+.center {
+	text-align: center;
 }
 
 ::-webkit-scrollbar {

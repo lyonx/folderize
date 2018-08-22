@@ -9,6 +9,9 @@ class Design extends React.Component {
 		this.state = {
 			settings: {
 				options: {
+					backgroundImg: '',
+					backgroundLrg: '',
+					backgroundColor: '',
 					renderTitlebar: true,
 					navPosition: null,
 					colorOverrides: [],
@@ -18,30 +21,15 @@ class Design extends React.Component {
 		};
 	}
 
-	syncState() {
-		buildfire.datastore.get('data', (err, response) => {
-			if (err) throw err;
-			if (!response.id) {
-				buildfire.datastore.insert({ settings: this.state.settings }, 'data', true, (err, status) => {
-					if (err) throw err;
-				});
-				return;
-			} else {
-				// insert pages into db
-				buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
-					if (err) {
-						throw err;
-					}
-				});
-			}
-		});
-	}
+	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
 	componentDidUpdate() {
 		this.debounceSync();
 	}
 
 	componentDidMount() {
+		console.warn(this.state);
+		
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
@@ -122,6 +110,64 @@ class Design extends React.Component {
 			}
 		});
 	}
+
+	// ------------------------- DATA HANDLING ------------------------- //
+
+	changeBackground(size, remove) {
+		let settings = this.state.settings;
+		if (remove) {
+			switch (size) {
+				case 'small':
+					settings.options.backgroundImg = '';
+					this.setState({ settings });
+					break;
+				case 'large':
+					settings.options.backgroundLrg = '';
+					this.setState({ settings });
+					break;
+				default:
+					break;
+			}
+			return;
+		}
+		buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+			if (err) throw err;
+			if (!res.selectedFiles[0]) return;
+			switch (size) {
+				case 'small':
+					settings.options.backgroundImg = res.selectedFiles[0];
+					this.setState({ settings });
+					break;
+				case 'large':
+					settings.options.backgroundLrg = res.selectedFiles[0];
+					this.setState({ settings });
+					break;
+				default:
+					break;
+			}
+		});
+	}
+
+	syncState() {
+		buildfire.datastore.get('data', (err, response) => {
+			if (err) throw err;
+			if (!response.id) {
+				buildfire.datastore.insert({ settings: this.state.settings }, 'data', true, (err, status) => {
+					if (err) throw err;
+				});
+				return;
+			} else {
+				// insert pages into db
+				buildfire.datastore.update(response.id, { settings: this.state.settings }, 'data', (err, status) => {
+					if (err) {
+						throw err;
+					}
+				});
+			}
+		});
+	}
+
+	// --------------------------- RENDERING --------------------------- //
 
 	renderLayouts() {
 		let layouts = [];
@@ -294,7 +340,106 @@ class Design extends React.Component {
 								</div>
 							</div>
 						</div>
-						{/* </div> */}
+						<hr />
+						<div className="item clearfix row padding-bottom-twenty">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+								<span>Background Image</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<div className="screens clearfix">
+									<div className="devices-screen mobile-device text-center pull-left">
+										<a onClick={() => this.changeBackground('small', false)}>
+											<span className="add-icon">+</span>
+											<img className="bg-sm" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundImg, {width: 66, height: 116})} style={this.state.settings.options.backgroundImg ? false : 'display: none'} />
+										</a>
+										<label className='secondary'>750x1334</label>
+										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundImg ? false : 'display: none'} onClick={() => this.changeBackground('small', true)}></span>
+									</div>
+									<div className="devices-screen ipad-device pull-left text-center" >
+										<a onClick={() => this.changeBackground('large', false)}>
+											<span className="add-icon">+</span>
+
+											<img className="bg-lrg" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundLrg, {width: 135, height: 190})} style={this.state.settings.options.backgroundLrg ? false : 'display: none'} />
+										</a>
+										<label className='secondary'>1536x2048</label>
+										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundLrg ? false : 'display: none'} onClick={() => this.changeBackground('large', true)}></span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<hr />
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+								<span>Text Alignment</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<div className="radio radio-primary radio-inline">
+									<input
+										className="input-radio"
+										id="titlebar-left"
+										type="radio"
+										aria-label="..."
+										onClick={e => {
+											switch (e.target.checked) {
+												case true: {
+													// let settings = this.state.settings;
+													// settings.options.renderTitlebar = true;
+													// this.setState({ settings });
+													break;
+												}
+												case false: {
+													// let settings = this.state.settings;
+													// settings.options.renderTitlebar = false;
+													// this.setState({ settings });
+													break;
+												}
+												default:
+													return;
+											}
+										}}
+										// checked={this.state.settings.options.renderTitlebar ? true : false}
+									/>
+									<label htmlFor="align-left">Left</label>
+								</div>
+								<div className="radio radio-primary radio-inline">
+									<input
+										className="input-radio"
+										id="align-center"
+										type="radio"
+										aria-label="..."
+										onClick={e => {
+											switch (e.target.checked) {
+												case true: {
+													let settings = this.state.settings;
+													settings.options.renderTitlebar = false;
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													let settings = this.state.settings;
+													settings.options.renderTitlebar = true;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													return;
+											}
+										}}
+										// checked={this.state.settings.options.renderTitlebar ? false : true}
+									/>
+									<label htmlFor="align-center">Center</label>
+								</div>
+							</div>
+						</div>
+						<hr />
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+									<span>Background Overlay</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+									<div className='thumbnail' id="bg-cover">{this.state.settings.options.backgroundColor ? 'Add Overlay Color' : this.state.settings.options.backgroundColor}</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

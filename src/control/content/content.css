@@ -1,3 +1,23 @@
+.tooltip-info {
+	visibility: hidden;
+	font-size: 18px;
+	position: absolute;
+	z-index: 99999999999;
+	top: -18px;
+	left: 30px;
+	font-family: 'Muli', sans-serif;
+	width: 65vw;
+}
+
+.tooltip-custom {
+	z-index: 999999999;
+	pointer-events: all;
+}
+
+.tooltip-custom:hover .tooltip-info {
+	visibility: visible;
+}
+
 .title {
 	flex: 1 !important;
 }
@@ -52,7 +72,7 @@ span {
 .panel-hide {
 	display: none;
 	animation-name: slide-out;
-	animation-duration: .5s;
+	animation-duration: 0.5s;
 	animation-direction: normal;
 	animation-fill-mode: forwards;
 }
@@ -60,7 +80,7 @@ span {
 .panel-show {
 	display: block;
 	animation-name: slide-in;
-	animation-duration: .5s;
+	animation-duration: 0.5s;
 	animation-direction: normal;
 	animation-fill-mode: forwards;
 }
@@ -169,13 +189,25 @@ span {
 	background-clip: padding-box;
 }
 
+.pagepanel {
+	position: absolute;
+	overflow: overlay;
+	width: 100vw;
+	height: 100vh;
+	z-index: 9091;
+	background: white;
+	-moz-background-clip: padding;
+	-webkit-background-clip: padding;
+	background-clip: padding-box;
+}
+
 .modal-footer {
 	position: sticky;
 }
 
 .thumbnail {
 	margin-bottom: 0px;
-	width: 66%
+	width: 66%;
 }
 
 .addnodes {
@@ -185,7 +217,7 @@ span {
 }
 
 .tag {
-	margin-right: 1rem; 
+	margin-right: 1rem;
 }
 
 .page-panel {
@@ -251,8 +283,8 @@ span {
 	width: 0px;
 }
 html {
-    overflow: scroll;
-    overflow-x: hidden;
+	overflow: scroll;
+	overflow-x: hidden;
 }
 
 .tab > .thumbnail {

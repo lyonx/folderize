@@ -35,7 +35,7 @@ class Page extends Component {
 			backgroundImg: {},
 			iconUrl: '',
 			backgroundCSS: '',
-			tutorials: false
+			// tutorials: false
 		};
 	}
 
@@ -53,8 +53,9 @@ class Page extends Component {
 		let title = '';
 		this.props.data.title.length > 0 ? (title = this.props.data.title) : (title = 'untitled');
 
-		this.setState({ tutorials: this.props.tutorials });
+		// this.setState({ tutorials: this.props.tutorials });
 		this.initEditor();
+		this.editor.loadItems(this.props.data.nodes, false);
 	}
 	// ON UPDATE, REFRESH THE SORTABLE NODE LIST'S DATA
 	componentDidUpdate() {
@@ -109,6 +110,7 @@ class Page extends Component {
 					}
 				} else {
 					if (!result) return;
+					
 					if (result.selectedButton.key === 'confirm') {
 						this.deletePage(this.props.index);
 					}
@@ -181,13 +183,11 @@ class Page extends Component {
 				panel.classList.remove('panel-show');
 				panel.classList.add('panel-hide');
 				panel.setAttribute('data-toggle', 'hide');
-				// this.setState({ show: false });
 				break;
 			case 'hide':
 				panel.classList.remove('panel-hide');
 				panel.classList.add('panel-show');
 				panel.setAttribute('data-toggle', 'show');
-				// this.setState({ show: true });
 				break;
 			default:
 				break;
@@ -202,22 +202,22 @@ class Page extends Component {
 		}
 	}
 	// HANDLES TUTORIAL DISPLAY
-	toggleTutorials(control) {
-		switch (control) {
-			case 'on':
-				localStorage.setItem('tutorial', true);
+	// toggleTutorials(control) {
+	// 	switch (control) {
+	// 		case 'on':
+	// 			localStorage.setItem('tutorial', true);
 
-				this.setState({ tutorials: true });
-				break;
-			case 'off':
-				localStorage.setItem('tutorial', false);
-				this.setState({ tutorials: false });
-				break;
+	// 			this.setState({ tutorials: true });
+	// 			break;
+	// 		case 'off':
+	// 			localStorage.setItem('tutorial', false);
+	// 			this.setState({ tutorials: false });
+	// 			break;
 
-			default:
-				break;
-		}
-	}
+	// 		default:
+	// 			break;
+	// 	}
+	// }
 
 	// --------------------------- RENDERING --------------------------- //
 
@@ -609,21 +609,21 @@ class Page extends Component {
 	}
 
 	render() {
-		let pageTutorialTop = (
-			<div className="alert alert-primary" style="font-size: 16px" role="alert">
-				Welcome to your first page! You can change the title and add elements below!
-			</div>
-		);
-		let pageTutorialMid = (
-			<div className="alert alert-primary" style="font-size: 16px" role="alert">
-				All of the elements on your page will appear here. You can drag them to reorder, or click them to edit!
-			</div>
-		);
-		let pageTutorialBottom = (
-			<div className="alert alert-primary" style="font-size: 16px" role="alert">
-				You can set a navbar icon and change the background color and image under "options"!
-			</div>
-		);
+		// let pageTutorialTop = (
+		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
+		// 		Welcome to your first page! You can change the title and add elements below!
+		// 	</div>
+		// );
+		// let pageTutorialMid = (
+		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
+		// 		All of the elements on your page will appear here. You can drag them to reorder, or click them to edit!
+		// 	</div>
+		// );
+		// let pageTutorialBottom = (
+		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
+		// 		You can set a navbar icon and change the background color and image under "options"!
+		// 	</div>
+		// );
 		return (
 			<div>
 				<div className="panel panel-default no-border">
@@ -649,13 +649,12 @@ class Page extends Component {
 							onClick={e => {
 								e.preventDefault();
 								e.stopPropagation();
-								// e.nativeEvent.stopImmediatePropagation();
-								// e.nativeEvent.stopPropagation();
+								// this.state.tutorials ? this.toggleTutorials('off') : null;
 								this.toggle(e);
 							}}
 						/>
-						<div className="panel-body nodepanel" style="top: 10%; height: 80%">
-							{this.state.tutorials ? (
+						<div className="panel-body pagepanel">
+							{/* {this.state.tutorials ? (
 								<a
 									style={'position: absolute; top: 5px; right: 15px; z-index: 10000'}
 									onClick={e => {
@@ -681,16 +680,16 @@ class Page extends Component {
 							// 	}}>
 							// 	Show tutorials
 							// </a>
-							}
+							} */}
 							<div className="container">
 								<div className="row">
-									<div className="info">{this.state.tutorials ? pageTutorialTop : false}</div>
+									{/* <div className="info">{this.state.tutorials ? pageTutorialTop : false}</div> */}
 
 									<div className="col-sm-12 header" />
 									<form>
 										<div className="input-group">
-											<h4>Edit Page Title</h4>
-
+											<h4>Edit Page Title<span style={'margin-left: 10px;'} className='glyphicon glyphicon-info-sign tooltip-custom'><div className='alert alert-info tooltip-info'>You can change the Page title here. This apprears in the Navbar if no icon is selected.</div></span></h4>
+											
 											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={e => this.handleChange(e, this.props.index)} />
 										</div>
 									</form>
@@ -776,7 +775,7 @@ class Page extends Component {
 
 									<div className="col-sm-12">
 										<div style="margin-bottom: 15px;">
-											<h5 className="text-center">Add Elements</h5>
+											<h5 className="text-center">Add Elements<span style={'margin-left: 10px;'} className='glyphicon glyphicon-info-sign tooltip-custom'><div className='alert alert-info tooltip-info' style={'top: -80px; left: -28.5vw; width: 65vw;'}>You can add elements to this page by clicking on the buttons below. All elements appear in the list below. Click to edit, or drag to rearrange.</div></span></h5>
 											<div className="btn-group tab" id={`menu${this.props.index}`}>
 												<button
 													className="btn btn-default add tab-toggle"
@@ -840,10 +839,10 @@ class Page extends Component {
 									{/* </div> */}
 									<div className="col-sm-12">{this.renderNodes()}</div>
 									{/* <div className="info">{localStorage.getItem('tutorial') === 'true' ? pageTutorialMid : false}</div> */}
-									<div className="info">{this.state.tutorials ? pageTutorialMid : false}</div>
+									{/* <div className="info">{this.state.tutorials ? pageTutorialMid : false}</div> */}
 
 									<div className="col-sm-12" id={`nodelist${this.props.index}`} />
-									<div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div>
+									{/* <div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div> */}
 									<div className="tab modal-footer">
 										<button
 											className="btn btn-success"
@@ -851,8 +850,8 @@ class Page extends Component {
 											id={`tab${this.props.index}`}
 											index={this.props.index}
 											onClick={e => {
-												this.state.tutorials ? this.setState({ tutorials: false }) : null;
-												localStorage.setItem('tutorial', false);
+												// this.state.tutorials ? this.toggleTutorials('off') : null;
+												// localStorage.setItem('tutorial', false);
 												this.toggle(e);
 											}}>
 											<span className="glyphicon glyphicon-ok" />

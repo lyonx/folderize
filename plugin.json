@@ -1,7 +1,7 @@
 {
   "author":"Buildfire",
   "pluginName": "Pages",
-  "pluginDescription": " ",
+  "pluginDescription": "Pages is a highly customizable plugin designed to give you the most control over your content. Add as many Pages as you want, and fill them with any amout of content. Drag and drop Pages and their content.",
   "supportEmail":"support@buildfire.com",
   "control": {
     "content":{
