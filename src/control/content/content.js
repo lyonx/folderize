@@ -119,8 +119,6 @@ class Content extends Component {
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
-	
-		
 
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
@@ -141,7 +139,6 @@ class Content extends Component {
 					true,
 					(err, status) => {
 						if (err) throw err;
-						
 					}
 				);
 				return;
@@ -237,22 +234,22 @@ class Content extends Component {
 	addPage() {
 		if (this.state.settings.pages.length === 0) {
 			// if (localStorage.getItem('tutorial') === 'true') {
-				// localStorage.setItem('tutorial', false);
-				// let tutorials = this.state.tutorials;
-				// tutorials = false;
-				// this.setState({ tutorials });
-				// return;
-			}
-
-			// localStorage.setItem('tutorial', true);
-			// let tutorials = this.state.tutorials;
-			// tutorials = true;
-			// this.setState({ tutorials });
-		// } else {
 			// localStorage.setItem('tutorial', false);
 			// let tutorials = this.state.tutorials;
 			// tutorials = false;
 			// this.setState({ tutorials });
+			// return;
+		}
+
+		// localStorage.setItem('tutorial', true);
+		// let tutorials = this.state.tutorials;
+		// tutorials = true;
+		// this.setState({ tutorials });
+		// } else {
+		// localStorage.setItem('tutorial', false);
+		// let tutorials = this.state.tutorials;
+		// tutorials = false;
+		// this.setState({ tutorials });
 		// }
 
 		let newPage = {
@@ -353,16 +350,20 @@ class Content extends Component {
 				break;
 			}
 			case 'image': {
-				nodes.push({
-					type: 'image',
-					title: 'Image',
-					instanceId: Date.now(),
-					data: { src: 'https://images.unsplash.com/photo-1519636243899-5544aa477f70?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjQ0MDV9&s=6c937b3dbd83210ac77d8c591265cdf8' }
+				buildfire.imageLib.showDialog({}, (err, result) => {
+					if (err) throw err;
+					if (!result.selectedFiles[0]) return;
+					nodes.push({
+						type: 'image',
+						title: 'Image',
+						instanceId: Date.now(),
+						data: { src: result.selectedFiles[0] }
+					});
+					this.setState({ settings });
+					setTimeout(() => {
+						callback();
+					}, 100);
 				});
-				this.setState({ settings });
-				setTimeout(() => {
-					callback();
-				}, 100);
 				break;
 			}
 			case 'hero': {
@@ -457,11 +458,29 @@ class Content extends Component {
 				break;
 			}
 			case 'img': {
+				console.log(event);
+				if (typeof event === 'number') {
+					node.data.height = event;
+					this.setState({ settings });
+					return;
+				}
 				if (event.target.checked) {
-					node.format = 'hero';
+					switch (event.target.name) {
+						case 'hero':
+							node.format = 'hero';
 					node.data.header = node.data.header || 'header';
 					node.data.subtext = node.data.subtext || 'subtext';
 					nodes[index] = node;
+							break;
+						case 'custom': {
+							node.format = 'custom';
+							node.data.height = node.data.height || 0.54;
+							break;
+						}
+						default:
+							break;
+					}
+					
 					this.setState({ settings });
 				} else {
 					node.format = 'image';
@@ -682,13 +701,10 @@ class Content extends Component {
 		this.setState({ settings });
 	}
 
-
 	// --------------------------- RENDERING --------------------------- //
 
 	// LOOPS THROUGH AND RETURNS PAGES
 	renderPages() {
-		
-
 		// if (this.state.settings.pages.length < 1) return;
 		// let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
@@ -708,14 +724,14 @@ class Content extends Component {
 						<div className="panel panel-default">
 							<div className="panel-body">
 								<div className="col-md-12">
-									<button className="btn btn-primary" style="width: 100%" onClick={this.addPage}>
+									<button title="Adds a new page to your plugin." className="btn btn-primary" style="width: 100%" onClick={this.addPage}>
 										Add a Page{' '}
 									</button>{' '}
 								</div>{' '}
 							</div>{' '}
 						</div>{' '}
 					</div>{' '}
-					<div className="col-md-12" id="pages">
+					<div title='Your pages appear in order here. Click a page title to edit it, or drag to reorder.' className="col-md-12" id="pages">
 						{' '}
 						{/* <h4 className="text-center">Pages</h4> */} {this.renderPages()}{' '}
 					</div>{' '}

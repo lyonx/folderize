@@ -13,6 +13,9 @@ class Design extends React.Component {
 					backgroundLrg: '',
 					backgroundCSS: '',
 					backgroundColor: {},
+					bodyFontSize: 24,
+					headerFontSize: 36,
+					textAlign: 'left',
 					renderTitlebar: true,
 					navPosition: null,
 					colorOverrides: [],
@@ -225,12 +228,13 @@ class Design extends React.Component {
 						{/* NAV POSITION> */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Page Navigation Position</span>
+								<span title="Change the positioning of the navbar.">Page Navigation Position</span>
 							</div>
 							{/* <div className="btn-group"> */}
 							<div className="main col-md-9 pull-right">
-								<div className="radio radio-primary radio-inline">
+								<div title="Sets the navbar to appear at the bottom of the screen." className="radio radio-primary radio-inline">
 									<input
+									
 										className="input-radio"
 										id="nav-pos-bottom"
 										type="radio"
@@ -259,8 +263,9 @@ class Design extends React.Component {
 									<label htmlFor="nav-pos-bottom">Bottom</label>
 								</div>
 
-								<div className="radio radio-primary radio-inline">
+								<div title="Sets the navbar to appear at the top of the screen." className="radio radio-primary radio-inline">
 									<input
+									
 										className="input-radio"
 										id="nav-pos-top"
 										type="radio"
@@ -294,10 +299,10 @@ class Design extends React.Component {
 						{/* TITLEBAR DISPLAY */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Display Titlebar</span>
+								<span title="Toggle the display of the Buildfire titlebar.">Display Titlebar</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-								<div className="radio radio-primary radio-inline">
+								<div title='Forces the Buildfire titlebar to show.' className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
 										id="titlebar-true"
@@ -325,8 +330,8 @@ class Design extends React.Component {
 									/>
 									<label htmlFor="titlebar-true">True</label>
 								</div>
-								<div className="radio radio-primary radio-inline">
-									<input
+								<div title='Forces the Buildfire titlebar to hide.' className="radio radio-primary radio-inline">
+									<input										
 										className="input-radio"
 										id="titlebar-false"
 										type="radio"
@@ -359,7 +364,7 @@ class Design extends React.Component {
 						{/* LAYOUTS */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Layout Style</span>
+								<span title="Change the appearance of all Action Items">Layout Style</span>
 							</div>
 							<div className="main col-md-9 pull-right">
 								<div className="screens clearfix">
@@ -376,7 +381,7 @@ class Design extends React.Component {
 						{/* BACKGROUND IMAGE */}
 						<div className="item clearfix row padding-bottom-twenty">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Background Image</span>
+								<span title="Set a background behind all pages. Page backgrounds can be individually set in their Options.">Background Image</span>
 							</div>
 							<div className="main col-md-9 pull-right">
 								<div className="screens clearfix">
@@ -404,11 +409,12 @@ class Design extends React.Component {
 						{/* COLOR PICKER */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Background Overlay</span>
+								<span title="Set a background overlay behind all pages. Page background overlays can be individually set in their Options.">Background Overlay</span>
 							</div>
 							<div className="main col-md-9 pull-right">
 								<div className="tab">
 									<button
+									title='Click to change the overlay color.'
 										className="thumbnail"
 										id="bg-cover"
 										style={`${this.state.settings.options.backgroundCSS}`}
@@ -418,6 +424,7 @@ class Design extends React.Component {
 										<h5>{this.state.settings.options.backgroundColor.colorType ? this.state.settings.options.backgroundColor.colorType : 'Add Overlay Color'}</h5>
 									</button>
 									<button
+									title='Click to remove overlay color.'
 										className="btn btn-danger"
 										onClick={() => {
 											this.colorPicker(true);
@@ -431,38 +438,38 @@ class Design extends React.Component {
 						{/* TEXT ALIGN */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Text Alignment</span>
+								<span title="Set text allignment for all page text.">Text Alignment</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-								<div className="radio radio-primary radio-inline">
+								<div title='Align all page text right.' className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
-										id="titlebar-left"
+										id="align-left"
 										type="radio"
 										aria-label="..."
 										onClick={e => {
 											switch (e.target.checked) {
 												case true: {
-													// let settings = this.state.settings;
-													// settings.options.renderTitlebar = true;
-													// this.setState({ settings });
+													let settings = this.state.settings;
+													settings.options.textAlign = 'left';
+													this.setState({ settings });
 													break;
 												}
 												case false: {
-													// let settings = this.state.settings;
-													// settings.options.renderTitlebar = false;
-													// this.setState({ settings });
+													let settings = this.state.settings;
+													settings.options.textAlign = 'center';
+													this.setState({ settings });
 													break;
 												}
 												default:
 													return;
 											}
 										}}
-										// checked={this.state.settings.options.renderTitlebar ? true : false}
+										checked={this.state.settings.options.textAlign === 'left' ? true : false}
 									/>
 									<label htmlFor="align-left">Left</label>
 								</div>
-								<div className="radio radio-primary radio-inline">
+								<div title='Align all page text center.' className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
 										id="align-center"
@@ -472,13 +479,13 @@ class Design extends React.Component {
 											switch (e.target.checked) {
 												case true: {
 													let settings = this.state.settings;
-													settings.options.renderTitlebar = false;
+													settings.options.textAlign = 'center';
 													this.setState({ settings });
 													break;
 												}
 												case false: {
 													let settings = this.state.settings;
-													settings.options.renderTitlebar = true;
+													settings.options.textAlign = 'left';
 													this.setState({ settings });
 													break;
 												}
@@ -486,10 +493,32 @@ class Design extends React.Component {
 													return;
 											}
 										}}
-										// checked={this.state.settings.options.renderTitlebar ? false : true}
+										checked={this.state.settings.options.textAlign === 'center' ? true : false}
 									/>
 									<label htmlFor="align-center">Center</label>
 								</div>
+							</div>
+						</div>
+						<hr />
+						{/* FONT SIZE */}
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+								<span title="Set a font size for all page text.">Font Size</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<label htmlFor='header-font-size'>Headers: </label>
+								<input title='Change the header font size. You can use keyboard arrows.' type='number' name='header-font-size' value={this.state.settings.options.headerFontSize} onChange={e => {
+									let settings = this.state.settings;
+									settings.options.headerFontSize = parseInt(e.target.value);
+									this.setState({ settings });
+								}}/>
+								{'       '}
+								<label htmlFor='body-font-size'>Body: </label>
+								<input title='Change the body font size. You can use keyboard arrows.' type='number' name='body-font-size' value={this.state.settings.options.bodyFontSize} onChange={e => {
+									let settings = this.state.settings;
+									settings.options.bodyFontSize = parseInt(e.target.value);
+									this.setState({ settings });
+								}}/>
 							</div>
 						</div>
 					</div>

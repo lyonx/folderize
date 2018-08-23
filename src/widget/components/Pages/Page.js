@@ -19,7 +19,8 @@ class Page extends Component {
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
 		// this.setState({ data: this.props.data });
-
+		console.warn(this.props);
+		
 		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
 		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
 	}
@@ -40,8 +41,9 @@ class Page extends Component {
 		});
 	}
 	// CROPS IMAGES BASED ON LAYOUT
-	cropImg(image, isAction) {
+	cropImg(image, isAction, height) {
 		if (!image) return;
+		if (!height) height = 0.54;
 		let cropped;
 		let options = {};
 		if (isAction) {
@@ -76,7 +78,7 @@ class Page extends Component {
 			cropped = buildfire.imageLib.cropImage(image, options);
 		} else {
 			options.width = window.innerWidth;
-			options.height = options.width * 0.54;
+			options.height = options.width * height;
 			cropped = buildfire.imageLib.cropImage(image, options);
 		}
 		return cropped;
@@ -108,19 +110,18 @@ class Page extends Component {
 					let border;
 					node.data.border ? (border = '') : (border = `border-bottom: 0px !important;`);
 					nodes.push(
-						// <div className={`col-sm-12  node-layout${node.data.layout}`}>
 						<div className="col-sm-12">
 							<div className="page-header" style={border}>
-								<h1>{node.data.text}</h1>
+								<h1 style={`font-size: ${this.props.data.headerFontSize}px`}>{node.data.text}</h1>
 							</div>
 						</div>
 					);
 					break;
 				}
-				case 'desc': {
+				case 'desc': {					
 					nodes.push(
 						<div className="col-sm-12">
-							<p className="description">{node.data.text}</p>
+							<p className="description" style={`font-size: ${this.props.data.bodyFontSize}px`}>{node.data.text}</p>
 						</div>
 					);
 					break;
@@ -141,11 +142,15 @@ class Page extends Component {
 							</div>
 						);
 					} else {
+						let height = false;
+						if (node.format === 'custom') {
+							height = node.data.height;
+						}
 						nodes.push(
 							<div className="col-sm-12">
 								<div className="image-wrap">
-									<Lazyload offsetHorizontal={50} height={window.innerWidth * 0.54}>
-										<div className="images" style={`background: url(${this.cropImg(node.data.src, false)})`} />
+									<Lazyload offsetHorizontal={50} height={node.format === 'custom' ? window.innerWidth * height : window.innerWidth * 0.54}>
+										<div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} />
 									</Lazyload>
 								</div>
 							</div>

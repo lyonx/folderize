@@ -16,6 +16,7 @@ class Widget extends Component {
 				options: {
 					backgroundImg: '',
 					backgroundLrg: '',
+					textAlign: 'left',
 					navPosition: 'top',
 					renderTitlebar: false
 				}
@@ -330,6 +331,8 @@ class Widget extends Component {
 			// INTERPRET BG COLOR, PASS ONLY BG CSS
 			page.backgroundColor.colorType === 'solid' ? (page.backgroundColor = page.backgroundColor.solid.backgroundCSS) : (page.backgroundColor = page.backgroundColor.gradient.backgroundCSS);
 			// PASS PROPS TO PAGE AND PUSH
+			page.headerFontSize = this.state.settings.options.headerFontSize;
+			page.bodyFontSize = this.state.settings.options.bodyFontSize;
 			pages.push(<Page index={this.state.settings.pages.indexOf(page)} layout={this.state.settings.options.layout} data={page} />);
 		});
 
@@ -346,7 +349,7 @@ class Widget extends Component {
 					<div className="loader" />
 				</div>
 				<div id="sandbox" style={`${this.state.settings.options.backgroundCSS}`}>
-					<div className="slider js_simple_dots simple">
+					<div className="slider js_simple_dots simple" style={`text-align: ${this.state.settings.options.textAlign}`}>
 						{this.state.settings.options.navPosition === 'top' ? dotNav : null}
 						<div className="frame js_frame">
 							<ul className="slides js_slides">{this.renderPages()}</ul>

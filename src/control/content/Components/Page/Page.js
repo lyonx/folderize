@@ -34,14 +34,14 @@ class Page extends Component {
 			backgroundColor: {},
 			backgroundImg: {},
 			iconUrl: '',
-			backgroundCSS: '',
+			backgroundCSS: ''
 			// tutorials: false
 		};
 	}
 
 	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
-	// ON MOUNT INIT SORTABLE NODE LIST 
+	// ON MOUNT INIT SORTABLE NODE LIST
 	componentDidMount() {
 		// Unknown bug caused main panel to render with the wrong attributes
 		let panel = document.getElementById(`panel${this.props.index}`);
@@ -110,7 +110,7 @@ class Page extends Component {
 					}
 				} else {
 					if (!result) return;
-					
+
 					if (result.selectedButton.key === 'confirm') {
 						this.deletePage(this.props.index);
 					}
@@ -387,22 +387,52 @@ class Page extends Component {
 								/>
 								<div className="panel-body  nodepanel">
 									<h4 className="text-center">Selected Image:</h4>
-									<div className="plugin-thumbnail" style={`background: url('${node.data.src}')`} onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node), this.props.index)} />
+									<div className="plugin-thumbnail" title="Click to change Image." style={`background: url('${node.data.src}')`} onClick={() => this.addImg('node', this.props.data.nodes.indexOf(node), this.props.index)} />
 									<h6 className="text-center">Click to change</h6>
-									<div className="tab">
-										<label>Full screen {'  '}</label>
+									<div className="container">
+										<div className="item row margin-bottom-twenty clearfix">
+											<div className="col-md-3 padding-right-zero pull-left">
+												<span>Sizing: </span>
+											</div>
+											<div className="main col-md-9 pull-right">
+												{/* <div className="tab"> */}
+												<span title='Makes this image full screen with a header and subtext.' style='pointer-events: all'>
+												<label>Full screen {'  '}</label>
 
-										<input type="checkbox" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} />
+												<input  type="checkbox" name="hero" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} checked={node.format === 'hero' ? true : false} />
+												{/* </div> */}
+												{/* <div className="tab"> */}
+												</span>
+												<span title="Allows you to define a custom height for this image." style='pointer-events: all'>
+												<label >Custom {'  '}</label>
+
+												<input type="checkbox" name="custom" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} checked={node.format === 'custom' ? true : false} />
+												</span>
+											</div>
+										</div>
 									</div>
-									<div className="panel-hide">
-										{setTimeout(() => {
-											if (node.format === 'hero') {
-												document.getElementById(`${node.instanceId}`).checked = true;
-											} else {
-												return;
-											}
-										}, 1)}
-									</div>
+									{node.format === 'custom' ? (
+										<div>
+											<div className="input-group" style="line-height: 32px;">
+												<label htmlFor="size">Image height: </label>
+												<input
+													title="Sets the image height"
+													type="number"
+													step="0.01"
+													className="form-control"
+													style="width: 66vw; float: right;"
+													name="size"
+													value={node.data.height}
+													onChange={e => {
+														let height = parseFloat(e.target.value);
+														this.handleNodeChange(height, this.props.data.nodes.indexOf(node), 'img', false, this.props.index);
+													}}
+												/>
+											</div>
+										</div>
+									) : (
+										<div />
+									)}
 									{node.format === 'hero' ? (
 										<div>
 											<div className="input-group">
@@ -553,7 +583,7 @@ class Page extends Component {
 									</div>
 									{/* <div className="action"> */}
 									<h4 className="text-center">Selected Image:</h4>
-									<div className="plugin-thumbnail" style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index)} />
+									<div className="plugin-thumbnail" title="Click to change Image. You can change the appearance of Action Items in the Design tab." style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index)} />
 									<h6 className="text-center">Click to change</h6>
 
 									<h3 className="action-title">Action Text: {node.data.title}</h3>
@@ -625,7 +655,7 @@ class Page extends Component {
 		// 	</div>
 		// );
 		return (
-			<div>
+			<div title=''>
 				<div className="panel panel-default no-border">
 					<div className="panel-heading tab panel-hide">
 						<div className="toggle-group">
@@ -688,9 +718,14 @@ class Page extends Component {
 									<div className="col-sm-12 header" />
 									<form>
 										<div className="input-group">
-											<h4>Edit Page Title<span style={'margin-left: 10px;'} className='glyphicon glyphicon-info-sign tooltip-custom'><div className='alert alert-info tooltip-info'>You can change the Page title here. This apprears in the Navbar if no icon is selected.</div></span></h4>
-											
-											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={e => this.handleChange(e, this.props.index)} />
+											<h4>
+												Edit Page Title
+												<span style={'margin-left: 10px;'} className="glyphicon glyphicon-info-sign tooltip-custom">
+													<div className="alert alert-info tooltip-info">You can change the Page title here. This apprears in the Navbar if no icon is selected.</div>
+												</span>
+											</h4>
+
+											<input title='This will appear on the navbar unless an Icon is selected for this page.' type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={e => this.handleChange(e, this.props.index)} />
 										</div>
 									</form>
 									{/* ------- Config ------ */}
@@ -775,23 +810,33 @@ class Page extends Component {
 
 									<div className="col-sm-12">
 										<div style="margin-bottom: 15px;">
-											<h5 className="text-center">Add Elements<span style={'margin-left: 10px;'} className='glyphicon glyphicon-info-sign tooltip-custom'><div className='alert alert-info tooltip-info' style={'top: -80px; left: -28.5vw; width: 65vw;'}>You can add elements to this page by clicking on the buttons below. All elements appear in the list below. Click to edit, or drag to rearrange.</div></span></h5>
+											<h5 className="text-center">
+												Add Elements
+												<span style={'margin-left: 10px;'} className="glyphicon glyphicon-info-sign tooltip-custom">
+													<div className="alert alert-info tooltip-info" style={'top: -80px; left: -28.5vw; width: 65vw;'}>
+														You can add elements to this page by clicking on the buttons below. All elements appear in the list below. Click to edit, or drag to rearrange.
+													</div>
+												</span>
+											</h5>
 											<div className="btn-group tab" id={`menu${this.props.index}`}>
 												<button
-													className="btn btn-default add tab-toggle"
+												title='Add a Header Element to this page.'
+													className="btn btn-default add tab-toggle "
 													onClick={e => {
 														this.addNode('header', this.props.index, () => this.openLast());
 													}}>
 													Add Header
 												</button>
 												<button
+												title='Add a Text Element to this page.'
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
 														this.addNode('desc', this.props.index, () => this.openLast());
 													}}>
-													Add Description
+													Add Text
 												</button>
 												<button
+												title='Add an Image Element to this page.'
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
 														this.addNode('image', this.props.index, () => this.openLast());
@@ -799,6 +844,7 @@ class Page extends Component {
 													Add Image
 												</button>
 												<button
+												title='Add an Action Item to this page. Action items can link to other plugins, web content, and more.'
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
 														// this.toggleModal(this.props.index, 'actions', 'show');
@@ -841,7 +887,7 @@ class Page extends Component {
 									{/* <div className="info">{localStorage.getItem('tutorial') === 'true' ? pageTutorialMid : false}</div> */}
 									{/* <div className="info">{this.state.tutorials ? pageTutorialMid : false}</div> */}
 
-									<div className="col-sm-12" id={`nodelist${this.props.index}`} />
+									<div  title="This page's Elements appear here. Click the title to edit, or drag to reorder."  className="col-sm-12" id={`nodelist${this.props.index}`} />
 									{/* <div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div> */}
 									<div className="tab modal-footer">
 										<button
