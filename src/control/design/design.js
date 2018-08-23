@@ -11,7 +11,8 @@ class Design extends React.Component {
 				options: {
 					backgroundImg: '',
 					backgroundLrg: '',
-					backgroundColor: '',
+					backgroundCSS: '',
+					backgroundColor: {},
 					renderTitlebar: true,
 					navPosition: null,
 					colorOverrides: [],
@@ -24,12 +25,14 @@ class Design extends React.Component {
 	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
 	componentDidUpdate() {
+		console.warn(this.state);
+
 		this.debounceSync();
 	}
 
 	componentDidMount() {
 		console.warn(this.state);
-		
+
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
@@ -148,6 +151,33 @@ class Design extends React.Component {
 		});
 	}
 
+	colorPicker(remove) {
+		let settings = this.state.settings;
+		let bgCSS;
+		if (remove) {
+			settings.options.backgroundColor = {};
+			settings.options.backgroundCSS = '';
+			this.setState({ settings });
+			return;
+		}
+		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, {}, null, (err, res) => {
+			if (err) throw err;
+			switch (res.colorType) {
+				case 'solid': {
+					bgCSS = res.solid.backgroundCSS;
+					break;
+				}
+				case 'gradient': {
+					bgCSS = res.gradient.backgroundCSS;
+					break;
+				}
+			}
+			settings.options.backgroundColor = res;
+			settings.options.backgroundCSS = bgCSS;
+			this.setState({ settings });
+		});
+	}
+
 	syncState() {
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
@@ -192,7 +222,7 @@ class Design extends React.Component {
 			<div>
 				<div className="container">
 					<div className="row">
-						{/* <div className="col-md-12"> */}
+						{/* NAV POSITION> */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span>Page Navigation Position</span>
@@ -261,6 +291,7 @@ class Design extends React.Component {
 							</div>
 						</div>
 						<br />
+						{/* TITLEBAR DISPLAY */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span>Display Titlebar</span>
@@ -325,6 +356,7 @@ class Design extends React.Component {
 							</div>
 						</div>
 						<hr />
+						{/* LAYOUTS */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span>Layout Style</span>
@@ -341,6 +373,7 @@ class Design extends React.Component {
 							</div>
 						</div>
 						<hr />
+						{/* BACKGROUND IMAGE */}
 						<div className="item clearfix row padding-bottom-twenty">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span>Background Image</span>
@@ -350,24 +383,52 @@ class Design extends React.Component {
 									<div className="devices-screen mobile-device text-center pull-left">
 										<a onClick={() => this.changeBackground('small', false)}>
 											<span className="add-icon">+</span>
-											<img className="bg-sm" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundImg, {width: 66, height: 116})} style={this.state.settings.options.backgroundImg ? false : 'display: none'} />
+											<img className="bg-sm" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundImg, { width: 66, height: 116 })} style={this.state.settings.options.backgroundImg ? false : 'display: none'} />
 										</a>
-										<label className='secondary'>750x1334</label>
-										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundImg ? false : 'display: none'} onClick={() => this.changeBackground('small', true)}></span>
+										<label className="secondary">750x1334</label>
+										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundImg ? false : 'display: none'} onClick={() => this.changeBackground('small', true)} />
 									</div>
-									<div className="devices-screen ipad-device pull-left text-center" >
+									<div className="devices-screen ipad-device pull-left text-center">
 										<a onClick={() => this.changeBackground('large', false)}>
 											<span className="add-icon">+</span>
 
-											<img className="bg-lrg" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundLrg, {width: 135, height: 190})} style={this.state.settings.options.backgroundLrg ? false : 'display: none'} />
+											<img className="bg-lrg" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundLrg, { width: 135, height: 190 })} style={this.state.settings.options.backgroundLrg ? false : 'display: none'} />
 										</a>
-										<label className='secondary'>1536x2048</label>
-										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundLrg ? false : 'display: none'} onClick={() => this.changeBackground('large', true)}></span>
+										<label className="secondary">1536x2048</label>
+										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundLrg ? false : 'display: none'} onClick={() => this.changeBackground('large', true)} />
 									</div>
 								</div>
 							</div>
 						</div>
 						<hr />
+						{/* COLOR PICKER */}
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+								<span>Background Overlay</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<div className="tab">
+									<button
+										className="thumbnail"
+										id="bg-cover"
+										style={`${this.state.settings.options.backgroundCSS}`}
+										onClick={() => {
+											this.colorPicker(false);
+										}}>
+										<h5>{this.state.settings.options.backgroundColor.colorType ? this.state.settings.options.backgroundColor.colorType : 'Add Overlay Color'}</h5>
+									</button>
+									<button
+										className="btn btn-danger"
+										onClick={() => {
+											this.colorPicker(true);
+										}}>
+										Remove
+									</button>
+								</div>
+							</div>
+						</div>
+						<hr />
+						{/* TEXT ALIGN */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span>Text Alignment</span>
@@ -429,15 +490,6 @@ class Design extends React.Component {
 									/>
 									<label htmlFor="align-center">Center</label>
 								</div>
-							</div>
-						</div>
-						<hr />
-						<div className="item row margin-bottom-twenty clearfix">
-							<div className="labels col-md-3 padding-right-zero pull-left">
-									<span>Background Overlay</span>
-							</div>
-							<div className="main col-md-9 pull-right">
-									<div className='thumbnail' id="bg-cover">{this.state.settings.options.backgroundColor ? 'Add Overlay Color' : this.state.settings.options.backgroundColor}</div>
 							</div>
 						</div>
 					</div>

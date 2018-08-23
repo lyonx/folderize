@@ -345,7 +345,7 @@ class Widget extends Component {
 				<div id="cover" className="hide-cover">
 					<div className="loader" />
 				</div>
-				<div id="sandbox">
+				<div id="sandbox" style={`${this.state.settings.options.backgroundCSS}`}>
 					<div className="slider js_simple_dots simple">
 						{this.state.settings.options.navPosition === 'top' ? dotNav : null}
 						<div className="frame js_frame">
