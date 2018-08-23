@@ -5,61 +5,255 @@ import debounce from 'lodash.debounce';
 class Content extends Component {
 	constructor(props) {
 		super(props);
+
 		this.addPage = this.addPage.bind(this);
-		this.addImg = this.addImg.bind(this);
 		this.deletePage = this.deletePage.bind(this);
 		this.updatePage = this.updatePage.bind(this);
+		this.addImg = this.addImg.bind(this);
 		this.handleChange = this.handleChange.bind(this);
 		this.handleNodeChange = this.handleNodeChange.bind(this);
 		this.addNode = this.addNode.bind(this);
 		this.addImg = this.addImg.bind(this);
 		this.colorPicker = this.colorPicker.bind(this);
-		this.renderPages = this.renderPages.bind(this);
 		this.reorderNodes = this.reorderNodes.bind(this);
+
+		this.renderPages = this.renderPages.bind(this);
 		this.debounceSync = debounce(this.syncState, 100);
+
 		this.editor = {};
 		this.state = {
-			tutorials: false,
+			// tutorials: false,
 			settings: {
 				pages: [],
 				options: {
+					backgroundImg: '',
+					backgroundLrg: '',
 					renderTitlebar: true,
 					navPosition: 'top',
-					colorOverrides: [],
 					layout: 0
 				}
 			}
 		};
 	}
-	// ----------------------- PAGE CONFIGURATION ---------------------- //
 
-	// USED BY THE PAGES TO CHANGE THEIR ORDER
-	reorderNodes(index, nodes) {
-		let settings = this.state.settings;
-		settings.pages[index].nodes = nodes;
-		this.setState({ settings });
+	// ----------------------- LIFECYCLE METHODS ----------------------- //
+
+	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
+	componentDidMount() {
+		// this.debugDB();
+		// debugger
+		this.initSortable();
+
+		// this.debugDB();
+
+		buildfire.datastore.get('data', (err, response) => {
+			if (err) throw err;
+			// if none are present, insert default data
+			//
+
+			if (!response.id) {
+				this.addPage();
+				// this.setState({
+				// 	settings: {
+				// 		pages: [
+				// 			{
+				// 				title: 'new page',
+				// 				id: Date.now(),
+				// 				customizations: [],
+				// 				backgroundColor: {
+				// 					colorType: false,
+				// 					solid: {
+				// 						backgroundCSS: ''
+				// 					},
+				// 					gradient: {
+				// 						backgroundCSS: ''
+				// 					}
+				// 				},
+				// 				nodes: [
+				// 					{
+				// 						type: 'header',
+				// 						data: {
+				// 							text: 'new page'
+				// 						}
+				// 					}
+				// 				]
+				// 			}
+				// 		],
+				// 		options: {
+				// 			showTitleBar: false,
+				// 			navPosition: 'top',
+				// 			colorOverrides: []
+				// 		}
+				// 	}
+				// });
+			} else {
+				// otherwise, if all pages have been removed, insert default data
+				if (response.data.settings.pages.length === 0) {
+					this.addPage();
+					// setTimeout(() => {
+					// 	document.querySelector(`#tab0`).click();
+					// }, 250);
+				} else {
+					// update settings
+					this.setState({
+						settings: response.data.settings
+					});
+				}
+			}
+		});
+		// let tutorials = localStorage.getItem('tutorial');
+		// if (tutorials === 'true') {
+		// 	let tutorials = this.state.tutorials;
+		// 	tutorials = true;
+		// 	this.setState({
+		// 		tutorials
+		// 	});
+		// } else {
+		// 	let tutorials = this.state.tutorials;
+		// 	tutorials = false;
+		// 	this.setState({
+		// 		tutorials
+		// 	});
+		// }
 	}
+	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
+	componentDidUpdate() {
+		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
+	
+		
+
+		this.debounceSync();
+		this.editor.loadItems(this.state.settings.pages, false, false);
+	}
+	// ------------------------- DATA HANDLING ------------------------- //
+
+	// SYNCS THE CONTENT STATE WITH THE DB
+	syncState() {
+		buildfire.datastore.get('data', (err, response) => {
+			if (err) throw err;
+
+			if (!response.id) {
+				buildfire.datastore.insert(
+					{
+						settings: this.state.settings
+					},
+					'data',
+					true,
+					(err, status) => {
+						if (err) throw err;
+						
+					}
+				);
+				return;
+			} else {
+				// insert pages into db
+				buildfire.datastore.update(
+					response.id,
+					{
+						settings: this.state.settings
+					},
+					'data',
+					(err, status) => {
+						if (err) {
+							throw err;
+						}
+					}
+				);
+			}
+		});
+	}
+	// SETS UP THE SORTABLE LIST OF PAGES
+	initSortable() {
+		let navigationCallback = e => {
+			let target = this.state.settings.pages.filter(page => {
+				return page.instanceId === e.instanceId;
+			});
+			let index = this.state.settings.pages.indexOf(target[0]);
+			buildfire.messaging.sendMessageToWidget({
+				index
+			});
+			document.querySelector(`#tab${index}`).click();
+		};
+		this.editor = new buildfire.components.pluginInstance.sortableList(
+			'#pages',
+			[],
+			{
+				confirmDeleteItem: true
+			},
+			false,
+			false,
+			{
+				itemEditable: true,
+				navigationCallback
+			}
+		);
+
+		this.editor.onOrderChange = () => {
+			let settings = this.state.settings;
+			settings.pages = this.editor.items;
+			this.setState({
+				settings
+			});
+		};
+
+		this.editor.onAddItems = e => {};
+
+		this.editor.onDeleteItem = () => {
+			let settings = this.state.settings;
+			settings.pages = this.editor.items;
+			//
+			this.setState({
+				settings
+			});
+		};
+	}
+	// (DEV ONLY) MUST BE RUN ONCE WHEN DATA STRUCTURE CHANGES
+	debugDB() {
+		(() => {
+			buildfire.datastore.get('data', (err, response) => {
+				if (err) throw err;
+				//
+
+				// insert pages into db
+				buildfire.datastore.update(
+					response.id,
+					{
+						settings: this.state.settings
+					},
+					'data',
+					(err, status) => {
+						if (err) {
+							throw err;
+						}
+					}
+				);
+			});
+		})();
+	}
+
+	// ----------------- PAGE CONFIGURATION AND METHODS ---------------- //
+
 	// ADDS A NEW PAGE TO THE STATE
 	addPage() {
 		if (this.state.settings.pages.length === 0) {
-			if (localStorage.getItem('tutorial') === 'true') {
-				localStorage.setItem('tutorial', false);
+			// if (localStorage.getItem('tutorial') === 'true') {
+				// localStorage.setItem('tutorial', false);
 				// let tutorials = this.state.tutorials;
 				// tutorials = false;
 				// this.setState({ tutorials });
 				// return;
 			}
 
-			localStorage.setItem('tutorial', true);
+			// localStorage.setItem('tutorial', true);
 			// let tutorials = this.state.tutorials;
 			// tutorials = true;
 			// this.setState({ tutorials });
-		} else {
-			localStorage.setItem('tutorial', false);
+		// } else {
+			// localStorage.setItem('tutorial', false);
 			// let tutorials = this.state.tutorials;
 			// tutorials = false;
 			// this.setState({ tutorials });
-		}
+		// }
 
 		let newPage = {
 			title: 'New Page',
@@ -127,399 +321,6 @@ class Content extends Component {
 			});
 		}
 	}
-
-	// addImg() {
-	// 	buildfire.imageLib.showDialog({}, (err, result) => {
-	// 		if (err) throw err;
-	// 		this.setState({
-	// 			image: result.selectedFiles[0]
-	// 		});
-	// 	});
-	// }
-
-	// ------------------------- DATA HANDLING ------------------------- //
-
-	// SYNCS THE CONTENT STATE WITH THE DB
-	syncState() {
-		buildfire.datastore.get('data', (err, response) => {
-			if (err) throw err;
-
-			if (!response.id) {
-				buildfire.datastore.insert(
-					{
-						settings: this.state.settings
-					},
-					'data',
-					true,
-					(err, status) => {
-						if (err) throw err;
-					}
-				);
-				return;
-			} else {
-				// insert pages into db
-				buildfire.datastore.update(
-					response.id,
-					{
-						settings: this.state.settings
-					},
-					'data',
-					(err, status) => {
-						if (err) {
-							throw err;
-						}
-					}
-				);
-			}
-		});
-	}
-
-	initSortable() {
-		let navigationCallback = e => {
-			let target = this.state.settings.pages.filter(page => {
-				return page.instanceId === e.instanceId;
-			});
-			let index = this.state.settings.pages.indexOf(target[0]);
-			buildfire.messaging.sendMessageToWidget({
-				index
-			});
-			document.querySelector(`#tab${index}`).click();
-		};
-		this.editor = new buildfire.components.pluginInstance.sortableList(
-			'#pages',
-			[],
-			{
-				confirmDeleteItem: true
-			},
-			false,
-			false,
-			{
-				itemEditable: true,
-				navigationCallback
-			}
-		);
-
-		this.editor.onOrderChange = () => {
-			let settings = this.state.settings;
-			settings.pages = this.editor.items;
-			this.setState({
-				settings
-			});
-		};
-
-		this.editor.onAddItems = e => {};
-
-		this.editor.onDeleteItem = () => {
-			let settings = this.state.settings;
-			settings.pages = this.editor.items;
-			//
-			this.setState({
-				settings
-			});
-		};
-	}
-
-	// MUST BE RUN ONCE WHEN DATA STRUCTURE CHANGES
-	debugDB() {
-		(() => {
-			buildfire.datastore.get('data', (err, response) => {
-				if (err) throw err;
-				//
-
-				// insert pages into db
-				buildfire.datastore.update(
-					response.id,
-					{
-						settings: this.state.settings
-					},
-					'data',
-					(err, status) => {
-						if (err) {
-							throw err;
-						}
-					}
-				);
-			});
-		})();
-	}
-
-	// ------------------------- PAGE METHODS ------------------------- //
-
-	// USED BY INPUT FEILDS TO UPDATE STATE
-	handleChange(event, index) {
-		const target = event.target;
-		const name = target.name;
-		let settings = this.state.settings;
-		settings.pages[index][name] = event.target.value;
-		this.setState({
-			settings
-		});
-	}
-
-	handleNodeChange(event, index, attr, type, pageIndex) {
-		if (!type) type = 'none';
-		let settings = this.state.settings;
-		let page = settings.pages[pageIndex];
-		let nodes = page.nodes;
-		let node = nodes[index];
-		switch (attr) {
-			case 'text': {
-				node.data.text = event.target.value;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			// combine these
-			case 'src': {
-				switch (node.type) {
-					case 'plugin': {
-						node.data.iconUrl = event;
-						this.setState({	settings });
-						break;
-					}
-					case 'image': {
-						node.data.src = event;
-						this.setState({	settings });
-						break;
-					}
-					case 'hero': {
-						node.data.src = event;
-						this.setState({	settings });
-						break;
-					}
-					case 'action': {
-						node.data.iconUrl = event;
-						this.setState({	settings });
-						break;
-					}
-					default:
-						return;
-				}
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'img': {
-				if (event.target.checked) {
-					node.format = 'hero';
-					node.data.header = node.data.header || 'header';
-					node.data.subtext = node.data.subtext || 'subtext';
-					nodes[index] = node;
-					this.setState({	settings });
-				} else {
-					node.format = 'image';
-					nodes[index] = node;
-					this.setState({	settings });
-				}
-				break;
-			}
-			case 'delete': {
-				// let confirm = window.confirm("Are you sure? Item will be lost!");
-
-				buildfire.notifications.confirm(
-					{
-						title: 'Remove Node',
-						message: 'Are you sure? Node will be lost!'
-						// buttonLabels: ['delete', 'cancel']
-					},
-					(err, result) => {
-						if (err) {
-							if (typeof err == 'boolean') {
-								nodes.splice(index, 1);
-								this.setState({	settings });
-								// setTimeout(() => {
-									// document.querySelector(`#page${pageIndex}node${index}`).click();
-								// }, 100);
-							} else {
-								throw err;
-							}
-						} else {
-							if (result.selectedButton.key === 'confirm') {
-								nodes.splice(index, 1);
-								this.setState({	settings });
-								// setTimeout(() => {
-								// 	document.querySelector(`#page${pageIndex}node${index}`).click();
-								// }, 1000);
-							}
-						}
-					}
-				);
-				break;
-			}
-			case 'plugin': {
-				node.data.title = event.target.value;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'action': {
-				node.data.title = `Action Item: ${event.target.value}`;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'icon': {
-				node.data.iconUrl = event.target.value;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'hero-header': {
-				node.data.header = event.target.value;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'hero-subtext': {
-				node.data.subtext = event.target.value;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'hero-button': {
-				node.data.showButton = event.target.value;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'layout': {
-				node.data.layout = event.target.value;
-				nodes[index] = node;
-				this.setState({	settings });
-				break;
-			}
-			case 'header': {
-				switch (type) {
-					case 'border':
-						node.data.border = event.target.checked;
-						nodes[index] = node;
-						this.setState({	settings });
-						break;
-					// case 'fontSize': {
-					// 	node.data.fontSize = event.target.value;
-					// nodes[index] = node;
-					// this.setState({
-					// 	nodes
-					// });
-					// this.update();
-					// 	break;
-					// }
-					default:
-						break;
-				}
-				break;
-			}
-			default:
-				return;
-		}
-	}
-
-	// OPENS IMAGELIB DIALOG WITH SPECIFIC TARGET
-	addImg(control, nodeIndex, pageIndex, remove) {
-		if (!remove) remove = false;
-		let settings = this.state.settings;
-		switch (control) {
-			case 'background': {
-				if (remove) {
-					settings.pages[pageIndex].backgroundImg = {};
-					this.setState({ settings });
-					return;
-				}
-				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-					if (err) throw err;
-					if (!res.selectedFiles[0]) return;
-					settings.pages[pageIndex].backgroundImg = res.selectedFiles[0];
-					this.setState({ settings });
-				});
-				break;
-			}
-			case 'plugin': {
-				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
-					if (err) throw err;
-					// this.setState({ backgroundImg: res.selectedFiles[0] });
-					// this.update();
-					this.handleNodeChange(res.selectedFiles[0], nodeIndex, 'src');
-				});
-				break;
-			}
-			case 'action': {
-				buildfire.imageLib.showDialog({ multiSelection: false }, (err, result) => {
-					if (err) throw err;
-					// this.setState({ backgroundImg: res.selectedFiles[0] });
-					// this.update();
-					// this.handleNodeChange(res.selectedFiles[0], nodeIndex, 'src');
-					settings.pages[pageIndex].nodes[nodeIndex].data.iconUrl = result.selectedFiles[0];
-					this.setState({ settings });
-				});
-				break;
-			}
-			case 'icon': {
-				if (remove) {
-					settings.pages[pageIndex].iconUrl = '';
-					this.setState({ settings });
-					return;
-				}
-				buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
-					if (err) throw err;
-					if (!res.selectedIcons[0]) return;
-
-					settings.pages[pageIndex].iconUrl = res.selectedIcons[0];
-					this.setState({ settings });
-					// this.update();
-					// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
-				});
-				break;
-			}
-			case 'hero': {
-				buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
-					if (err) throw err;
-					// this.setState({ iconUrl: res.selectedIcons[0] });
-					this.handleNodeChange(res.selectedFiles[0], nodeIndex, 'src');
-					// this.update();
-					// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
-				});
-				break;
-			}
-			default: {
-				buildfire.imageLib.showDialog({}, (err, result) => {
-					if (err) throw err;
-					if (result.selectedFiles.length === 0) return;
-					// this.handleNodeChange(result.selectedFiles[0], nodeIndex, 'src');
-					settings.pages[pageIndex].nodes[nodeIndex].data.src = result.selectedFiles[0];
-					this.setState({ settings });
-				});
-			}
-		}
-	}
-
-	colorPicker(attr, index, remove) {
-		let settings = this.state.settings;
-		if (remove) {
-			settings.pages[index].backgroundColor = { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } };
-			settings.pages[index].backgroundCSS = false;
-			// { backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } }, backgroundCSS: false }
-			this.setState({ settings });
-			return;
-		}
-		buildfire.colorLib.showDialog(this.state.settings.pages[index].backgroundColor, {}, null, (err, res) => {
-			if (err) throw err;
-			let bgCSS;
-			switch (res.colorType) {
-				case 'solid': {
-					bgCSS = res.solid.backgroundCSS;
-					break;
-				}
-				case 'gradient': {
-					bgCSS = res.gradient.backgroundCSS;
-					break;
-				}
-			}
-			settings.pages[index][attr] = res;
-			settings.pages[index].backgroundCSS = bgCSS;
-			this.setState({ settings });
-		});
-	}
-
 	// ADDS A NODE OBJECT OF THE CORRESPONDING TYPE
 	addNode(type, index, callback) {
 		let settings = this.state.settings;
@@ -601,102 +402,298 @@ class Content extends Component {
 				return;
 		}
 	}
+	// USED BY INPUT FEILDS TO UPDATE STATE
+	handleChange(event, index) {
+		const target = event.target;
+		const name = target.name;
+		let settings = this.state.settings;
+		settings.pages[index][name] = event.target.value;
+		this.setState({
+			settings
+		});
+	}
+	// USED BY PAGES TO EDIT THEIR NODE DATA IN CONTENT
+	handleNodeChange(event, index, attr, type, pageIndex) {
+		if (!type) type = 'none';
+		let settings = this.state.settings;
+		let page = settings.pages[pageIndex];
+		let nodes = page.nodes;
+		let node = nodes[index];
+		switch (attr) {
+			case 'text': {
+				node.data.text = event.target.value;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			// combine these
+			case 'src': {
+				switch (node.type) {
+					case 'plugin': {
+						node.data.iconUrl = event;
+						this.setState({ settings });
+						break;
+					}
+					case 'image': {
+						node.data.src = event;
+						this.setState({ settings });
+						break;
+					}
+					case 'hero': {
+						node.data.src = event;
+						this.setState({ settings });
+						break;
+					}
+					case 'action': {
+						node.data.iconUrl = event;
+						this.setState({ settings });
+						break;
+					}
+					default:
+						return;
+				}
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'img': {
+				if (event.target.checked) {
+					node.format = 'hero';
+					node.data.header = node.data.header || 'header';
+					node.data.subtext = node.data.subtext || 'subtext';
+					nodes[index] = node;
+					this.setState({ settings });
+				} else {
+					node.format = 'image';
+					nodes[index] = node;
+					this.setState({ settings });
+				}
+				break;
+			}
+			case 'delete': {
+				// let confirm = window.confirm("Are you sure? Item will be lost!");
 
-	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
-	componentDidMount() {
-		this.initSortable();
-
-		// this.debugDB();
-
-		buildfire.datastore.get('data', (err, response) => {
-			if (err) throw err;
-			// if none are present, insert default data
-			//
-
-			if (!response.id) {
-				this.setState({
-					settings: {
-						pages: [
-							{
-								title: 'new page',
-								id: Date.now(),
-								customizations: [],
-								backgroundColor: {
-									colorType: false,
-									solid: {
-										backgroundCSS: ''
-									},
-									gradient: {
-										backgroundCSS: ''
-									}
-								},
-								nodes: [
-									{
-										type: 'header',
-										data: {
-											text: 'new page'
-										}
-									}
-								]
+				buildfire.notifications.confirm(
+					{
+						title: 'Remove Node',
+						message: 'Are you sure? Node will be lost!',
+						buttonLabels: ['delete', 'cancel']
+					},
+					(err, result) => {
+						if (err) {
+							if (typeof err == 'boolean') {
+								nodes.splice(index, 1);
+								this.setState({ settings });
+								// setTimeout(() => {
+								// document.querySelector(`#page${pageIndex}node${index}`).click();
+								// }, 100);
+							} else {
+								throw err;
 							}
-						],
-						options: {
-							showTitleBar: false,
-							navPosition: 'top',
-							colorOverrides: []
+						} else {
+							if (result.selectedButton.key === 'confirm') {
+								nodes.splice(index, 1);
+								this.setState({ settings });
+								// setTimeout(() => {
+								// 	document.querySelector(`#page${pageIndex}node${index}`).click();
+								// }, 1000);
+							}
 						}
 					}
-				});
-			} else {
-				// otherwise, if all pages have been removed, insert default data
-				if (response.data.settings.pages.length === 0) {
-					this.addPage();
-					// setTimeout(() => {
-					// 	document.querySelector(`#tab0`).click();
-					// }, 250);
-				} else {
-					// update settings
-					this.setState({
-						settings: response.data.settings
-					});
-				}
+				);
+				break;
 			}
-		});
-		let tutorials = localStorage.getItem('tutorial');
-		if (tutorials === 'true') {
-			let tutorials = this.state.tutorials;
-			tutorials = true;
-			this.setState({
-				tutorials
-			});
-		} else {
-			let tutorials = this.state.tutorials;
-			tutorials = false;
-			this.setState({
-				tutorials
-			});
+			case 'plugin': {
+				node.data.title = event.target.value;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'action': {
+				node.data.title = `Action Item: ${event.target.value}`;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'icon': {
+				node.data.iconUrl = event.target.value;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'hero-header': {
+				node.data.header = event.target.value;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'hero-subtext': {
+				node.data.subtext = event.target.value;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'hero-button': {
+				node.data.showButton = event.target.value;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'layout': {
+				node.data.layout = event.target.value;
+				nodes[index] = node;
+				this.setState({ settings });
+				break;
+			}
+			case 'header': {
+				switch (type) {
+					case 'border':
+						node.data.border = event.target.checked;
+						nodes[index] = node;
+						this.setState({ settings });
+						break;
+					// case 'fontSize': {
+					// 	node.data.fontSize = event.target.value;
+					// nodes[index] = node;
+					// this.setState({
+					// 	nodes
+					// });
+					// this.update();
+					// 	break;
+					// }
+					default:
+						break;
+				}
+				break;
+			}
+			default:
+				return;
 		}
 	}
-	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
-	componentDidUpdate() {
-		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
-		console.log(this.state.settings.pages, this.editor.items);
+	// OPENS IMAGELIB DIALOG WITH SPECIFIC TARGET
+	addImg(control, nodeIndex, pageIndex, remove) {
+		if (!remove) remove = false;
+		let settings = this.state.settings;
+		switch (control) {
+			case 'background': {
+				if (remove) {
+					settings.pages[pageIndex].backgroundImg = {};
+					this.setState({ settings });
+					return;
+				}
+				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+					if (err) throw err;
+					if (!res.selectedFiles[0]) return;
+					settings.pages[pageIndex].backgroundImg = res.selectedFiles[0];
+					this.setState({ settings });
+				});
+				break;
+			}
+			case 'plugin': {
+				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+					if (err) throw err;
+					// this.setState({ backgroundImg: res.selectedFiles[0] });
+					// this.update();
+					this.handleNodeChange(res.selectedFiles[0], nodeIndex, 'src');
+				});
+				break;
+			}
+			case 'action': {
+				buildfire.imageLib.showDialog({ multiSelection: false }, (err, result) => {
+					if (err) throw err;
+					// this.setState({ backgroundImg: res.selectedFiles[0] });
+					// this.update();
+					// this.handleNodeChange(res.selectedFiles[0], nodeIndex, 'src');
+					settings.pages[pageIndex].nodes[nodeIndex].data.iconUrl = result.selectedFiles[0];
+					this.setState({ settings });
+				});
+				break;
+			}
+			case 'icon': {
+				if (remove) {
+					settings.pages[pageIndex].iconUrl = '';
+					this.setState({ settings });
+					return;
+				}
+				buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
+					if (err) throw err;
+					if (!res.selectedIcons[0]) return;
 
-		this.debounceSync();
-		this.editor.loadItems(this.state.settings.pages, false, false);
+					settings.pages[pageIndex].iconUrl = res.selectedIcons[0];
+					this.setState({ settings });
+					// this.update();
+					// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
+				});
+				break;
+			}
+			case 'hero': {
+				buildfire.imageLib.showDialog({ multiSelection: false, showFiles: false }, (err, res) => {
+					if (err) throw err;
+					// this.setState({ iconUrl: res.selectedIcons[0] });
+					this.handleNodeChange(res.selectedFiles[0], nodeIndex, 'src');
+					// this.update();
+					// this.handleNodeChange(res.selectedFiles[0], index, 'icon');
+				});
+				break;
+			}
+			default: {
+				buildfire.imageLib.showDialog({}, (err, result) => {
+					if (err) throw err;
+					if (result.selectedFiles.length === 0) return;
+					// this.handleNodeChange(result.selectedFiles[0], nodeIndex, 'src');
+					settings.pages[pageIndex].nodes[nodeIndex].data.src = result.selectedFiles[0];
+					this.setState({ settings });
+				});
+			}
+		}
 	}
+	// USED BY PAGES TO SELECT AND APPLY COLORS
+	colorPicker(attr, index, remove) {
+		let settings = this.state.settings;
+		if (remove) {
+			settings.pages[index].backgroundColor = { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } };
+			settings.pages[index].backgroundCSS = false;
+			// { backgroundColor: { colorType: false, solid: { backgroundCSS: '' }, gradient: { backgroundCSS: '' } }, backgroundCSS: false }
+			this.setState({ settings });
+			return;
+		}
+		buildfire.colorLib.showDialog(this.state.settings.pages[index].backgroundColor, {}, null, (err, res) => {
+			if (err) throw err;
+			let bgCSS;
+			switch (res.colorType) {
+				case 'solid': {
+					bgCSS = res.solid.backgroundCSS;
+					break;
+				}
+				case 'gradient': {
+					bgCSS = res.gradient.backgroundCSS;
+					break;
+				}
+			}
+			settings.pages[index][attr] = res;
+			settings.pages[index].backgroundCSS = bgCSS;
+			this.setState({ settings });
+		});
+	}
+	// USED BY THE PAGES TO CHANGE THEIR ORDER
+	reorderNodes(index, nodes) {
+		let settings = this.state.settings;
+		settings.pages[index].nodes = nodes;
+		this.setState({ settings });
+	}
+
 
 	// --------------------------- RENDERING --------------------------- //
 
 	// LOOPS THROUGH AND RETURNS PAGES
 	renderPages() {
-		console.log(this.state.settings.pages);
+		
 
 		// if (this.state.settings.pages.length < 1) return;
-		let tutorials = JSON.parse(localStorage.getItem('tutorial'));
+		// let tutorials = JSON.parse(localStorage.getItem('tutorial'));
 		let pages = [];
 		this.state.settings.pages.map((page, index) => {
-			pages.push(<Page key={index} index={index} tutorials={tutorials} handleChange={this.handleChange} handleNodeChange={this.handleNodeChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
+			pages.push(<Page key={index} index={index} handleChange={this.handleChange} handleNodeChange={this.handleNodeChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
 

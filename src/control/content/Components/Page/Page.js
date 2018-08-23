@@ -35,17 +35,14 @@ class Page extends Component {
 			backgroundImg: {},
 			iconUrl: '',
 			backgroundCSS: '',
-			tutorials: false
+			// tutorials: false
 		};
 	}
 
-	// ------------------------- DATA HANDLING ------------------------- //
+	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
-	// ON MOUNT...
+	// ON MOUNT INIT SORTABLE NODE LIST 
 	componentDidMount() {
-		console.count(`page ${this.props.index} MOUNT`);
-		console.warn(this.state, this.props);
-
 		// Unknown bug caused main panel to render with the wrong attributes
 		let panel = document.getElementById(`panel${this.props.index}`);
 		if (panel.getAttribute('data-toggle') === 'show') {
@@ -53,24 +50,21 @@ class Page extends Component {
 			panel.classList.replace('panel-show', 'panel-hide');
 		}
 
-
 		let title = '';
 		this.props.data.title.length > 0 ? (title = this.props.data.title) : (title = 'untitled');
 
-		this.setState({
-			// index: this.props.index,
-			// title: title,
-			// nodes: this.props.data.nodes,
-			// backgroundColor: this.props.data.backgroundColor,
-			// backgroundImg: this.props.data.backgroundImg,
-			// iconUrl: this.props.data.iconUrl,
-			// backgroundCSS: this.props.data.backgroundColor != false ? (this.props.data.backgroundColor.colorType === 'solid' ? this.props.data.backgroundColor.solid.backgroundCSS : this.props.data.backgroundColor.gradient.backgroundCSS) : false,
-			tutorials: this.props.tutorials
-		});
-
+		// this.setState({ tutorials: this.props.tutorials });
 		this.initEditor();
+		this.editor.loadItems(this.props.data.nodes, false);
+	}
+	// ON UPDATE, REFRESH THE SORTABLE NODE LIST'S DATA
+	componentDidUpdate() {
+		this.editor.loadItems(this.props.data.nodes, false);
 	}
 
+	// ------------------------- DATA HANDLING ------------------------- //
+
+	// SET UP THE SORTABLE NODE LIST
 	initEditor() {
 		let navigationCallback = e => {
 			let target = this.props.data.nodes.filter(node => {
@@ -94,200 +88,18 @@ class Page extends Component {
 			this.reorderNodes(this.props.index, this.editor.items);
 		};
 	}
-
-	componentDidUpdate() {
-		console.warn(this.state, this.props);
-		console.log(this.props.data.title, this.state.title);
-		this.editor.loadItems(this.props.data.nodes, false);
-	}
-
-	// USED TO EDIT NODES
-	// handleNodeChange(event, index, attr, type) {
-	// 	if (!type) type = 'none';
-	// 	let nodes = this.props.data.nodes;
-	// 	let node = this.props.data.nodes[index];
-	// 	switch (attr) {
-	// 		case 'text': {
-	// 			node.data.text = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'src': {
-	// 			switch (node.type) {
-	// 				case 'plugin': {
-	// 					node.data.iconUrl = event;
-	// 					break;
-	// 				}
-	// 				case 'image': {
-	// 					node.data.src = event;
-	// 					break;
-	// 				}
-	// 				case 'hero': {
-	// 					node.data.src = event;
-	// 					break;
-	// 				}
-	// 				case 'action': {
-	// 					node.data.iconUrl = event;
-	// 					break;
-	// 				}
-	// 				default:
-	// 					return;
-	// 			}
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'delete': {
-	// 			// let confirm = window.confirm("Are you sure? Item will be lost!");
-
-	// 			buildfire.notifications.confirm(
-	// 				{
-	// 					title: 'Remove Node',
-	// 					message: 'Are you sure? Node will be lost!'
-	// 					// buttonLabels: ['delete', 'cancel']
-	// 				},
-	// 				(err, result) => {
-	// 					if (err) {
-	// 						if (typeof err == 'boolean') {
-	// 							nodes.splice(index, 1);
-	// 							this.setState({
-	// 								nodes
-	// 							});
-	// 							setTimeout(() => {
-	// 								document.querySelector(`#page${this.props.index}node${index}`).click();
-	// 							}, 100);
-	// 							this.update();
-	// 						} else {
-	// 							throw err;
-	// 						}
-	// 					} else {
-	// 						if (result.selectedButton.key === 'confirm') {
-	// 							nodes.splice(index, 1);
-	// 							this.setState({
-	// 								nodes
-	// 							});
-	// 							setTimeout(() => {
-	// 								document.querySelector(`#page${this.props.index}node${index}`).click();
-	// 							}, 1000);
-	// 							this.update();
-	// 						}
-	// 					}
-	// 				}
-	// 			);
-	// 			break;
-	// 		}
-	// 		case 'plugin': {
-	// 			node.data.title = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'action': {
-	// 			node.data.title = `Action Item: ${event.target.value}`;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'icon': {
-	// 			node.data.iconUrl = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'hero-header': {
-	// 			node.data.header = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'hero-subtext': {
-	// 			node.data.subtext = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'hero-button': {
-	// 			//
-	// 			node.data.showButton = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'layout': {
-	// 			node.data.layout = event.target.value;
-	// 			nodes[index] = node;
-	// 			this.setState({
-	// 				nodes
-	// 			});
-	// 			this.update();
-	// 			break;
-	// 		}
-	// 		case 'header': {
-	// 			switch (type) {
-	// 				case 'border':
-	// 					node.data.border = event.target.checked;
-	// 					nodes[index] = node;
-	// 					this.setState({
-	// 						nodes
-	// 					});
-	// 					this.update();
-	// 					break;
-	// 				// case 'fontSize': {
-	// 				// 	node.data.fontSize = event.target.value;
-	// 				// nodes[index] = node;
-	// 				// this.setState({
-	// 				// 	nodes
-	// 				// });
-	// 				// this.update();
-	// 				// 	break;
-	// 				// }
-	// 				default:
-	// 					break;
-	// 			}
-	// 			break;
-	// 		}
-	// 		default:
-	// 			return;
-	// 	}
-	// }
-
+	// OPEN THE LAST NODE ADDED
 	openLast() {
 		let n = this.props.data.nodes.length - 1;
 		document.querySelector(`#page${this.props.index}node${n}`).click();
 	}
-
 	// DELETES THIS PAGE
 	delete() {
 		buildfire.notifications.confirm(
 			{
 				title: 'Remove Page',
 				message: 'Are you sure? Page will be lost!',
-				buttonLabels: ['cancel', 'delete']
+				buttonLabels: ['delete', 'cancel']
 			},
 			(err, result) => {
 				if (err) {
@@ -297,6 +109,8 @@ class Page extends Component {
 						throw err;
 					}
 				} else {
+					if (!result) return;
+					
 					if (result.selectedButton.key === 'confirm') {
 						this.deletePage(this.props.index);
 					}
@@ -304,7 +118,6 @@ class Page extends Component {
 			}
 		);
 	}
-
 	// PIPES CURRENT STATE TO CONTROL'S STATE, UPDATES PAGE AT THIS INDEX
 	update(updateAll, target) {
 		if (!updateAll) {
@@ -336,7 +149,6 @@ class Page extends Component {
 			this.updatePage(this.props.index, data, true);
 		}
 	}
-
 	// USED TO TOGGLE MODALS OR PANELS
 	toggle(e, type) {
 		if (!e.target.id) return;
@@ -371,19 +183,16 @@ class Page extends Component {
 				panel.classList.remove('panel-show');
 				panel.classList.add('panel-hide');
 				panel.setAttribute('data-toggle', 'hide');
-				// this.setState({ show: false });
 				break;
 			case 'hide':
 				panel.classList.remove('panel-hide');
 				panel.classList.add('panel-show');
 				panel.setAttribute('data-toggle', 'show');
-				// this.setState({ show: true });
 				break;
 			default:
 				break;
 		}
 	}
-
 	// USED TO TOGGLE A SPECIAL MODAL FOR PLUGINS AND ACTION NODE CREATION
 	toggleModal(index, target, toggle) {
 		if (toggle === 'show') {
@@ -392,23 +201,23 @@ class Page extends Component {
 			document.getElementById(`${target}${index}`).classList.replace('panel-show', 'panel-hide');
 		}
 	}
+	// HANDLES TUTORIAL DISPLAY
+	// toggleTutorials(control) {
+	// 	switch (control) {
+	// 		case 'on':
+	// 			localStorage.setItem('tutorial', true);
 
-	toggleTutorials(control) {
-		switch (control) {
-			case 'on':
-				localStorage.setItem('tutorial', true);
+	// 			this.setState({ tutorials: true });
+	// 			break;
+	// 		case 'off':
+	// 			localStorage.setItem('tutorial', false);
+	// 			this.setState({ tutorials: false });
+	// 			break;
 
-				this.setState({ tutorials: true });
-				break;
-			case 'off':
-				localStorage.setItem('tutorial', false);
-				this.setState({ tutorials: false });
-				break;
-
-			default:
-				break;
-		}
-	}
+	// 		default:
+	// 			break;
+	// 	}
+	// }
 
 	// --------------------------- RENDERING --------------------------- //
 
@@ -583,11 +392,7 @@ class Page extends Component {
 									<div className="tab">
 										<label>Full screen {'  '}</label>
 
-										<input
-											type="checkbox"
-											id={`${node.instanceId}`}
-											onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)}
-										/>
+										<input type="checkbox" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} />
 									</div>
 									<div className="panel-hide">
 										{setTimeout(() => {
@@ -804,23 +609,23 @@ class Page extends Component {
 	}
 
 	render() {
-		let pageTutorialTop = (
-			<div className="alert alert-primary" style="font-size: 16px" role="alert">
-				Welcome to your first page! You can change the title and add elements below!
-			</div>
-		);
-		let pageTutorialMid = (
-			<div className="alert alert-primary" style="font-size: 16px" role="alert">
-				All of the elements on your page will appear here. You can drag them to reorder, or click them to edit!
-			</div>
-		);
-		let pageTutorialBottom = (
-			<div className="alert alert-primary" style="font-size: 16px" role="alert">
-				You can set a navbar icon and change the background color and image under "options"!
-			</div>
-		);
+		// let pageTutorialTop = (
+		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
+		// 		Welcome to your first page! You can change the title and add elements below!
+		// 	</div>
+		// );
+		// let pageTutorialMid = (
+		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
+		// 		All of the elements on your page will appear here. You can drag them to reorder, or click them to edit!
+		// 	</div>
+		// );
+		// let pageTutorialBottom = (
+		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
+		// 		You can set a navbar icon and change the background color and image under "options"!
+		// 	</div>
+		// );
 		return (
-			<div id={Date.now()}>
+			<div>
 				<div className="panel panel-default no-border">
 					<div className="panel-heading tab panel-hide">
 						<div className="toggle-group">
@@ -844,13 +649,12 @@ class Page extends Component {
 							onClick={e => {
 								e.preventDefault();
 								e.stopPropagation();
-								// e.nativeEvent.stopImmediatePropagation();
-								// e.nativeEvent.stopPropagation();
+								// this.state.tutorials ? this.toggleTutorials('off') : null;
 								this.toggle(e);
 							}}
 						/>
-						<div className="panel-body nodepanel" style="top: 10%; height: 80%">
-							{this.state.tutorials ? (
+						<div className="panel-body pagepanel">
+							{/* {this.state.tutorials ? (
 								<a
 									style={'position: absolute; top: 5px; right: 15px; z-index: 10000'}
 									onClick={e => {
@@ -876,16 +680,16 @@ class Page extends Component {
 							// 	}}>
 							// 	Show tutorials
 							// </a>
-							}
+							} */}
 							<div className="container">
 								<div className="row">
-									<div className="info">{this.state.tutorials ? pageTutorialTop : false}</div>
+									{/* <div className="info">{this.state.tutorials ? pageTutorialTop : false}</div> */}
 
 									<div className="col-sm-12 header" />
 									<form>
 										<div className="input-group">
-											<h4>Edit Page Title</h4>
-
+											<h4>Edit Page Title<span style={'margin-left: 10px;'} className='glyphicon glyphicon-info-sign tooltip-custom'><div className='alert alert-info tooltip-info'>You can change the Page title here. This apprears in the Navbar if no icon is selected.</div></span></h4>
+											
 											<input type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={e => this.handleChange(e, this.props.index)} />
 										</div>
 									</form>
@@ -971,7 +775,7 @@ class Page extends Component {
 
 									<div className="col-sm-12">
 										<div style="margin-bottom: 15px;">
-											<h5 className="text-center">Add Elements</h5>
+											<h5 className="text-center">Add Elements<span style={'margin-left: 10px;'} className='glyphicon glyphicon-info-sign tooltip-custom'><div className='alert alert-info tooltip-info' style={'top: -80px; left: -28.5vw; width: 65vw;'}>You can add elements to this page by clicking on the buttons below. All elements appear in the list below. Click to edit, or drag to rearrange.</div></span></h5>
 											<div className="btn-group tab" id={`menu${this.props.index}`}>
 												<button
 													className="btn btn-default add tab-toggle"
@@ -1035,10 +839,10 @@ class Page extends Component {
 									{/* </div> */}
 									<div className="col-sm-12">{this.renderNodes()}</div>
 									{/* <div className="info">{localStorage.getItem('tutorial') === 'true' ? pageTutorialMid : false}</div> */}
-									<div className="info">{this.state.tutorials ? pageTutorialMid : false}</div>
+									{/* <div className="info">{this.state.tutorials ? pageTutorialMid : false}</div> */}
 
 									<div className="col-sm-12" id={`nodelist${this.props.index}`} />
-									<div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div>
+									{/* <div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div> */}
 									<div className="tab modal-footer">
 										<button
 											className="btn btn-success"
@@ -1046,8 +850,8 @@ class Page extends Component {
 											id={`tab${this.props.index}`}
 											index={this.props.index}
 											onClick={e => {
-												this.state.tutorials ? this.setState({ tutorials: false }) : null;
-												localStorage.setItem('tutorial', false);
+												// this.state.tutorials ? this.toggleTutorials('off') : null;
+												// localStorage.setItem('tutorial', false);
 												this.toggle(e);
 											}}>
 											<span className="glyphicon glyphicon-ok" />
