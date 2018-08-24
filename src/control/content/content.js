@@ -26,6 +26,8 @@ class Content extends Component {
 			settings: {
 				pages: [],
 				options: {
+					headerImg: false,
+					headerImgSrc: 'https://via.placeholder.com/350x150',
 					backgroundImg: '',
 					backgroundLrg: '',
 					renderTitlebar: true,
@@ -43,6 +45,8 @@ class Content extends Component {
 		// this.debugDB();
 		// debugger
 		this.initSortable();
+
+
 
 		// this.debugDB();
 
@@ -115,10 +119,12 @@ class Content extends Component {
 		// 		tutorials
 		// 	});
 		// }
+
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
+		console.warn(this.state);
 
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
@@ -468,9 +474,9 @@ class Content extends Component {
 					switch (event.target.name) {
 						case 'hero':
 							node.format = 'hero';
-					node.data.header = node.data.header || 'header';
-					node.data.subtext = node.data.subtext || 'subtext';
-					nodes[index] = node;
+							node.data.header = node.data.header || 'header';
+							node.data.subtext = node.data.subtext || 'subtext';
+							nodes[index] = node;
 							break;
 						case 'custom': {
 							node.format = 'custom';
@@ -480,7 +486,7 @@ class Content extends Component {
 						default:
 							break;
 					}
-					
+
 					this.setState({ settings });
 				} else {
 					node.format = 'image';
@@ -594,6 +600,20 @@ class Content extends Component {
 		if (!remove) remove = false;
 		let settings = this.state.settings;
 		switch (control) {
+			case 'header': {
+				if (remove) {
+					settings.options.headerImgSrc = 'https://via.placeholder.com/350x150';
+					this.setState({ settings });
+					return;
+				}
+				buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+					if (err) throw err;
+					if (!res.selectedFiles[0]) return;
+					settings.options.headerImgSrc = res.selectedFiles[0];
+					this.setState({ settings });
+				});
+				break;
+			}
 			case 'background': {
 				if (remove) {
 					settings.pages[pageIndex].backgroundImg = {};
@@ -717,9 +737,54 @@ class Content extends Component {
 	}
 
 	render() {
+		let headerImgDiag = (
+			<div className="main col-md-9 pull-right">
+				<div className="border-radius-four border-grey">
+					<div className="d-item">
+						<div className="media-holder pull-left" onClick={() => this.addImg('header', false, false, false)}>
+							<img src={this.state.settings.options.headerImgSrc ? this.state.settings.options.headerImgSrc : './assets/noImg.PNG'} />
+						</div>
+						<div className="copy pull-right">
+							<div className="pull-right">
+								<span className="btn-edit-icon btn-primary" style="display: inline-block" />
+								<span className="btn-icon btn-delete-icon btn-danger transition-third" style="display: inline-block; margin-left: 5px; pointer-events: all;" onClick={() => this.addImg('header', false, false, true)}/>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
 		return (
 			<div className="container-fluid">
 				<div className="row">
+					<div className="col-md-12">
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left" style="display: initial">
+								<span title="Add a header Image to appear at the top of the plugin.">Header Image: </span>
+								<input
+									type="checkbox"
+									name="header-img"
+									onChange={e => {
+										let settings = this.state.settings;
+										switch (e.target.checked) {
+											case true:
+												settings.options.headerImg = true;
+												this.setState({ settings });
+												break;
+											case false:
+												settings.options.headerImg = false;
+												this.setState({ settings });
+												break;
+											default:
+												break;
+										}
+									}}
+									checked={this.state.settings.options.headerImg}
+								/>
+							</div>
+							{this.state.settings.options.headerImg ? headerImgDiag : false}
+						</div>
+					</div>
 					<div className="col-md-12">
 						<div className="panel panel-default">
 							<div className="panel-body">
@@ -731,7 +796,7 @@ class Content extends Component {
 							</div>{' '}
 						</div>{' '}
 					</div>{' '}
-					<div title='Your pages appear in order here. Click a page title to edit it, or drag to reorder.' className="col-md-12" id="pages">
+					<div title="Your pages appear in order here. Click a page title to edit it, or drag to reorder." className="col-md-12" id="pages">
 						{' '}
 						{/* <h4 className="text-center">Pages</h4> */} {this.renderPages()}{' '}
 					</div>{' '}

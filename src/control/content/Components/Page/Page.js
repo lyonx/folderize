@@ -515,6 +515,8 @@ class Page extends Component {
 								id={`defaultImg${index}`}
 								type="checkbox"
 								onChange={e => {
+									
+									
 									switch (e.target.checked) {
 										case true:
 											{
@@ -529,7 +531,8 @@ class Page extends Component {
 										case false:
 											{
 												let prevImg = localStorage.getItem(`prevImg${node.instanceId}`);
-
+												
+												if (prevImg === 'undefined') prevImg = false;
 												if (prevImg) {
 													this.handleNodeChange(prevImg, index, 'src', false, this.props.index);
 												} else {
@@ -541,10 +544,43 @@ class Page extends Component {
 											break;
 									}
 								}}
+								checked={node.data.iconUrl ? node.data.iconUrl.indexOf('/plugins/') > -1 ? true : false : false}
 							/>
 						</div>
 					);
-
+					
+					
+					let linkOnly = (
+						<div style={'position: absolute; right: 15px; z-index: 10000'}>
+						<label Htmlfor="link-only">Link Only</label>
+						<input
+							name="link-only"
+							id={`linkOnly${index}`}
+							type="checkbox"
+							onChange={e => {
+								switch (e.target.checked) {
+									case true:
+										{
+											node.format = 'linkOnly';
+											this.update();
+										}
+										break;
+									case false:
+										{
+											node.format = 'default';
+											this.update();
+										}
+										break;
+									default:
+										break;
+								}
+							}}
+							checked={node.format === 'linkOnly' ? true : false}
+						/>
+					</div>
+					);
+					let image;
+					node.data.iconUrl ? image = node.data.iconUrl : image = './assets/noImg.PNG';
 					nodes.push(
 						<div>
 							<div className="panel panel-default" style={'display:none'}>
@@ -569,7 +605,8 @@ class Page extends Component {
 								/>
 								<div className="panel-body nodepanel">
 									{node.data.action === 'linkToApp' ? defaultImgDiag : null}
-									<div className="panel-hide">
+									{node.data.action === 'linkToWeb' ? linkOnly : null}
+									{/* <div className="panel-hide">
 										{node.data.iconUrl
 											? null
 											: setTimeout(() => {
@@ -580,13 +617,13 @@ class Page extends Component {
 														this.update();
 													});
 											  }, 100)}
-									</div>
+									</div> */}
 									{/* <div className="action"> */}
 									<h4 className="text-center">Selected Image:</h4>
-									<div className="plugin-thumbnail" title="Click to change Image. You can change the appearance of Action Items in the Design tab." style={`background: url("${node.data.iconUrl}")`} alt="..." onClick={e => this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index)} />
-									<h6 className="text-center">Click to change</h6>
+									{node.format === 'linkOnly'? false : <div><div className="plugin-thumbnail" title="Click to change Image. You can change the appearance of Action Items in the Design tab." style={`background: url("${image}")`} alt="..." onClick={e => this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index)} />
+									<h6 className="text-center">Click to change</h6></div>}
 
-									<h3 className="action-title">Action Text: {node.data.title}</h3>
+									<h3 className="action-title">Action Text: {node.data.title ? node.data.title : 'Untitled'}</h3>
 									{/* </div> */}
 									<hr />
 									<div className="tab">

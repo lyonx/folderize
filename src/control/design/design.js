@@ -163,7 +163,25 @@ class Design extends React.Component {
 			this.setState({ settings });
 			return;
 		}
-		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, {}, null, (err, res) => {
+		let onChange = (err, res) => {
+			if (err) throw err;
+			console.log(res);
+			
+			switch (res.colorType) {
+				case 'solid': {
+					bgCSS = res.solid.backgroundCSS;
+					buildfire.messaging.sendMessageToWidget({ color: bgCSS});
+					break;
+				}
+				case 'gradient': {
+					bgCSS = res.gradient.backgroundCSS;
+					buildfire.messaging.sendMessageToWidget({ color: bgCSS});
+					break;
+				}
+			}
+			
+		};
+		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, {backdrop: false}, onChange, (err, res) => {
 			if (err) throw err;
 			switch (res.colorType) {
 				case 'solid': {

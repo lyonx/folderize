@@ -19,8 +19,7 @@ class Page extends Component {
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
 		// this.setState({ data: this.props.data });
-		console.warn(this.props);
-		
+
 		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
 		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
 	}
@@ -73,8 +72,7 @@ class Page extends Component {
 				options.width = window.innerWidth;
 				options.height = options.width * 0.41;
 			}
-			
-			
+
 			cropped = buildfire.imageLib.cropImage(image, options);
 		} else {
 			options.width = window.innerWidth;
@@ -118,10 +116,12 @@ class Page extends Component {
 					);
 					break;
 				}
-				case 'desc': {					
+				case 'desc': {
 					nodes.push(
 						<div className="col-sm-12">
-							<p className="description" style={`font-size: ${this.props.data.bodyFontSize}px`}>{node.data.text}</p>
+							<p className="description" style={`font-size: ${this.props.data.bodyFontSize}px`}>
+								{node.data.text}
+							</p>
 						</div>
 					);
 					break;
@@ -146,11 +146,24 @@ class Page extends Component {
 						if (node.format === 'custom') {
 							height = node.data.height;
 						}
+						console.log(node);
+
 						nodes.push(
 							<div className="col-sm-12">
 								<div className="image-wrap">
-									<Lazyload offsetHorizontal={50} height={node.format === 'custom' ? window.innerWidth * height : window.innerWidth * 0.54}>
-										<div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} />
+									<Lazyload
+										offsetHorizontal={50}
+										// onContentVisible={() => {
+										// 	let ele = document.getElementById(`loader${node.instanceId}`);
+										// 	console.log(ele.parentNode);
+
+										// 	ele.parentNode.removeChild(ele);
+										// }}
+										height={node.format === 'custom' ? window.innerWidth * height : window.innerWidth * 0.54}>
+										{/* <div> */}
+											<div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} />
+											{/* <div className="img-loader" id={`loader${node.instanceId}`} /> */}
+										{/* </div> */}
 									</Lazyload>
 								</div>
 							</div>
@@ -172,18 +185,31 @@ class Page extends Component {
 				}
 				case 'action': {
 					if (!node.data) return;
-					let croppedImg = this.cropImg(node.data.iconUrl, true);
+					let croppedImg = '';
+
+					node.data.iconUrl === 'undefined' ? (node.data.iconUrl = false) : false;
+					// if (node.data.iconUrl) {
+					// 	croppedImg = this.cropImg(node.data.iconUrl, true);
+					// } else {
+					// 	croppedImg = false;
+					// }
+					node.data.iconUrl ? (croppedImg = this.cropImg(node.data.iconUrl, true)) : (croppedImg = false);
+					let classList;
+					node.format === 'linkOnly' ? (classList = 'plugin linkOnly') : (classList = 'plugin');
 					nodes.push(
 						<div className="col-sm-12">
 							<div
-								className="plugin"
+								className={classList}
 								onClick={e => {
 									buildfire.actionItems.execute(node.data, (err, res) => {
 										if (err) throw err;
 									});
 								}}>
-								<img className="plugin-thumbnail" src={`${croppedImg}`} alt="..." />
-								<h3 className="plugin-title">{node.data.title}</h3>
+								{croppedImg ? <img className="plugin-thumbnail" src={`${croppedImg}`} alt="..." /> : false}
+
+								<h3 style={node.format === 'linkOnly' ? `font-size: ${this.props.data.bodyFontSize}px` : false} className={node.format === 'linkOnly' ? 'plugin-title transition-half primary-color' : 'plugin-title'}>
+									{node.data.title}
+								</h3>
 							</div>
 						</div>
 					);
@@ -219,8 +245,12 @@ class Page extends Component {
 				<div className="row">{this.renderNodes()}</div>
 			</div>
 		);
+		let style = '';
+		this.props.data.backgroundImg ? (style += `background: url("${this.props.data.backgroundImg}");`) : '';
+		this.props.header ? (style += `height: 80vh`) : '';
+
 		return (
-			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={this.props.data.backgroundImg ? `background: url("${this.props.data.backgroundImg}")` : null}>
+			<li className="js_slide" index={this.props.index} id={`slide${this.props.index}`} style={style}>
 				{/* if the page is not next up or not currently in the viewport, dont render its content */}
 				{this.state.offset > window.innerWidth + 100 ? null : content}
 			</li>

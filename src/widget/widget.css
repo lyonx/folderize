@@ -36,6 +36,20 @@
 	}
 }
 
+.img-loader {
+	position: relative;
+	z-index: -1;
+	margin: auto;
+	border: 5px solid #f3f3f300;
+	border-radius: 50%;
+	border-top: 5px solid #3498db;
+	top: -26.5vh;
+	width: 50px;
+	height: 50px;
+	-webkit-animation: spin 2s linear infinite; /* Safari */
+	animation: spin 2s linear infinite;
+}
+
 /* DOT NAVIGATION */
 
 #dot-nav > .active {
@@ -136,6 +150,7 @@ h6 {
 
 .images {
 	height: 100%;
+	z-index: 1;
 	margin-bottom: 15px;
 	width: 100vw;
 	background-size: cover !important;
@@ -155,6 +170,14 @@ h6 {
 	padding-right: 15px;
 }
 
+.header-wrap {
+	height: 10vh;
+}
+
+.header-image {
+	height: 10vh;
+}
+
 .plugin-title {
 	flex: 1;
 	padding-left: 15px;
@@ -165,11 +188,28 @@ h6 {
 .plugin {
 	margin-top: -1px;
 	margin-left: -15px;
+	margin-right: -15px;
 	padding: 15px;
 	border-top: 1px solid rgba(57, 52, 46, 0.25) !important;
 	border-bottom: 1px solid rgba(57, 52, 46, 0.25) !important;
 	display: flex;
 }
+
+.linkOnly {
+	padding-top: 0px;
+	padding-bottom: 0px;
+	border-bottom: 0px !important;
+	border-top: 0px !important;
+}
+.linkOnly > h3 {
+	font-size: 2.5rem;
+	line-height: inherit !important;
+	text-align: unset !important;
+	background: none !important;
+	min-height: unset !important;
+	max-height: unset !important;
+}
+
 #hero {
 	position: relative;
 	top: 50%;

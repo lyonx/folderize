@@ -111,8 +111,12 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
-			if (this.state.settings.pages.length === 0) return;
-			this.slider.slideTo(message.index);
+			if (message.color) {
+				document.querySelector('#sandbox').setAttribute('style', message.color);
+			} else {
+				if (this.state.settings.pages.length === 0) return;
+				this.slider.slideTo(message.index);
+			}
 		};
 	}
 	// FETCHES DATA FROM DB, IMPORTANT WHEN WIDGET IS DEPLOYED
@@ -260,6 +264,7 @@ class Widget extends Component {
 					icon.classList.add(`${url[0]}`);
 					icon.classList.add(`${url[1]}`);
 					icon.classList.add(`glyphicon`);
+					dot_tabs[i].innerHTML = '';
 					dot_tabs[i].appendChild(icon);
 					// OTHERWISE SET TITLE
 				} else {
@@ -298,9 +303,9 @@ class Widget extends Component {
 			case true:
 				BG = this.state.settings.options.backgroundLrg;
 				break;
-		
+
 			default:
-			BG = this.state.settings.options.backgroundImg;
+				BG = this.state.settings.options.backgroundImg;
 				break;
 		}
 		return `background: url("${BG}")`;
@@ -333,7 +338,7 @@ class Widget extends Component {
 			// PASS PROPS TO PAGE AND PUSH
 			page.headerFontSize = this.state.settings.options.headerFontSize;
 			page.bodyFontSize = this.state.settings.options.bodyFontSize;
-			pages.push(<Page index={this.state.settings.pages.indexOf(page)} layout={this.state.settings.options.layout} data={page} />);
+			pages.push(<Page index={this.state.settings.pages.indexOf(page)} header={this.state.settings.options.headerImg} layout={this.state.settings.options.layout} data={page} />);
 		});
 
 		// FORMAT THE PAGES AND NAV AFTER RETURN STATEMENT
@@ -343,12 +348,35 @@ class Widget extends Component {
 
 	render() {
 		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" />;
+		// let header = <div style={`background: url("${this.state.settings.options.headerImgSrc}");`} className="header-image"/>;
+		let cropped;
+		setTimeout(() => {
+			// console.log(document.querySelector('.header-image').clientHeight);
+		}, 200);
+		// let options = {
+		// 	width: window.innerWidth * 1.114,
+		// 	height: (window.innerHeight * 1.114) / 10
+		// };
+		let ratio = window.devicePixelRatio;
+		let options = {
+			width: document.body.clientWidth / ratio,
+			height: (document.body.clientHeight / ratio) / 10,
+			disablePixelRation: true
+		};
+		console.log(options, ratio);
+		if (this.state.settings.options.headerImgSrc && options) cropped = buildfire.imageLib.cropImage(this.state.settings.options.headerImgSrc, options);
+		let header = (
+			<div className="header-wrap">
+				<div style={`background: url("${cropped}");`} className="header-image" />
+			</div>
+		);
 		return (
 			<div className="backgroundColor" style={this.getBG()} id="container foo backgroundColor">
 				<div id="cover" className="hide-cover">
 					<div className="loader" />
 				</div>
 				<div id="sandbox" style={`${this.state.settings.options.backgroundCSS}`}>
+					{this.state.settings.options.headerImg ? header : false}
 					<div className="slider js_simple_dots simple" style={`text-align: ${this.state.settings.options.textAlign}`}>
 						{this.state.settings.options.navPosition === 'top' ? dotNav : null}
 						<div className="frame js_frame">
