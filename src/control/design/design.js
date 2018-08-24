@@ -11,7 +11,11 @@ class Design extends React.Component {
 				options: {
 					backgroundImg: '',
 					backgroundLrg: '',
-					backgroundColor: '',
+					backgroundCSS: '',
+					backgroundColor: {},
+					bodyFontSize: 24,
+					headerFontSize: 36,
+					textAlign: 'left',
 					renderTitlebar: true,
 					navPosition: null,
 					colorOverrides: [],
@@ -24,12 +28,14 @@ class Design extends React.Component {
 	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
 	componentDidUpdate() {
+		console.warn(this.state);
+
 		this.debounceSync();
 	}
 
 	componentDidMount() {
 		console.warn(this.state);
-		
+
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
@@ -148,6 +154,51 @@ class Design extends React.Component {
 		});
 	}
 
+	colorPicker(remove) {
+		let settings = this.state.settings;
+		let bgCSS;
+		if (remove) {
+			settings.options.backgroundColor = {};
+			settings.options.backgroundCSS = '';
+			this.setState({ settings });
+			return;
+		}
+		let onChange = (err, res) => {
+			if (err) throw err;
+			console.log(res);
+			
+			switch (res.colorType) {
+				case 'solid': {
+					bgCSS = res.solid.backgroundCSS;
+					buildfire.messaging.sendMessageToWidget({ color: bgCSS});
+					break;
+				}
+				case 'gradient': {
+					bgCSS = res.gradient.backgroundCSS;
+					buildfire.messaging.sendMessageToWidget({ color: bgCSS});
+					break;
+				}
+			}
+			
+		};
+		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, {backdrop: false}, onChange, (err, res) => {
+			if (err) throw err;
+			switch (res.colorType) {
+				case 'solid': {
+					bgCSS = res.solid.backgroundCSS;
+					break;
+				}
+				case 'gradient': {
+					bgCSS = res.gradient.backgroundCSS;
+					break;
+				}
+			}
+			settings.options.backgroundColor = res;
+			settings.options.backgroundCSS = bgCSS;
+			this.setState({ settings });
+		});
+	}
+
 	syncState() {
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
@@ -192,15 +243,16 @@ class Design extends React.Component {
 			<div>
 				<div className="container">
 					<div className="row">
-						{/* <div className="col-md-12"> */}
+						{/* NAV POSITION> */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Page Navigation Position</span>
+								<span title="Change the positioning of the navbar.">Page Navigation Position</span>
 							</div>
 							{/* <div className="btn-group"> */}
 							<div className="main col-md-9 pull-right">
-								<div className="radio radio-primary radio-inline">
+								<div title="Sets the navbar to appear at the bottom of the screen." className="radio radio-primary radio-inline">
 									<input
+									
 										className="input-radio"
 										id="nav-pos-bottom"
 										type="radio"
@@ -229,8 +281,9 @@ class Design extends React.Component {
 									<label htmlFor="nav-pos-bottom">Bottom</label>
 								</div>
 
-								<div className="radio radio-primary radio-inline">
+								<div title="Sets the navbar to appear at the top of the screen." className="radio radio-primary radio-inline">
 									<input
+									
 										className="input-radio"
 										id="nav-pos-top"
 										type="radio"
@@ -261,12 +314,13 @@ class Design extends React.Component {
 							</div>
 						</div>
 						<br />
+						{/* TITLEBAR DISPLAY */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Display Titlebar</span>
+								<span title="Toggle the display of the Buildfire titlebar.">Display Titlebar</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-								<div className="radio radio-primary radio-inline">
+								<div title='Forces the Buildfire titlebar to show.' className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
 										id="titlebar-true"
@@ -294,8 +348,8 @@ class Design extends React.Component {
 									/>
 									<label htmlFor="titlebar-true">True</label>
 								</div>
-								<div className="radio radio-primary radio-inline">
-									<input
+								<div title='Forces the Buildfire titlebar to hide.' className="radio radio-primary radio-inline">
+									<input										
 										className="input-radio"
 										id="titlebar-false"
 										type="radio"
@@ -325,9 +379,10 @@ class Design extends React.Component {
 							</div>
 						</div>
 						<hr />
+						{/* LAYOUTS */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Layout Style</span>
+								<span title="Change the appearance of all Action Items">Layout Style</span>
 							</div>
 							<div className="main col-md-9 pull-right">
 								<div className="screens clearfix">
@@ -341,67 +396,98 @@ class Design extends React.Component {
 							</div>
 						</div>
 						<hr />
+						{/* BACKGROUND IMAGE */}
 						<div className="item clearfix row padding-bottom-twenty">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Background Image</span>
+								<span title="Set a background behind all pages. Page backgrounds can be individually set in their Options.">Background Image</span>
 							</div>
 							<div className="main col-md-9 pull-right">
 								<div className="screens clearfix">
 									<div className="devices-screen mobile-device text-center pull-left">
 										<a onClick={() => this.changeBackground('small', false)}>
 											<span className="add-icon">+</span>
-											<img className="bg-sm" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundImg, {width: 66, height: 116})} style={this.state.settings.options.backgroundImg ? false : 'display: none'} />
+											<img className="bg-sm" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundImg, { width: 66, height: 116 })} style={this.state.settings.options.backgroundImg ? false : 'display: none'} />
 										</a>
-										<label className='secondary'>750x1334</label>
-										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundImg ? false : 'display: none'} onClick={() => this.changeBackground('small', true)}></span>
+										<label className="secondary">750x1334</label>
+										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundImg ? false : 'display: none'} onClick={() => this.changeBackground('small', true)} />
 									</div>
-									<div className="devices-screen ipad-device pull-left text-center" >
+									<div className="devices-screen ipad-device pull-left text-center">
 										<a onClick={() => this.changeBackground('large', false)}>
 											<span className="add-icon">+</span>
 
-											<img className="bg-lrg" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundLrg, {width: 135, height: 190})} style={this.state.settings.options.backgroundLrg ? false : 'display: none'} />
+											<img className="bg-lrg" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundLrg, { width: 135, height: 190 })} style={this.state.settings.options.backgroundLrg ? false : 'display: none'} />
 										</a>
-										<label className='secondary'>1536x2048</label>
-										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundLrg ? false : 'display: none'} onClick={() => this.changeBackground('large', true)}></span>
+										<label className="secondary">1536x2048</label>
+										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundLrg ? false : 'display: none'} onClick={() => this.changeBackground('large', true)} />
 									</div>
 								</div>
 							</div>
 						</div>
 						<hr />
+						{/* COLOR PICKER */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span>Text Alignment</span>
+								<span title="Set a background overlay behind all pages. Page background overlays can be individually set in their Options.">Background Overlay</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-								<div className="radio radio-primary radio-inline">
+								<div className="tab">
+									<button
+									title='Click to change the overlay color.'
+										className="thumbnail"
+										id="bg-cover"
+										style={`${this.state.settings.options.backgroundCSS}`}
+										onClick={() => {
+											this.colorPicker(false);
+										}}>
+										<h5>{this.state.settings.options.backgroundColor.colorType ? this.state.settings.options.backgroundColor.colorType : 'Add Overlay Color'}</h5>
+									</button>
+									<button
+									title='Click to remove overlay color.'
+										className="btn btn-danger"
+										onClick={() => {
+											this.colorPicker(true);
+										}}>
+										Remove
+									</button>
+								</div>
+							</div>
+						</div>
+						<hr />
+						{/* TEXT ALIGN */}
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+								<span title="Set text allignment for all page text.">Text Alignment</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<div title='Align all page text right.' className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
-										id="titlebar-left"
+										id="align-left"
 										type="radio"
 										aria-label="..."
 										onClick={e => {
 											switch (e.target.checked) {
 												case true: {
-													// let settings = this.state.settings;
-													// settings.options.renderTitlebar = true;
-													// this.setState({ settings });
+													let settings = this.state.settings;
+													settings.options.textAlign = 'left';
+													this.setState({ settings });
 													break;
 												}
 												case false: {
-													// let settings = this.state.settings;
-													// settings.options.renderTitlebar = false;
-													// this.setState({ settings });
+													let settings = this.state.settings;
+													settings.options.textAlign = 'center';
+													this.setState({ settings });
 													break;
 												}
 												default:
 													return;
 											}
 										}}
-										// checked={this.state.settings.options.renderTitlebar ? true : false}
+										checked={this.state.settings.options.textAlign === 'left' ? true : false}
 									/>
 									<label htmlFor="align-left">Left</label>
 								</div>
-								<div className="radio radio-primary radio-inline">
+								<div title='Align all page text center.' className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
 										id="align-center"
@@ -411,13 +497,13 @@ class Design extends React.Component {
 											switch (e.target.checked) {
 												case true: {
 													let settings = this.state.settings;
-													settings.options.renderTitlebar = false;
+													settings.options.textAlign = 'center';
 													this.setState({ settings });
 													break;
 												}
 												case false: {
 													let settings = this.state.settings;
-													settings.options.renderTitlebar = true;
+													settings.options.textAlign = 'left';
 													this.setState({ settings });
 													break;
 												}
@@ -425,19 +511,32 @@ class Design extends React.Component {
 													return;
 											}
 										}}
-										// checked={this.state.settings.options.renderTitlebar ? false : true}
+										checked={this.state.settings.options.textAlign === 'center' ? true : false}
 									/>
 									<label htmlFor="align-center">Center</label>
 								</div>
 							</div>
 						</div>
 						<hr />
+						{/* FONT SIZE */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-									<span>Background Overlay</span>
+								<span title="Set a font size for all page text.">Font Size</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-									<div className='thumbnail' id="bg-cover">{this.state.settings.options.backgroundColor ? 'Add Overlay Color' : this.state.settings.options.backgroundColor}</div>
+								<label htmlFor='header-font-size'>Headers: </label>
+								<input title='Change the header font size. You can use keyboard arrows.' type='number' name='header-font-size' value={this.state.settings.options.headerFontSize} onChange={e => {
+									let settings = this.state.settings;
+									settings.options.headerFontSize = parseInt(e.target.value);
+									this.setState({ settings });
+								}}/>
+								{'       '}
+								<label htmlFor='body-font-size'>Body: </label>
+								<input title='Change the body font size. You can use keyboard arrows.' type='number' name='body-font-size' value={this.state.settings.options.bodyFontSize} onChange={e => {
+									let settings = this.state.settings;
+									settings.options.bodyFontSize = parseInt(e.target.value);
+									this.setState({ settings });
+								}}/>
 							</div>
 						</div>
 					</div>
