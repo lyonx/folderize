@@ -317,9 +317,11 @@ class Widget extends Component {
 	// SETS UP AND RETURNS PAGE COMPONENTS
 	renderPages() {
 		// PREVENT ACCIDENTAL RENDERS
-		if (this.state.settings.pages.length === 0) return;
+		if (this.state.settings.pages.length === 0) {
+			return 	<h1>Click "Add a Page" to begin!</h1>;
+		}
 		let pages = [];
-
+		
 		// REMOVES EXISTING PAGES AND NAVS (PREVENTS BUILDUP)
 		if (document.querySelector('.js_slides')) document.querySelector('.js_slides').innerHTML = '';
 		if (document.querySelector('.js_dots')) {
@@ -379,11 +381,11 @@ class Widget extends Component {
 				<div id="sandbox" style={`${this.state.settings.options.backgroundCSS}`}>
 					{this.state.settings.options.headerImg ? header : false}
 					<div className="slider js_simple_dots simple" style={`text-align: ${this.state.settings.options.textAlign}`}>
-						{this.state.settings.options.navPosition === 'top' ? dotNav : null}
+						{this.state.settings.options.navPosition === 'top' && this.state.settings.pages.length > 0 ? dotNav : null}
 						<div className="frame js_frame">
 							<ul className="slides js_slides">{this.renderPages()}</ul>
 						</div>
-						{this.state.settings.options.navPosition === 'bottom' ? dotNav : null}
+						{this.state.settings.options.navPosition === 'bottom' && this.state.settings.pages.length > 0 ? dotNav : null}
 					</div>
 				</div>
 			</div>

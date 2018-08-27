@@ -146,7 +146,7 @@ class Page extends Component {
 						if (node.format === 'custom') {
 							height = node.data.height;
 						}
-						console.log(node);
+						
 
 						nodes.push(
 							<div className="col-sm-12">
@@ -155,13 +155,14 @@ class Page extends Component {
 										offsetHorizontal={50}
 										// onContentVisible={() => {
 										// 	let ele = document.getElementById(`loader${node.instanceId}`);
-										// 	console.log(ele.parentNode);
+										// 	
 
 										// 	ele.parentNode.removeChild(ele);
 										// }}
 										height={node.format === 'custom' ? window.innerWidth * height : window.innerWidth * 0.54}>
 										{/* <div> */}
-											<div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} />
+											{/* <div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} /> */}
+											<div className="images" style={`background: url("${node.data.src}")`} />
 											{/* <div className="img-loader" id={`loader${node.instanceId}`} /> */}
 										{/* </div> */}
 									</Lazyload>

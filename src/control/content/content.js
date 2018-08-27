@@ -57,7 +57,7 @@ class Content extends Component {
 			//
 
 			if (!response.id) {
-				this.addPage();
+				// this.addPage();
 				// this.setState({
 				// 	settings: {
 				// 		pages: [
@@ -94,7 +94,7 @@ class Content extends Component {
 			} else {
 				// otherwise, if all pages have been removed, insert default data
 				if (response.data.settings.pages.length === 0) {
-					this.addPage();
+					// this.addPage();
 					// setTimeout(() => {
 					// 	document.querySelector(`#tab0`).click();
 					// }, 250);
@@ -617,7 +617,7 @@ class Content extends Component {
 			}
 			case 'background': {
 				if (remove) {
-					settings.pages[pageIndex].backgroundImg = {};
+					settings.pages[pageIndex].backgroundImg = false;
 					this.setState({ settings });
 					return;
 				}

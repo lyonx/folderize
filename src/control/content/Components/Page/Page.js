@@ -43,6 +43,8 @@ class Page extends Component {
 
 	// ON MOUNT INIT SORTABLE NODE LIST
 	componentDidMount() {
+		console.warn(this.props);
+
 		// Unknown bug caused main panel to render with the wrong attributes
 		let panel = document.getElementById(`panel${this.props.index}`);
 		if (panel.getAttribute('data-toggle') === 'show') {
@@ -59,6 +61,8 @@ class Page extends Component {
 	}
 	// ON UPDATE, REFRESH THE SORTABLE NODE LIST'S DATA
 	componentDidUpdate() {
+		console.warn(this.props);
+
 		this.editor.loadItems(this.props.data.nodes, false);
 	}
 
@@ -396,24 +400,24 @@ class Page extends Component {
 											</div>
 											<div className="main col-md-9 pull-right">
 												{/* <div className="tab"> */}
-												<span title='Makes this image full screen with a header and subtext.' style='pointer-events: all'>
-												<label>Full screen {'  '}</label>
+												<span title="Makes this image full screen with a header and subtext." style="pointer-events: all">
+													<label>Full screen {'  '}</label>
 
-												<input  type="checkbox" name="hero" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} checked={node.format === 'hero' ? true : false} />
-												{/* </div> */}
-												{/* <div className="tab"> */}
+													<input type="checkbox" name="hero" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} checked={node.format === 'hero' ? true : false} />
+													{/* </div> */}
+													{/* <div className="tab"> */}
 												</span>
-												<span title="Allows you to define a custom height for this image." style='pointer-events: all'>
-												<label >Custom {'  '}</label>
+												<span title="Allows you to define a custom height for this image." style="pointer-events: all">
+													<label>Custom {'  '}</label>
 
-												<input type="checkbox" name="custom" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} checked={node.format === 'custom' ? true : false} />
+													<input type="checkbox" name="custom" id={`${node.instanceId}`} onChange={e => this.handleNodeChange(e, this.props.data.nodes.indexOf(node), 'img', false, this.props.index)} checked={node.format === 'custom' ? true : false} />
 												</span>
 											</div>
 										</div>
 									</div>
 									{node.format === 'custom' ? (
 										<div>
-											<div className="input-group" style="line-height: 32px;">
+											{/* <div className="input-group" style="line-height: 32px;">
 												<label htmlFor="size">Image height: </label>
 												<input
 													title="Sets the image height"
@@ -425,6 +429,24 @@ class Page extends Component {
 													value={node.data.height}
 													onChange={e => {
 														let height = parseFloat(e.target.value);
+														this.handleNodeChange(height, this.props.data.nodes.indexOf(node), 'img', false, this.props.index);
+													}}
+												/>
+											</div> */}
+											<div className="input-group" style="line-height: 32px;">
+												<label htmlFor="size">Image height: </label>
+												<input
+													title="Sets the image height"
+													type="range"
+													min='1'
+													max='150'
+													// step="0.01"
+													className="form-control img-slider"
+													style="width: 66vw; float: right;"
+													name="size"
+													value={node.data.height * 100}
+													onChange={e => {
+														let height = parseFloat(e.target.value) / 100;
 														this.handleNodeChange(height, this.props.data.nodes.indexOf(node), 'img', false, this.props.index);
 													}}
 												/>
@@ -515,8 +537,6 @@ class Page extends Component {
 								id={`defaultImg${index}`}
 								type="checkbox"
 								onChange={e => {
-									
-									
 									switch (e.target.checked) {
 										case true:
 											{
@@ -531,7 +551,7 @@ class Page extends Component {
 										case false:
 											{
 												let prevImg = localStorage.getItem(`prevImg${node.instanceId}`);
-												
+
 												if (prevImg === 'undefined') prevImg = false;
 												if (prevImg) {
 													this.handleNodeChange(prevImg, index, 'src', false, this.props.index);
@@ -544,43 +564,42 @@ class Page extends Component {
 											break;
 									}
 								}}
-								checked={node.data.iconUrl ? node.data.iconUrl.indexOf('/plugins/') > -1 ? true : false : false}
+								checked={node.data.iconUrl ? (node.data.iconUrl.indexOf('/plugins/') > -1 ? true : false) : false}
 							/>
 						</div>
 					);
-					
-					
+
 					let linkOnly = (
 						<div style={'position: absolute; right: 15px; z-index: 10000'}>
-						<label Htmlfor="link-only">Link Only</label>
-						<input
-							name="link-only"
-							id={`linkOnly${index}`}
-							type="checkbox"
-							onChange={e => {
-								switch (e.target.checked) {
-									case true:
-										{
-											node.format = 'linkOnly';
-											this.update();
-										}
-										break;
-									case false:
-										{
-											node.format = 'default';
-											this.update();
-										}
-										break;
-									default:
-										break;
-								}
-							}}
-							checked={node.format === 'linkOnly' ? true : false}
-						/>
-					</div>
+							<label Htmlfor="link-only">Link Only</label>
+							<input
+								name="link-only"
+								id={`linkOnly${index}`}
+								type="checkbox"
+								onChange={e => {
+									switch (e.target.checked) {
+										case true:
+											{
+												node.format = 'linkOnly';
+												this.update();
+											}
+											break;
+										case false:
+											{
+												node.format = 'default';
+												this.update();
+											}
+											break;
+										default:
+											break;
+									}
+								}}
+								checked={node.format === 'linkOnly' ? true : false}
+							/>
+						</div>
 					);
 					let image;
-					node.data.iconUrl ? image = node.data.iconUrl : image = './assets/noImg.PNG';
+					node.data.iconUrl ? (image = node.data.iconUrl) : (image = './assets/noImg.PNG');
 					nodes.push(
 						<div>
 							<div className="panel panel-default" style={'display:none'}>
@@ -620,8 +639,14 @@ class Page extends Component {
 									</div> */}
 									{/* <div className="action"> */}
 									<h4 className="text-center">Selected Image:</h4>
-									{node.format === 'linkOnly'? false : <div><div className="plugin-thumbnail" title="Click to change Image. You can change the appearance of Action Items in the Design tab." style={`background: url("${image}")`} alt="..." onClick={e => this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index)} />
-									<h6 className="text-center">Click to change</h6></div>}
+									{node.format === 'linkOnly' ? (
+										false
+									) : (
+										<div>
+											<div className="plugin-thumbnail" title="Click to change Image. You can change the appearance of Action Items in the Design tab." style={`background: url("${image}")`} alt="..." onClick={e => this.addImg('action', this.props.data.nodes.indexOf(node), this.props.index)} />
+											<h6 className="text-center">Click to change</h6>
+										</div>
+									)}
 
 									<h3 className="action-title">Action Text: {node.data.title ? node.data.title : 'Untitled'}</h3>
 									{/* </div> */}
@@ -672,27 +697,19 @@ class Page extends Component {
 					return;
 			}
 		});
+		setTimeout(() => {
+			let listItems = document.querySelector(`#nodelist${this.props.index}`).childNodes[0].childNodes[1].childNodes[2].childNodes;
+			listItems.forEach((item, index) => {
+
+			});
+			
+		}, 200);
 		return nodes;
 	}
 
 	render() {
-		// let pageTutorialTop = (
-		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
-		// 		Welcome to your first page! You can change the title and add elements below!
-		// 	</div>
-		// );
-		// let pageTutorialMid = (
-		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
-		// 		All of the elements on your page will appear here. You can drag them to reorder, or click them to edit!
-		// 	</div>
-		// );
-		// let pageTutorialBottom = (
-		// 	<div className="alert alert-primary" style="font-size: 16px" role="alert">
-		// 		You can set a navbar icon and change the background color and image under "options"!
-		// 	</div>
-		// );
 		return (
-			<div title=''>
+			<div title="">
 				<div className="panel panel-default no-border">
 					<div className="panel-heading tab panel-hide">
 						<div className="toggle-group">
@@ -721,37 +738,9 @@ class Page extends Component {
 							}}
 						/>
 						<div className="panel-body pagepanel">
-							{/* {this.state.tutorials ? (
-								<a
-									style={'position: absolute; top: 5px; right: 15px; z-index: 10000'}
-									onClick={e => {
-										e.preventDefault();
-										this.toggleTutorials('off');
-									}}>
-									Hide tutorials
-								</a>
-							) : (
-								<a
-									style={'position: absolute; top: 5px; right: 15px; z-index: 10000'}
-									onClick={e => {
-										e.preventDefault();
-										this.toggleTutorials('on');
-									}}>
-									Show tutorials
-								</a>
-							)
-							// <a
-							// 	style={'position: absolute; right: 15px; z-index: 10000'}
-							// 	onClick={e => {
-							// 		this.toggleTutorials('on');
-							// 	}}>
-							// 	Show tutorials
-							// </a>
-							} */}
 							<div className="container">
 								<div className="row">
-									{/* <div className="info">{this.state.tutorials ? pageTutorialTop : false}</div> */}
-
+									{/* ------ PAGE TITLE ------ */}
 									<div className="col-sm-12 header" />
 									<form>
 										<div className="input-group">
@@ -762,39 +751,159 @@ class Page extends Component {
 												</span>
 											</h4>
 
-											<input title='This will appear on the navbar unless an Icon is selected for this page.' type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={e => this.handleChange(e, this.props.index)} />
+											<input title="This will appear on the navbar unless an Icon is selected for this page." type="text" className="form-control" name="title" aria-describedby="sizing-addon2" value={this.props.data.title} onChange={e => this.handleChange(e, this.props.index)} />
 										</div>
 									</form>
+
 									{/* ------- Config ------ */}
 									<div className="col-sm-12">
-										{/* <button className="btn btn-deafult tab-toggle" id={`page${this.props.index}addnodesbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'addnodes')}>
-											Add Nodes
-										</button> */}
 										<div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}options`}>
 											<div className="backdrop" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
 												<div className="panel-body nodepanel" data-toggle="hide">
-													<br />
-													<div className="tab">
+												
+
+													{/* BG COLOR */}
+													{/* <div className="tab">
 														<div>
 															<h4 className="tag" style="width: 33%">
 																Background Color:{' '}
 															</h4>
 															<a onClick={() => this.update(true, 'color')}>Apply to all</a>
-														</div>
-														<button className={`btn thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor', this.props.index)} style={`${this.props.data.backgroundCSS}`}>
-															<h5>{this.props.data.backgroundColor ? (this.props.data.backgroundColor.colorType != false ? `${this.props.data.backgroundColor.colorType}` : 'Add Background Color') : null}</h5>
-														</button>
+														</div> */}
+													<ul className="list-group">
+														<li className="list-group-item border-none" style="padding: 0px;">
+															<div className="padding-top-twenty clearfix">
+																Custom Background
+																<hr className="margin-top-ten margin-bottom-ten" style="height: 1px;" />
+																<div className="screens col-md-6 clearfix" style="float: left;">
+																	<div className="row text-left">
+																		<label className="text-light-grey small margin-left-five">Image</label>
+																	</div>
+																	<div className="row clearfix">
+																		<div className="col-md-6">
+																			<div className="screen ipads pull-left text-center" style="width: 100%">
+																				<a className="border-radius-four default-background-hover" onClick={() => this.addImg('background', null, this.props.index)}>
+																					<span className="add-icon">+</span>
+																					<img src={this.props.data.backgroundImg} />
+																				</a>
+																				<span
+																					className="icon btn-delete-icon btn-danger transition-third ng-hide"
+																					style={this.props.data.backgroundImg ? 'pointer-events: all' : 'display: none'}
+																					onClick={() => {
+																						this.addImg('background', null, this.props.index, true);
+																					}}
+																				/>
+																				<div className="row padding-left-ten">
+																					<label className="secondary">750x1043</label>
+																				</div>
+																			</div>
+																			{/* <div className="screen ipads pull-left text-center" style="width: 25%">
+																			<a className="border-radius-four default-background-hover">
+																				<span className="add-icon">+</span>
+																				<img />
+																			</a>
+																			<span className="icon btn-delete-icon btn-danger transition-third ng-hide" />
+																			<div className="row padding-left-ten">
+																				<label className="secondary">1536x2048</label>
+																			</div>
+																		</div> */}
+																		</div>
+																	</div>
+																</div>
+																<div className="col-md-6 margin-bottom-ten" style="float: left;">
+																	<div className="row text-left">
+																		<label className="text-light-grey small margin-left-five">Background Color</label>
+																	</div>
+																	<div className="row">
+																		{/* <div className="main col-md-8 pull-left custom-switch padding-left-zero">
+																			<a className={this.props.data.backgroundColor ? 'btn' : `btn btn-primary` } id="color-on" onClick={() => {
+																				let settings = this.state.settings;
+																				settings.backgroundColor.display = true;
+																			}}>
+																				On
+																			</a>
+																			<a className={this.props.data.backgroundColor ? `btn btn-primary` : 'btn' } id="color-off" onClick={() => {
+																				let settings = this.state.settings;
+																				settings.backgroundColor.display = false;
+																			}}>
+																				Off
+																			</a>
+																		</div> */}
+																		<div className="col-md-3 pull-left">
+																			<div className="colorgrid pull-left">
+																				<div className="gradient-results">
+																					<div className="coloritem margin-bottom-zero">
+																						<a className="img-thumbnail">
+																							<span className="color border-radius-four border-grey relative-position" onClick={() => this.colorPicker('backgroundColor', this.props.index)} style={`${this.props.data.backgroundCSS}; pointer-events: all; position: relative;`}>
+																								{this.props.data.backgroundColor.colorType === false ? <div className='color-not-selected'></div> : null}
+																							</span>
+																						</a>
+																					</div>
+																				</div>
+																			</div>
+																		</div>
+																		<div className="col-md-3 pull-left">
+																			<button
+																				className="btn btn-danger"
+																				disabled={this.props.data.backgroundColor.colorType === false ? true : false}
+																				onClick={() => {
+																					this.colorPicker('backgroundColor', this.props.index, true);
+																				}}>
+																				Remove
+																			</button>
+																		</div>
+																	</div>
+																</div>
+																<br />
+															</div>
+														</li>
+														<li className="list-group-item border-none" style="padding: 0px;">
+															<div className="padding-top-twenty clearfix">
+																Navbar Icon
+																<hr className="margin-top-ten margin-bottom-ten" />
+																<div className="col-md-6 margin-top-ten">
+																	<div className="row text-left">
+																		<label className="text-light-grey small margin-left-five">Selected Icon</label>
+																	</div>
+																	<div className="row">
+																		<div className="screens col-md-6 clearfix">
+																			<div className="screen wideicon pull-left text-center" style="width: 100%;line-height: normal;height: 100%;">
+																				<a className="border-radius-three default-background-hover" onClick={() => this.addImg('icon', null, this.props.index)}>
+																					<span className="add-icon" style={this.props.data.iconUrl ? 'display: none' : null}>
+																						+
+																					</span>
+																					{this.props.data.iconUrl ? <span className={`glyphicon ${this.props.data.iconUrl}`} /> : null}
+																				</a>
+																				<span
+																					className="icon btn-delete-icon btn-danger transition-third ng-hide"
+																					style={this.props.data.iconUrl ? 'pointer-events: all' : 'display: none;'}
+																					onClick={() => {
+																						this.addImg('icon', null, this.props.index, true);
+																					}}
+																				/>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</li>
+													</ul>
 
-														<button
-															className="btn btn-danger"
-															onClick={() => {
-																this.colorPicker('backgroundColor', this.props.index, true);
-															}}>
-															Remove
-														</button>
-													</div>
-													<br />
-													<div className="tab">
+													{/* <button className={`btn thumbnail page${this.props.index}color`} onClick={() => this.colorPicker('backgroundColor', this.props.index)} style={`${this.props.data.backgroundCSS}`}>
+															<h5>{this.props.data.backgroundColor ? (this.props.data.backgroundColor.colorType != false ? `${this.props.data.backgroundColor.colorType}` : 'Add Background Color') : null}</h5>
+														</button> */}
+
+													{/* <button
+														className="btn btn-danger"
+														onClick={() => {
+															this.colorPicker('backgroundColor', this.props.index, true);
+														}}>
+														Remove
+													</button> */}
+													{/* </div> */}
+													{/* BG IMG */}
+
+													{/* <div className="tab">
 														<div>
 															<h4 className="tag" style="width: 33%">
 																Background Image:{' '}
@@ -811,9 +920,11 @@ class Page extends Component {
 															}}>
 															Remove
 														</button>
-													</div>
-													<br />
-													<div className="tab">
+													</div> */}
+
+													{/* NAV ICON */}
+
+													{/* <div className="tab">
 														<h4 className="tag" style="width: 33%">
 															Navigation Icon:{' '}
 														</h4>
@@ -827,9 +938,10 @@ class Page extends Component {
 															}}>
 															Remove
 														</button>
-													</div>
+													</div> */}
 													<button
-														className="btn btn-success tab-toggle"
+														className="btn btn-success"
+														style="float: right;"
 														id={`page${this.props.index}optionsbutton`}
 														index={`${this.props.index}`}
 														onClick={e => {
@@ -842,9 +954,8 @@ class Page extends Component {
 											</div>
 										</div>
 									</div>
-									{/* <div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}addnodes`}> */}
-									{/* <div id={`page${this.props.index}addnodes`} className="addnodes" data-toggle="hide"> */}
 
+									{/* ------ ADD NODES ------ */}
 									<div className="col-sm-12">
 										<div style="margin-bottom: 15px;">
 											<h5 className="text-center">
@@ -857,7 +968,7 @@ class Page extends Component {
 											</h5>
 											<div className="btn-group tab" id={`menu${this.props.index}`}>
 												<button
-												title='Add a Header Element to this page.'
+													title="Add a Header Element to this page."
 													className="btn btn-default add tab-toggle "
 													onClick={e => {
 														this.addNode('header', this.props.index, () => this.openLast());
@@ -865,7 +976,7 @@ class Page extends Component {
 													Add Header
 												</button>
 												<button
-												title='Add a Text Element to this page.'
+													title="Add a Text Element to this page."
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
 														this.addNode('desc', this.props.index, () => this.openLast());
@@ -873,7 +984,7 @@ class Page extends Component {
 													Add Text
 												</button>
 												<button
-												title='Add an Image Element to this page.'
+													title="Add an Image Element to this page."
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
 														this.addNode('image', this.props.index, () => this.openLast());
@@ -881,7 +992,7 @@ class Page extends Component {
 													Add Image
 												</button>
 												<button
-												title='Add an Action Item to this page. Action items can link to other plugins, web content, and more.'
+													title="Add an Action Item to this page. Action items can link to other plugins, web content, and more."
 													className="btn btn-default add tab-toggle"
 													onClick={() => {
 														// this.toggleModal(this.props.index, 'actions', 'show');
@@ -917,15 +1028,11 @@ class Page extends Component {
 											</div>
 										</div>
 									</div>
-									{/* </div> */}
-
-									{/* </div> */}
+									{/* ------ HIDDEN NODELIST ------ */}
 									<div className="col-sm-12">{this.renderNodes()}</div>
-									{/* <div className="info">{localStorage.getItem('tutorial') === 'true' ? pageTutorialMid : false}</div> */}
-									{/* <div className="info">{this.state.tutorials ? pageTutorialMid : false}</div> */}
 
-									<div  title="This page's Elements appear here. Click the title to edit, or drag to reorder."  className="col-sm-12" id={`nodelist${this.props.index}`} />
-									{/* <div className="info">{this.state.tutorials ? pageTutorialBottom : false}</div> */}
+									<div title="This page's Elements appear here. Click the title to edit, or drag to reorder." className="col-sm-12" id={`nodelist${this.props.index}`} />
+
 									<div className="tab modal-footer">
 										<button
 											className="btn btn-success"
