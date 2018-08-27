@@ -18,6 +18,7 @@ class Design extends React.Component {
 					textAlign: 'left',
 					renderTitlebar: true,
 					navPosition: null,
+					navShadow: false,
 					colorOverrides: [],
 					layout: 0
 				}
@@ -166,22 +167,21 @@ class Design extends React.Component {
 		let onChange = (err, res) => {
 			if (err) throw err;
 			console.log(res);
-			
+
 			switch (res.colorType) {
 				case 'solid': {
 					bgCSS = res.solid.backgroundCSS;
-					buildfire.messaging.sendMessageToWidget({ color: bgCSS});
+					buildfire.messaging.sendMessageToWidget({ color: bgCSS });
 					break;
 				}
 				case 'gradient': {
 					bgCSS = res.gradient.backgroundCSS;
-					buildfire.messaging.sendMessageToWidget({ color: bgCSS});
+					buildfire.messaging.sendMessageToWidget({ color: bgCSS });
 					break;
 				}
 			}
-			
 		};
-		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, {backdrop: false}, onChange, (err, res) => {
+		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, { backdrop: false }, onChange, (err, res) => {
 			if (err) throw err;
 			switch (res.colorType) {
 				case 'solid': {
@@ -252,7 +252,6 @@ class Design extends React.Component {
 							<div className="main col-md-9 pull-right">
 								<div title="Sets the navbar to appear at the bottom of the screen." className="radio radio-primary radio-inline">
 									<input
-									
 										className="input-radio"
 										id="nav-pos-bottom"
 										type="radio"
@@ -283,7 +282,6 @@ class Design extends React.Component {
 
 								<div title="Sets the navbar to appear at the top of the screen." className="radio radio-primary radio-inline">
 									<input
-									
 										className="input-radio"
 										id="nav-pos-top"
 										type="radio"
@@ -313,14 +311,79 @@ class Design extends React.Component {
 								</div>
 							</div>
 						</div>
-						<br />
+						{/* NAV SHADOW */}
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+								<span title="Toggle shadow below page navbar.">Page Navigation Shadow</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<div title="Enable Shadow." className="radio radio-primary radio-inline">
+									<input
+										className="input-radio"
+										id="nav-drop-on"
+										type="radio"
+										name="drop-on"
+										aria-label="..."
+										onChange={e => {
+											let settings = this.state.settings;
+											switch (e.target.checked) {
+												case true: {
+													settings.options.navShadow = true;
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													settings.options.navShadow = false;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													break;
+											}
+										}}
+										checked={this.state.settings.options.navShadow ? true : false}
+									/>
+									<label htmlFor="nav-drop-on">On</label>
+								</div>
+
+								<div title="Disable Shadow." className="radio radio-primary radio-inline">
+									<input 
+									className="input-radio" 
+									id="nav-drop-off" 
+									type="radio" 
+									name="drop-off" 
+									aria-label="..." 
+									onChange={e => {
+											let settings = this.state.settings;
+											switch (e.target.checked) {
+												case true: {
+													settings.options.navShadow = false;
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													settings.options.navShadow = true;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													break;
+											}
+										}}
+										checked={this.state.settings.options.navShadow ? false : true}
+										/>
+									<label htmlFor="nav-drop-on">Off</label>
+								</div>
+							</div>
+						</div>
+						{/* <br /> */}
 						{/* TITLEBAR DISPLAY */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span title="Toggle the display of the Buildfire titlebar.">Display Titlebar</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-								<div title='Forces the Buildfire titlebar to show.' className="radio radio-primary radio-inline">
+								<div title="Forces the Buildfire titlebar to show." className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
 										id="titlebar-true"
@@ -348,8 +411,8 @@ class Design extends React.Component {
 									/>
 									<label htmlFor="titlebar-true">True</label>
 								</div>
-								<div title='Forces the Buildfire titlebar to hide.' className="radio radio-primary radio-inline">
-									<input										
+								<div title="Forces the Buildfire titlebar to hide." className="radio radio-primary radio-inline">
+									<input
 										className="input-radio"
 										id="titlebar-false"
 										type="radio"
@@ -432,7 +495,7 @@ class Design extends React.Component {
 							<div className="main col-md-9 pull-right">
 								<div className="tab">
 									<button
-									title='Click to change the overlay color.'
+										title="Click to change the overlay color."
 										className="thumbnail"
 										id="bg-cover"
 										style={`${this.state.settings.options.backgroundCSS}`}
@@ -442,7 +505,7 @@ class Design extends React.Component {
 										<h5>{this.state.settings.options.backgroundColor.colorType ? this.state.settings.options.backgroundColor.colorType : 'Add Overlay Color'}</h5>
 									</button>
 									<button
-									title='Click to remove overlay color.'
+										title="Click to remove overlay color."
 										className="btn btn-danger"
 										onClick={() => {
 											this.colorPicker(true);
@@ -459,7 +522,7 @@ class Design extends React.Component {
 								<span title="Set text allignment for all page text.">Text Alignment</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-								<div title='Align all page text right.' className="radio radio-primary radio-inline">
+								<div title="Align all page text right." className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
 										id="align-left"
@@ -487,7 +550,7 @@ class Design extends React.Component {
 									/>
 									<label htmlFor="align-left">Left</label>
 								</div>
-								<div title='Align all page text center.' className="radio radio-primary radio-inline">
+								<div title="Align all page text center." className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
 										id="align-center"
@@ -524,19 +587,31 @@ class Design extends React.Component {
 								<span title="Set a font size for all page text.">Font Size</span>
 							</div>
 							<div className="main col-md-9 pull-right">
-								<label htmlFor='header-font-size'>Headers: </label>
-								<input title='Change the header font size. You can use keyboard arrows.' type='number' name='header-font-size' value={this.state.settings.options.headerFontSize} onChange={e => {
-									let settings = this.state.settings;
-									settings.options.headerFontSize = parseInt(e.target.value);
-									this.setState({ settings });
-								}}/>
+								<label htmlFor="header-font-size">Headers: </label>
+								<input
+									title="Change the header font size. You can use keyboard arrows."
+									type="number"
+									name="header-font-size"
+									value={this.state.settings.options.headerFontSize}
+									onChange={e => {
+										let settings = this.state.settings;
+										settings.options.headerFontSize = parseInt(e.target.value);
+										this.setState({ settings });
+									}}
+								/>
 								{'       '}
-								<label htmlFor='body-font-size'>Body: </label>
-								<input title='Change the body font size. You can use keyboard arrows.' type='number' name='body-font-size' value={this.state.settings.options.bodyFontSize} onChange={e => {
-									let settings = this.state.settings;
-									settings.options.bodyFontSize = parseInt(e.target.value);
-									this.setState({ settings });
-								}}/>
+								<label htmlFor="body-font-size">Body: </label>
+								<input
+									title="Change the body font size. You can use keyboard arrows."
+									type="number"
+									name="body-font-size"
+									value={this.state.settings.options.bodyFontSize}
+									onChange={e => {
+										let settings = this.state.settings;
+										settings.options.bodyFontSize = parseInt(e.target.value);
+										this.setState({ settings });
+									}}
+								/>
 							</div>
 						</div>
 					</div>

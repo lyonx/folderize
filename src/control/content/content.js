@@ -27,11 +27,12 @@ class Content extends Component {
 				pages: [],
 				options: {
 					headerImg: false,
-					headerImgSrc: 'https://via.placeholder.com/350x150',
+					headerImgSrc: false,
 					backgroundImg: '',
 					backgroundLrg: '',
 					renderTitlebar: true,
 					navPosition: 'top',
+					navShadow: false,
 					layout: 0
 				}
 			}
@@ -602,7 +603,7 @@ class Content extends Component {
 		switch (control) {
 			case 'header': {
 				if (remove) {
-					settings.options.headerImgSrc = 'https://via.placeholder.com/350x150';
+					settings.options.headerImgSrc = false;
 					this.setState({ settings });
 					return;
 				}
@@ -769,6 +770,7 @@ class Content extends Component {
 										switch (e.target.checked) {
 											case true:
 												settings.options.headerImg = true;
+												settings.options.headerImgSrc ? null : this.addImg('header', false, false, false);
 												this.setState({ settings });
 												break;
 											case false:
@@ -795,12 +797,12 @@ class Content extends Component {
 								</div>{' '}
 							</div>{' '}
 						</div>{' '}
-					</div>{' '}
+					</div>
 					<div title="Your pages appear in order here. Click a page title to edit it, or drag to reorder." className="col-md-12" id="pages">
 						{' '}
 						{/* <h4 className="text-center">Pages</h4> */} {this.renderPages()}{' '}
-					</div>{' '}
-				</div>{' '}
+					</div>
+				</div>
 			</div>
 		);
 	}
