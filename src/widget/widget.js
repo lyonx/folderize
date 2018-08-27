@@ -18,6 +18,7 @@ class Widget extends Component {
 					backgroundLrg: '',
 					textAlign: 'left',
 					navPosition: 'top',
+					navShadow: false,
 					renderTitlebar: false
 				}
 			},
@@ -347,7 +348,7 @@ class Widget extends Component {
 	}
 
 	render() {
-		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" />;
+		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" style={this.state.settings.options.navShadow ? (this.state.settings.options.navPosition === 'top' ? 'box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px 0px;' : 'box-shadow: 0 -2px 4px 0 rgba(0,0,0,.15);') : false} />;
 		// let header = <div style={`background: url("${this.state.settings.options.headerImgSrc}");`} className="header-image"/>;
 		let cropped;
 		setTimeout(() => {
@@ -360,7 +361,7 @@ class Widget extends Component {
 		let ratio = window.devicePixelRatio;
 		let options = {
 			width: document.body.clientWidth / ratio,
-			height: (document.body.clientHeight / ratio) / 10,
+			height: document.body.clientHeight / ratio / 10,
 			disablePixelRation: true
 		};
 		console.log(options, ratio);
