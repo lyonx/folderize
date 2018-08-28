@@ -18,7 +18,7 @@ class Content extends Component {
 		this.reorderNodes = this.reorderNodes.bind(this);
 
 		this.renderPages = this.renderPages.bind(this);
-		this.debounceSync = debounce(this.syncState, 100);
+		this.debounceSync = debounce(this.syncState, 150);
 
 		this.editor = {};
 		this.state = {
@@ -299,6 +299,8 @@ class Content extends Component {
 	}
 	// USED BY THE PAGES TO DELETE THEMSELVES
 	deletePage(index) {
+		console.log(index);
+		
 		let settings = this.state.settings;
 		settings.pages.splice(index, 1);
 		document.querySelector(`#tab${index}`).click();
@@ -733,7 +735,47 @@ class Content extends Component {
 			pages.push(<Page key={index} index={index} handleChange={this.handleChange} handleNodeChange={this.handleNodeChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
+		setTimeout(() => {
+			console.log(document.querySelector('#pages').childNodes);
+			let pageDiv = document.querySelector('#pages');
+			let items = pageDiv.childNodes[pageDiv.childNodes.length - 1].childNodes[1].childNodes[2].childNodes;
 
+			items.forEach((item, index) => {
+				console.log(index);
+				
+				let btn = item.childNodes[1].childNodes[1].childNodes[0];
+				let tab = btn.parentNode;
+				let clone = btn.cloneNode();
+				tab.removeChild(btn);
+				tab.appendChild(clone);
+				clone.addEventListener('click', e => {
+					buildfire.notifications.confirm(
+						{
+							title: 'Remove Page',
+							message: 'Are you sure? Page will be lost!',
+							buttonLabels: ['delete', 'cancel']
+						},
+						(err, result) => {
+							if (err) {
+								if (typeof err === 'boolean') {
+									this.deletePage(index);
+								} else {
+									throw err;
+								}
+							} else {
+								if (!result) return;
+			
+								if (result.selectedButton.key === 'confirm') {
+									this.deletePage(index);
+								}
+							}
+						}
+					);
+				});
+				
+			});
+			
+		}, 300);
 		return pages;
 	}
 
@@ -799,8 +841,7 @@ class Content extends Component {
 						</div>{' '}
 					</div>
 					<div title="Your pages appear in order here. Click a page title to edit it, or drag to reorder." className="col-md-12" id="pages">
-						{' '}
-						{/* <h4 className="text-center">Pages</h4> */} {this.renderPages()}{' '}
+						{this.renderPages()}
 					</div>
 				</div>
 			</div>

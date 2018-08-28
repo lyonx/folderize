@@ -159,7 +159,14 @@ class Page extends Component {
 		let panel;
 		switch (type) {
 			case 'node': {
-				panel = document.getElementById(`page${this.props.index}nodepanel${document.getElementById(e.target.id).getAttribute('index')}`);
+				let index = document.getElementById(e.target.id).getAttribute('index');
+				panel = document.getElementById(`page${this.props.index}nodepanel${index}`);
+				if (panel.getAttribute('data-toggle') === 'hide') {
+					buildfire.messaging.sendMessageToWidget({
+						nodeIndex: index,
+						pageIndex: this.props.index
+					});
+				}
 				break;
 			}
 			case 'options': {
@@ -205,23 +212,6 @@ class Page extends Component {
 			document.getElementById(`${target}${index}`).classList.replace('panel-show', 'panel-hide');
 		}
 	}
-	// HANDLES TUTORIAL DISPLAY
-	// toggleTutorials(control) {
-	// 	switch (control) {
-	// 		case 'on':
-	// 			localStorage.setItem('tutorial', true);
-
-	// 			this.setState({ tutorials: true });
-	// 			break;
-	// 		case 'off':
-	// 			localStorage.setItem('tutorial', false);
-	// 			this.setState({ tutorials: false });
-	// 			break;
-
-	// 		default:
-	// 			break;
-	// 	}
-	// }
 
 	// --------------------------- RENDERING --------------------------- //
 
@@ -436,13 +426,23 @@ class Page extends Component {
 											<div className="input-group" style="line-height: 32px;">
 												<label htmlFor="size">Image height: </label>
 												<input
+													type="number"
+													value={node.data.height * 100}
+													style="width: 9vw"
+													step="1"
+													onChange={e => {
+														let height = parseFloat(e.target.value) / 100;
+														this.handleNodeChange(height, this.props.data.nodes.indexOf(node), 'img', false, this.props.index);
+													}}
+												/>
+												<input
 													title="Sets the image height"
 													type="range"
-													min='1'
-													max='150'
+													min="1"
+													max="150"
 													// step="0.01"
 													className="form-control img-slider"
-													style="width: 66vw; float: right;"
+													style="width: 60vw; float: right;"
 													name="size"
 													value={node.data.height * 100}
 													onChange={e => {
@@ -697,12 +697,37 @@ class Page extends Component {
 					return;
 			}
 		});
+
+		// REPLACE DEFAULT SORTABLE LIST DELETE BUTTON
 		setTimeout(() => {
 			let listItems = document.querySelector(`#nodelist${this.props.index}`).childNodes[0].childNodes[1].childNodes[2].childNodes;
 			listItems.forEach((item, index) => {
+				let btn = item.childNodes[1].childNodes[1].childNodes[0];
+				let tab = btn.parentNode;
+				let clone = btn.cloneNode();
 
+				let view = document.createElement('span');
+				view.setAttribute('title', 'Scrolls this Element into view and highlights it.')
+				let label = document.createElement('span');
+				label.innerHTML = 'Peek  ';
+				let icon = document.createElement('span');
+				icon.classList.add('glyphicon');
+				icon.classList.add('glyphicon-eye-open');
+
+				view.appendChild(label);
+				view.appendChild(icon);
+
+				tab.removeChild(btn);
+				tab.appendChild(view);
+				tab.appendChild(clone);
+				clone.addEventListener('click', e => this.handleNodeChange(e, index, 'delete', false, this.props.index));
+				view.addEventListener('click', e => {
+					buildfire.messaging.sendMessageToWidget({
+						nodeIndex: index,
+						pageIndex: this.props.index
+					});
+				});
 			});
-			
 		}, 200);
 		return nodes;
 	}
@@ -760,8 +785,6 @@ class Page extends Component {
 										<div className="panel-hide modal-wrap" data-toggle="hide" id={`page${this.props.index}options`}>
 											<div className="backdrop" id={`page${this.props.index}optionsbutton`} index={`${this.props.index}`} onClick={e => this.toggle(e, 'options')}>
 												<div className="panel-body nodepanel" data-toggle="hide">
-												
-
 													{/* BG COLOR */}
 													{/* <div className="tab">
 														<div>
@@ -835,7 +858,7 @@ class Page extends Component {
 																					<div className="coloritem margin-bottom-zero">
 																						<a className="img-thumbnail">
 																							<span className="color border-radius-four border-grey relative-position" onClick={() => this.colorPicker('backgroundColor', this.props.index)} style={`${this.props.data.backgroundCSS}; pointer-events: all; position: relative;`}>
-																								{this.props.data.backgroundColor.colorType === false ? <div className='color-not-selected'></div> : null}
+																								{this.props.data.backgroundColor.colorType === false ? <div className="color-not-selected" /> : null}
 																							</span>
 																						</a>
 																					</div>

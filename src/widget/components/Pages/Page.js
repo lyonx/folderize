@@ -144,6 +144,7 @@ class Page extends Component {
 					} else {
 						let height = false;
 						if (node.format === 'custom') {
+							// height = node.data.height * devicePixelRatio;
 							height = node.data.height;
 						}
 						
@@ -161,8 +162,8 @@ class Page extends Component {
 										// }}
 										height={node.format === 'custom' ? window.innerWidth * height : window.innerWidth * 0.54}>
 										{/* <div> */}
-											{/* <div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} /> */}
-											<div className="images" style={`background: url("${node.data.src}")`} />
+											<div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} />
+											{/* <div className="images" style={`background: url("${node.data.src}")`} /> */}
 											{/* <div className="img-loader" id={`loader${node.instanceId}`} /> */}
 										{/* </div> */}
 									</Lazyload>

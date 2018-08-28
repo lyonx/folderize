@@ -52,35 +52,27 @@ class Widget extends Component {
 		}
 		buildfire.spinner.hide();
 
-		// --------------------------- IN DEVELOPMENT -------------------------- //
-		// buildfire.appearance.getAppTheme((err, res) => {
-		// 	let themeData = [];
-		// 	if (err) throw err;
-		// 	for (var key in res.colors) {
-		// 		if (res.colors.hasOwnProperty(key)) {
-		//
-		//
-		// 			themeData.push({
-		// 				[key]: res.colors[key]
-		// 			});
-		// 		}
-		// 	}
-		//
-		// 	themeData.forEach(theme => {
-		// 		let targets = Array.from(document.getElementsByClassName(Object.keys(theme)));
-		//
-		// 		if (targets.length === 0) return;
-		// 		// for (let i = 0; i < targets.length - 1; i++) {
-		// 		//
-		// 		// 	targets[i].setAttribute('background', theme.Object.keys(theme));
-		// 		// }
-		// 		let key = Object.keys(theme)[0];
-		// 		targets.forEach(element => {
-		// 			element.setAttribute('background', theme[key]);
-		// 		});
-		// 	});
-		// });
-		// --------------------------------------------------------------------- //
+		setTimeout(() => {
+			try {
+				let activeSlide = document.querySelector('.js_slide.active');
+				console.log(activeSlide);
+
+				activeSlide.addEventListener('scroll', e => {
+					// console.log(e.target.scrollTop);
+					localStorage.setItem('scroll', e.target.scrollTop);
+				});
+				let scrollHeight = localStorage.getItem('scroll');
+				console.log(typeof scrollHeight);
+				let scrollOptions = {
+					top: parseInt(scrollHeight),
+					left: 0,
+					behavior: 'instant'
+				};
+				scrollHeight ? activeSlide.scrollTo(scrollOptions) : null;
+			} catch (err) {
+				console.error(err);
+			}
+		}, 400);
 	}
 	// GETS LAYOUTS AND OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
@@ -91,6 +83,28 @@ class Widget extends Component {
 		if (document.querySelector('.hero-img')) {
 			this.state.settings.pages.length === 1 ? document.querySelector('.hero-img').classList.add('full') : null;
 		}
+
+		setTimeout(() => {
+			let activeSlide = document.querySelector('.js_slide.active');
+			try {
+				console.log(activeSlide);
+				activeSlide.addEventListener('scroll', e => {
+					// console.log(e.target.scrollTop);
+					localStorage.setItem('scroll', e.target.scrollTop);
+				});
+			} catch (err) {
+				console.error(err);
+			}
+
+			let scrollHeight = localStorage.getItem('scroll');
+			console.log(typeof scrollHeight);
+			let scrollOptions = {
+				top: parseInt(scrollHeight),
+				left: 0,
+				behavior: 'instant'
+			};
+			scrollHeight ? activeSlide.scrollTo(scrollOptions) : null;
+		}, 25);
 	}
 
 	// ------------------------- DATA HANDLING ------------------------- //
@@ -112,9 +126,32 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
+			console.error(message);
+
 			if (message.color) {
 				document.querySelector('#sandbox').setAttribute('style', message.color);
 			} else {
+				if (message.nodeIndex) {
+					let slide = document.querySelector(`#slide${message.pageIndex}`);
+					let nodes = slide.childNodes[0].childNodes[0].childNodes;
+					let node = nodes[message.nodeIndex];
+
+					let activeSlide = document.querySelector('.js_slide.active');
+
+					let scrollOptions = {
+						top: parseInt(node.offsetTop),
+						left: 0,
+						behavior: 'smooth'
+					};
+					activeSlide.scrollTo(scrollOptions);
+					// this.slider.slideTo(message.pageIndex);
+
+					node.classList.add('focus');
+					setTimeout(() => {
+						node.classList.remove('focus');
+					}, 1000);
+					return;
+				}
 				if (this.state.settings.pages.length === 0) return;
 				this.slider.slideTo(message.index);
 			}
@@ -318,10 +355,12 @@ class Widget extends Component {
 	renderPages() {
 		// PREVENT ACCIDENTAL RENDERS
 		if (this.state.settings.pages.length === 0) {
-			return 	<h1>Click "Add a Page" to begin!</h1>;
+			console.log(window.location.pathname);
+
+			return <h1>Click "Add a Page" to begin!</h1>;
 		}
 		let pages = [];
-		
+
 		// REMOVES EXISTING PAGES AND NAVS (PREVENTS BUILDUP)
 		if (document.querySelector('.js_slides')) document.querySelector('.js_slides').innerHTML = '';
 		if (document.querySelector('.js_dots')) {
@@ -363,8 +402,8 @@ class Widget extends Component {
 		let ratio = window.devicePixelRatio;
 		let options = {
 			width: document.body.clientWidth / ratio,
-			height: document.body.clientHeight / ratio / 10,
-			disablePixelRation: true
+			height: document.body.clientHeight / ratio / 10
+			// disablePixelRation: true
 		};
 		console.log(options, ratio);
 		if (this.state.settings.options.headerImgSrc && options) cropped = buildfire.imageLib.cropImage(this.state.settings.options.headerImgSrc, options);

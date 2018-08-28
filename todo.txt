@@ -1,8 +1,0 @@
-Make draggable list have delete icons
-
-nav border option
-Disable auto page creation on load!
-page settings: change bg image display
-color thumbnail 
-slider for sizes
-box-shadow: 0 -2px 4px 0 rgba(0,0,0,.15);
