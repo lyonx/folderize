@@ -30,6 +30,10 @@ class Content extends Component {
 					headerImgSrc: false,
 					backgroundImg: '',
 					backgroundLrg: '',
+					backgroundColor: {},
+					bodyFontSize: 24,
+					headerFontSize: 36,
+					textAlign: 'left',
 					renderTitlebar: true,
 					navPosition: 'top',
 					navShadow: false,
@@ -43,84 +47,26 @@ class Content extends Component {
 
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
-		// this.debugDB();
-		// debugger
+
+		// INIT SORTABLE LIST
 		this.initSortable();
-
-
-
-		// this.debugDB();
-
+		// FETCH DATA
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
-			// if none are present, insert default data
-			//
-
+			console.log(response);
+			
+			// IF THERE IS NO DATA, RETURN
 			if (!response.id) {
-				// this.addPage();
-				// this.setState({
-				// 	settings: {
-				// 		pages: [
-				// 			{
-				// 				title: 'new page',
-				// 				id: Date.now(),
-				// 				customizations: [],
-				// 				backgroundColor: {
-				// 					colorType: false,
-				// 					solid: {
-				// 						backgroundCSS: ''
-				// 					},
-				// 					gradient: {
-				// 						backgroundCSS: ''
-				// 					}
-				// 				},
-				// 				nodes: [
-				// 					{
-				// 						type: 'header',
-				// 						data: {
-				// 							text: 'new page'
-				// 						}
-				// 					}
-				// 				]
-				// 			}
-				// 		],
-				// 		options: {
-				// 			showTitleBar: false,
-				// 			navPosition: 'top',
-				// 			colorOverrides: []
-				// 		}
-				// 	}
-				// });
-			} else {
-				// otherwise, if all pages have been removed, insert default data
-				if (response.data.settings.pages.length === 0) {
-					// this.addPage();
-					// setTimeout(() => {
-					// 	document.querySelector(`#tab0`).click();
-					// }, 250);
-				} else {
-					// update settings
-					this.setState({
-						settings: response.data.settings
-					});
-				}
+				this.debounceSync();
+				return;
 			}
+			// IF THERE ARE NO PAGES, RETURN
+			// if (!response.data.settings.pages ||response.data.settings.pages.length === 0) return;
+			// UPDATE SETTINGS
+			this.setState({
+				settings: response.data.settings
+			});
 		});
-		// let tutorials = localStorage.getItem('tutorial');
-		// if (tutorials === 'true') {
-		// 	let tutorials = this.state.tutorials;
-		// 	tutorials = true;
-		// 	this.setState({
-		// 		tutorials
-		// 	});
-		// } else {
-		// 	let tutorials = this.state.tutorials;
-		// 	tutorials = false;
-		// 	this.setState({
-		// 		tutorials
-		// 	});
-		// }
-
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
@@ -239,25 +185,6 @@ class Content extends Component {
 
 	// ADDS A NEW PAGE TO THE STATE
 	addPage() {
-		if (this.state.settings.pages.length === 0) {
-			// if (localStorage.getItem('tutorial') === 'true') {
-			// localStorage.setItem('tutorial', false);
-			// let tutorials = this.state.tutorials;
-			// tutorials = false;
-			// this.setState({ tutorials });
-			// return;
-		}
-
-		// localStorage.setItem('tutorial', true);
-		// let tutorials = this.state.tutorials;
-		// tutorials = true;
-		// this.setState({ tutorials });
-		// } else {
-		// localStorage.setItem('tutorial', false);
-		// let tutorials = this.state.tutorials;
-		// tutorials = false;
-		// this.setState({ tutorials });
-		// }
 
 		let newPage = {
 			title: 'New Page',
@@ -272,14 +199,14 @@ class Content extends Component {
 				}
 			},
 			nodes: [
-				{
-					type: 'header',
-					title: 'Header',
-					instanceId: Date.now(),
-					data: {
-						text: 'new page'
-					}
-				}
+				// {
+				// 	type: 'header',
+				// 	title: 'Header',
+				// 	instanceId: Date.now(),
+				// 	data: {
+				// 		text: 'new page'
+				// 	}
+				// }
 			]
 		};
 		let settings = this.state.settings;
@@ -287,7 +214,7 @@ class Content extends Component {
 		this.setState({
 			settings
 		});
-		// if (pages.length > 1) {
+
 		setTimeout(() => {
 			document.querySelector(`#tab${settings.pages.length - 1}`).click();
 		}, 250);
@@ -296,11 +223,21 @@ class Content extends Component {
 				index: settings.pages.length - 1
 			});
 		}, 750);
+
+		setTimeout(() => {
+			let btns = document.querySelector('#menu0').childNodes;
+			btns.forEach(btn => {
+				btn.classList.add('focus');
+				setTimeout(() => {
+					btn.classList.remove('focus');					
+				}, 1000);
+			});
+		}, 1000);
 	}
 	// USED BY THE PAGES TO DELETE THEMSELVES
 	deletePage(index) {
 		console.log(index);
-		
+
 		let settings = this.state.settings;
 		settings.pages.splice(index, 1);
 		document.querySelector(`#tab${index}`).click();
@@ -519,6 +456,7 @@ class Content extends Component {
 								throw err;
 							}
 						} else {
+							if (!result) return;
 							if (result.selectedButton.key === 'confirm') {
 								nodes.splice(index, 1);
 								this.setState({ settings });
@@ -742,7 +680,7 @@ class Content extends Component {
 
 			items.forEach((item, index) => {
 				console.log(index);
-				
+
 				let btn = item.childNodes[1].childNodes[1].childNodes[0];
 				let tab = btn.parentNode;
 				let clone = btn.cloneNode();
@@ -764,7 +702,7 @@ class Content extends Component {
 								}
 							} else {
 								if (!result) return;
-			
+
 								if (result.selectedButton.key === 'confirm') {
 									this.deletePage(index);
 								}
@@ -772,63 +710,16 @@ class Content extends Component {
 						}
 					);
 				});
-				
 			});
-			
 		}, 300);
 		return pages;
 	}
 
 	render() {
-		let headerImgDiag = (
-			<div className="main col-md-9 pull-right">
-				<div className="border-radius-four border-grey">
-					<div className="d-item">
-						<div className="media-holder pull-left" onClick={() => this.addImg('header', false, false, false)}>
-							<img src={this.state.settings.options.headerImgSrc ? this.state.settings.options.headerImgSrc : './assets/noImg.PNG'} />
-						</div>
-						<div className="copy pull-right">
-							<div className="pull-right">
-								<span className="btn-edit-icon btn-primary" style="display: inline-block" />
-								<span className="btn-icon btn-delete-icon btn-danger transition-third" style="display: inline-block; margin-left: 5px; pointer-events: all;" onClick={() => this.addImg('header', false, false, true)}/>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
+	
 		return (
 			<div className="container-fluid">
 				<div className="row">
-					<div className="col-md-12">
-						<div className="item row margin-bottom-twenty clearfix">
-							<div className="labels col-md-3 padding-right-zero pull-left" style="display: initial">
-								<span title="Add a header Image to appear at the top of the plugin.">Header Image: </span>
-								<input
-									type="checkbox"
-									name="header-img"
-									onChange={e => {
-										let settings = this.state.settings;
-										switch (e.target.checked) {
-											case true:
-												settings.options.headerImg = true;
-												settings.options.headerImgSrc ? null : this.addImg('header', false, false, false);
-												this.setState({ settings });
-												break;
-											case false:
-												settings.options.headerImg = false;
-												this.setState({ settings });
-												break;
-											default:
-												break;
-										}
-									}}
-									checked={this.state.settings.options.headerImg}
-								/>
-							</div>
-							{this.state.settings.options.headerImg ? headerImgDiag : false}
-						</div>
-					</div>
 					<div className="col-md-12">
 						<div className="panel panel-default">
 							<div className="panel-body">

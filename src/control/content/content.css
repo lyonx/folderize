@@ -1,3 +1,48 @@
+@keyframes focus-frame {
+	0% {
+		/* margin-left: 0vw;
+    margin-right: 0vw;
+    width: 100vw; */
+	}
+	50% {
+		background: #3498db
+
+	}
+	100% {
+	}
+}
+
+@keyframes focus {
+	0% {
+		/* margin-left: 0vw;
+    margin-right: 0vw;
+    width: 100vw; */
+	}
+	50% {
+		opacity: .5;
+
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.focus {
+	animation-name: focus-frame;
+	background-color: #ffffff !important;
+	animation-duration: 1s;
+	animation-direction: normal;
+	animation-fill-mode: forwards;
+}
+
+.focus .image-wrap div, .focus div {
+	animation-name: focus;
+	animation-duration: 1s;
+	animation-direction: normal;
+	animation-fill-mode: forwards;
+}
+
+
 .tooltip-info {
 	visibility: hidden;
 	font-size: 18px;

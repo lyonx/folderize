@@ -120,3 +120,31 @@ label {
 .tab > .btn {
   margin-left: 5px;
 }
+.d-item {
+	min-height: 56px;
+	padding: 8px 17px;
+}
+
+.d-item > .copy {
+	position: relative;
+	top: 5px;
+	display: inline-block;
+	/* width: 76.5%; */
+	max-width: 76.5%;
+}
+
+.d-item > .media-holder {
+	border-radius: 4px;
+	background: #eef0f0;
+	text-align: center;
+	/* width: 65px; */
+	height: 40px;
+	line-height: 36px;
+}
+
+.d-item > .media-holder > img {
+	max-width: 100%;
+	max-height: 100%;
+	vertical-align: middle;
+	border-radius: 4px;
+}

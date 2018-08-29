@@ -16,16 +16,7 @@ class Page extends Component {
 		this.initEditor = this.initEditor.bind(this);
 		this.addNode = props.addNode;
 		this.addImg = props.addImg;
-		// this.state = {
-		// 	title: props.data.title,
-		// 	nodes: [],
-		// 	show: false,
-		// 	backgroundColor: this.props.backgroundColor,
-		// 	backgroundImg: this.props.backgroundImg,
-		// 	iconUrl: this.props.iconUrl,
-		// 	backgroundCSS: '',
-		// 	tutorials: this.props.tutorials
-		// };
+		this.apply = false;
 		this.state = {
 			index: null,
 			title: '',
@@ -697,38 +688,44 @@ class Page extends Component {
 					return;
 			}
 		});
+		let applyIcons = () => {
+			console.log(this.apply);
+			
+			if (this.apply) return;
+			// REPLACE DEFAULT SORTABLE LIST DELETE BUTTON
+			this.apply = setTimeout(() => {
+				let listItems = document.querySelector(`#nodelist${this.props.index}`).childNodes[0].childNodes[1].childNodes[2].childNodes;
+				listItems.forEach((item, index) => {
+					let btn = item.childNodes[1].childNodes[1].childNodes[0];
+					let tab = btn.parentNode;
+					let clone = btn.cloneNode();
 
-		// REPLACE DEFAULT SORTABLE LIST DELETE BUTTON
-		setTimeout(() => {
-			let listItems = document.querySelector(`#nodelist${this.props.index}`).childNodes[0].childNodes[1].childNodes[2].childNodes;
-			listItems.forEach((item, index) => {
-				let btn = item.childNodes[1].childNodes[1].childNodes[0];
-				let tab = btn.parentNode;
-				let clone = btn.cloneNode();
+					let view = document.createElement('span');
+					view.setAttribute('title', 'Scrolls this Element into view and highlights it.');
+					let label = document.createElement('span');
+					label.innerHTML = 'Peek  ';
+					let icon = document.createElement('span');
+					icon.classList.add('glyphicon');
+					icon.classList.add('glyphicon-eye-open');
 
-				let view = document.createElement('span');
-				view.setAttribute('title', 'Scrolls this Element into view and highlights it.')
-				let label = document.createElement('span');
-				label.innerHTML = 'Peek  ';
-				let icon = document.createElement('span');
-				icon.classList.add('glyphicon');
-				icon.classList.add('glyphicon-eye-open');
+					view.appendChild(label);
+					view.appendChild(icon);
 
-				view.appendChild(label);
-				view.appendChild(icon);
-
-				tab.removeChild(btn);
-				tab.appendChild(view);
-				tab.appendChild(clone);
-				clone.addEventListener('click', e => this.handleNodeChange(e, index, 'delete', false, this.props.index));
-				view.addEventListener('click', e => {
-					buildfire.messaging.sendMessageToWidget({
-						nodeIndex: index,
-						pageIndex: this.props.index
+					tab.removeChild(btn);
+					tab.appendChild(view);
+					tab.appendChild(clone);
+					clone.addEventListener('click', e => this.handleNodeChange(e, index, 'delete', false, this.props.index));
+					view.addEventListener('click', e => {
+						buildfire.messaging.sendMessageToWidget({
+							nodeIndex: index,
+							pageIndex: this.props.index
+						});
 					});
 				});
-			});
-		}, 200);
+				this.apply = false;
+			}, 200);
+		};
+		applyIcons();
 		return nodes;
 	}
 

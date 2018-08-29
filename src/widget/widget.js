@@ -30,6 +30,8 @@ class Widget extends Component {
 
 	// ON MOUNT FETCHES DATA AND INITIALIZES DB LISTENERS
 	componentDidMount() {
+		console.warn(this.state);
+		
 		// GET ANY PREVIOUSLY STORED DATA
 		this.fetch();
 		// INITIALIZE THE DB LISTENER
@@ -55,6 +57,7 @@ class Widget extends Component {
 		setTimeout(() => {
 			try {
 				let activeSlide = document.querySelector('.js_slide.active');
+				if (!activeSlide) return;
 				console.log(activeSlide);
 
 				activeSlide.addEventListener('scroll', e => {
@@ -68,9 +71,9 @@ class Widget extends Component {
 					left: 0,
 					behavior: 'instant'
 				};
-				scrollHeight ? activeSlide.scrollTo(scrollOptions) : null;
+				if (scrollHeight) activeSlide.scrollTo(scrollOptions);
 			} catch (err) {
-				console.error(err);
+				console.warn(err);
 			}
 		}, 400);
 	}
@@ -85,25 +88,25 @@ class Widget extends Component {
 		}
 
 		setTimeout(() => {
-			let activeSlide = document.querySelector('.js_slide.active');
 			try {
-				console.log(activeSlide);
+				let activeSlide = document.querySelector('.js_slide.active');
+				if (!activeSlide) return;
 				activeSlide.addEventListener('scroll', e => {
 					// console.log(e.target.scrollTop);
 					localStorage.setItem('scroll', e.target.scrollTop);
 				});
+
+				let scrollHeight = localStorage.getItem('scroll');
+				console.log(typeof scrollHeight);
+				let scrollOptions = {
+					top: parseInt(scrollHeight),
+					left: 0,
+					behavior: 'instant'
+				};
+				scrollHeight ? activeSlide.scrollTo(scrollOptions) : null;
 			} catch (err) {
 				console.error(err);
 			}
-
-			let scrollHeight = localStorage.getItem('scroll');
-			console.log(typeof scrollHeight);
-			let scrollOptions = {
-				top: parseInt(scrollHeight),
-				left: 0,
-				behavior: 'instant'
-			};
-			scrollHeight ? activeSlide.scrollTo(scrollOptions) : null;
 		}, 25);
 	}
 
@@ -126,12 +129,10 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
-			console.error(message);
-
 			if (message.color) {
 				document.querySelector('#sandbox').setAttribute('style', message.color);
 			} else {
-				if (message.nodeIndex) {
+				if (message.nodeIndex || message.nodeIndex === 0) {
 					let slide = document.querySelector(`#slide${message.pageIndex}`);
 					let nodes = slide.childNodes[0].childNodes[0].childNodes;
 					let node = nodes[message.nodeIndex];
@@ -143,8 +144,10 @@ class Widget extends Component {
 						left: 0,
 						behavior: 'smooth'
 					};
+
 					activeSlide.scrollTo(scrollOptions);
-					// this.slider.slideTo(message.pageIndex);
+
+					if (localStorage.getItem('currentSlide') != message.pageIndex) this.slider.slideTo(message.pageIndex);
 
 					node.classList.add('focus');
 					setTimeout(() => {
@@ -354,10 +357,17 @@ class Widget extends Component {
 	// SETS UP AND RETURNS PAGE COMPONENTS
 	renderPages() {
 		// PREVENT ACCIDENTAL RENDERS
-		if (this.state.settings.pages.length === 0) {
-			console.log(window.location.pathname);
+		console.log(window.location.protocol);
 
-			return <h1>Click "Add a Page" to begin!</h1>;
+		if (this.state.settings.pages.length === 0 && window.location.protocol != 'file:') {
+			return (
+				<div style={'height: 100vh'}>
+					<h1>Click "Add a Page" to begin!</h1>
+					<small>(This will never appear to users)</small>
+				</div>
+			);
+		} else if (this.state.settings.pages.length === 0) {
+			return <div />;
 		}
 		let pages = [];
 
@@ -389,12 +399,12 @@ class Widget extends Component {
 	}
 
 	render() {
-		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" style={this.state.settings.options.navShadow ? (this.state.settings.options.navPosition === 'top' ? 'box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px 0px;' : 'box-shadow: 0 -2px 4px 0 rgba(0,0,0,.15);') : false} />;
+		let style = '';
+		this.state.settings.options.navShadow ? (this.state.settings.options.navPosition === 'top' ? (style += 'box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px 0px;') : (style += 'box-shadow: 0 -2px 4px 0 rgba(0,0,0,.15);')) : false;
+		this.state.settings.options.navBorder ? (style += 'border-top: 1px solid rgba(0, 0, 0, 0.24);') : null;
+		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" style={style} />;
 		// let header = <div style={`background: url("${this.state.settings.options.headerImgSrc}");`} className="header-image"/>;
-		let cropped;
-		setTimeout(() => {
-			// console.log(document.querySelector('.header-image').clientHeight);
-		}, 200);
+
 		// let options = {
 		// 	width: window.innerWidth * 1.114,
 		// 	height: (window.innerHeight * 1.114) / 10
@@ -406,10 +416,18 @@ class Widget extends Component {
 			// disablePixelRation: true
 		};
 		console.log(options, ratio);
-		if (this.state.settings.options.headerImgSrc && options) cropped = buildfire.imageLib.cropImage(this.state.settings.options.headerImgSrc, options);
+		let headerStyle = '';
+		let cropped;
+		if (this.state.settings.options.headerImgSrc === false) {
+			headerStyle += `background: url("./assets/noImg.PNG");`;
+			headerStyle += 'background-position: center;';
+		} else if (this.state.settings.options.headerImgSrc && options) {
+			cropped = buildfire.imageLib.cropImage(this.state.settings.options.headerImgSrc, options);
+			headerStyle += `background: url("${cropped}");`;
+		}
 		let header = (
 			<div className="header-wrap">
-				<div style={`background: url("${cropped}");`} className="header-image" />
+				<div style={headerStyle} className="header-image" />
 			</div>
 		);
 		return (
@@ -424,7 +442,7 @@ class Widget extends Component {
 						<div className="frame js_frame">
 							<ul className="slides js_slides">{this.renderPages()}</ul>
 						</div>
-						{this.state.settings.options.navPosition === 'bottom' && this.state.settings.pages.length > 0 ? dotNav : null}
+						{this.state.settings.pages ? this.state.settings.options.navPosition === 'bottom' && this.state.settings.pages.length > 0 ? dotNav : null : null}
 					</div>
 				</div>
 			</div>

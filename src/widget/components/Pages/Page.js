@@ -101,6 +101,9 @@ class Page extends Component {
 	renderNodes() {
 		let nodes = [];
 		if (!this.props.data.nodes) return;
+		if (this.props.data.nodes.length === 0) {
+			return <h1>This page is empty! You can add elements by clicking the buttons below "Add Elements"!</h1>
+		}
 		this.props.data.nodes.forEach(node => {
 			if (!node) return;
 			switch (node.type) {

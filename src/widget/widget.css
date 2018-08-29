@@ -166,6 +166,7 @@ li {
 
 .description {
 	padding-top: 15px;
+	margin-bottom: 0px;
 	padding-bottom: 15px;
 }
 
@@ -207,7 +208,10 @@ h6 {
 .page-header {
 	margin-right: -15px;
 	margin-left: -15px;
-	margin-top: 10px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin-top: 0px;
+	margin-bottom: 0px;
 	width: 100vw;
 	padding-left: 15px;
 	padding-right: 15px;
@@ -241,6 +245,8 @@ h6 {
 .linkOnly {
 	padding-top: 0px;
 	padding-bottom: 0px;
+	line-height: 10vh;
+	min-height: 10vh !important;
 	border-bottom: 0px !important;
 	border-top: 0px !important;
 }
