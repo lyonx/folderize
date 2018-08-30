@@ -31,7 +31,7 @@ class Widget extends Component {
 	// ON MOUNT FETCHES DATA AND INITIALIZES DB LISTENERS
 	componentDidMount() {
 		console.warn(this.state);
-		
+
 		// GET ANY PREVIOUSLY STORED DATA
 		this.fetch();
 		// INITIALIZE THE DB LISTENER
@@ -129,31 +129,56 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
+			console.log(message);
+
 			if (message.color) {
 				document.querySelector('#sandbox').setAttribute('style', message.color);
 			} else {
-				if (message.nodeIndex || message.nodeIndex === 0) {
-					let slide = document.querySelector(`#slide${message.pageIndex}`);
-					let nodes = slide.childNodes[0].childNodes[0].childNodes;
-					let node = nodes[message.nodeIndex];
-
-					let activeSlide = document.querySelector('.js_slide.active');
-
-					let scrollOptions = {
-						top: parseInt(node.offsetTop),
-						left: 0,
-						behavior: 'smooth'
-					};
-
-					activeSlide.scrollTo(scrollOptions);
-
-					if (localStorage.getItem('currentSlide') != message.pageIndex) this.slider.slideTo(message.pageIndex);
-
-					node.classList.add('focus');
+				if (message.scrollBottom) {
 					setTimeout(() => {
-						node.classList.remove('focus');
-					}, 1000);
+						let slide = document.querySelector(`#slide${parseInt(localStorage.getItem('currentSlide'))}`);
+						console.log(slide.scrollHeight  - slide.clientHeight);
+						slide.scrollTo(0, slide.scrollHeight - slide.clientHeight);
+					}, 750);
+
 					return;
+				} else if (message.nodeIndex || message.nodeIndex === 0) {
+					try {
+						setTimeout(() => {
+							
+						
+						let slide = document.querySelector(`#slide${message.pageIndex}`);
+						let nodes = slide.childNodes[0].childNodes[0].childNodes;
+						let node;
+						if (typeof message.nodeIndex === 'number') {
+							node = nodes[message.nodeIndex];
+						} else {
+							node = nodes[nodes.length - 1];
+						}
+						if (!node) return;
+						console.log(node, nodes, slide);
+
+						let activeSlide = document.querySelector('.js_slide.active');
+
+						let scrollOptions = {
+							top: parseInt(node.offsetTop),
+							left: 0,
+							behavior: 'smooth'
+						};
+
+						activeSlide.scrollTo(scrollOptions);
+
+						if (localStorage.getItem('currentSlide') != message.pageIndex) this.slider.slideTo(message.pageIndex);
+
+						node.classList.add('focus');
+						setTimeout(() => {
+							node.classList.remove('focus');
+						}, 1000);
+						return;
+					}, 600);
+					} catch (err) {
+						console.error(err);
+					}
 				}
 				if (this.state.settings.pages.length === 0) return;
 				this.slider.slideTo(message.index);
@@ -442,7 +467,7 @@ class Widget extends Component {
 						<div className="frame js_frame">
 							<ul className="slides js_slides">{this.renderPages()}</ul>
 						</div>
-						{this.state.settings.pages ? this.state.settings.options.navPosition === 'bottom' && this.state.settings.pages.length > 0 ? dotNav : null : null}
+						{this.state.settings.pages ? (this.state.settings.options.navPosition === 'bottom' && this.state.settings.pages.length > 0 ? dotNav : null) : null}
 					</div>
 				</div>
 			</div>

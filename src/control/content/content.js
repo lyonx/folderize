@@ -47,7 +47,8 @@ class Content extends Component {
 
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
-
+		// this.debugDB();
+		// return;
 		// INIT SORTABLE LIST
 		this.initSortable();
 		// FETCH DATA
@@ -348,6 +349,10 @@ class Content extends Component {
 			default:
 				return;
 		}
+		buildfire.messaging.sendMessageToWidget({
+			nodeIndex: 'last',
+			pageIndex: index
+		});
 	}
 	// USED BY INPUT FEILDS TO UPDATE STATE
 	handleChange(event, index) {

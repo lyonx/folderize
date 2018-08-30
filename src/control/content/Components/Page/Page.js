@@ -154,7 +154,7 @@ class Page extends Component {
 				panel = document.getElementById(`page${this.props.index}nodepanel${index}`);
 				if (panel.getAttribute('data-toggle') === 'hide') {
 					buildfire.messaging.sendMessageToWidget({
-						nodeIndex: index,
+						nodeIndex: parseInt(index),
 						pageIndex: this.props.index
 					});
 				}
