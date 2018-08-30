@@ -77,6 +77,7 @@ class Widget extends Component {
 			}
 		}, 400);
 	}
+
 	// GETS LAYOUTS AND OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
 		console.warn(this.state);

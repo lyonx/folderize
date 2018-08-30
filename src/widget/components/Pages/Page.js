@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import Lazyload from 'react-lazy-load';
+import Header from "../Header/Header";
+import Desc from "../Desc/Desc";
 
 // --------------------------- WIDGET PAGE COMPONENT --------------------------- //
 class Page extends Component {
@@ -27,6 +29,15 @@ class Page extends Component {
 	componentWillUnmount() {
 		document.removeEventListener('after.lory.slide', this.getOffset);
 	}
+
+	// shouldComponentUpdate(nextProps, nextState) {
+	// 	if (nextProps.data.nodes.length === this.props.data.nodes.length) {
+	// 		console.warn('false');
+			
+	// 		return false;
+	// 	}
+
+	// }
 
 	// ------------------------- DATA HANDLING ------------------------- //
 
@@ -110,22 +121,27 @@ class Page extends Component {
 				case 'header': {
 					let border;
 					node.data.border ? (border = '') : (border = `border-bottom: 0px !important;`);
+					node.data.headerFontSize = this.props.data.headerFontSize;
+					node.data.border = border;
 					nodes.push(
-						<div className="col-sm-12">
-							<div className="page-header" style={border}>
-								<h1 style={`font-size: ${this.props.data.headerFontSize}px`}>{node.data.text}</h1>
-							</div>
-						</div>
+						<Header data={node.data} />
+						// <div className="col-sm-12">
+						// 	<div className="page-header" style={border}>
+						// 		<h1 style={`font-size: ${this.props.data.headerFontSize}px`}>{node.data.text}</h1>
+						// 	</div>
+						// </div>
 					);
 					break;
 				}
 				case 'desc': {
+					node.data.bodyFontSize = this.props.data.bodyFontSize;
 					nodes.push(
-						<div className="col-sm-12">
-							<p className="description" style={`font-size: ${this.props.data.bodyFontSize}px`}>
-								{node.data.text}
-							</p>
-						</div>
+						<Desc data={node.data} />
+						// <div className="col-sm-12">
+						// 	<p className="description" style={`font-size: ${this.props.data.bodyFontSize}px`}>
+						// 		{node.data.text}
+						// 	</p>
+						// </div>
 					);
 					break;
 				}
@@ -245,6 +261,7 @@ class Page extends Component {
 	}
 
 	render() {
+		console.warn('render');
 		let content = (
 			<div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
 				<div className="row">{this.renderNodes()}</div>

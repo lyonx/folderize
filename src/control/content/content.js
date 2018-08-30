@@ -18,7 +18,7 @@ class Content extends Component {
 		this.reorderNodes = this.reorderNodes.bind(this);
 
 		this.renderPages = this.renderPages.bind(this);
-		this.debounceSync = debounce(this.syncState, 150);
+		this.debounceSync = debounce(this.syncState, 250);
 
 		this.editor = {};
 		this.state = {
