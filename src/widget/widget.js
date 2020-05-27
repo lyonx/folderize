@@ -14,6 +14,7 @@ class Widget extends Component {
 			settings: {
 				pages: [],
 				options: {
+					rememberPageIndex: true,
 					backgroundImg: '',
 					backgroundLrg: '',
 					textAlign: 'left',
@@ -30,8 +31,6 @@ class Widget extends Component {
 
 	// ON MOUNT FETCHES DATA AND INITIALIZES DB LISTENERS
 	componentDidMount() {
-		console.warn(this.state);
-
 		// GET ANY PREVIOUSLY STORED DATA
 		this.fetch();
 		// INITIALIZE THE DB LISTENER
@@ -58,14 +57,13 @@ class Widget extends Component {
 			try {
 				let activeSlide = document.querySelector('.js_slide.active');
 				if (!activeSlide) return;
-				console.log(activeSlide);
 
 				activeSlide.addEventListener('scroll', e => {
-					// console.log(e.target.scrollTop);
+					//
 					localStorage.setItem('scroll', e.target.scrollTop);
 				});
 				let scrollHeight = localStorage.getItem('scroll');
-				console.log(typeof scrollHeight);
+
 				let scrollOptions = {
 					top: parseInt(scrollHeight),
 					left: 0,
@@ -73,15 +71,13 @@ class Widget extends Component {
 				};
 				if (scrollHeight) activeSlide.scrollTo(scrollOptions);
 			} catch (err) {
-				console.warn(err);
+				console.error(err);
 			}
 		}, 400);
 	}
 
 	// GETS LAYOUTS AND OPTIONALLY RENDERS BUILDFIRE TITLEBAR
 	componentDidUpdate() {
-		console.warn(this.state);
-
 		this.getLayouts();
 		this.state.settings.options.renderTitlebar === true ? buildfire.appearance.titlebar.show() : buildfire.appearance.titlebar.hide();
 		if (document.querySelector('.hero-img')) {
@@ -93,12 +89,12 @@ class Widget extends Component {
 				let activeSlide = document.querySelector('.js_slide.active');
 				if (!activeSlide) return;
 				activeSlide.addEventListener('scroll', e => {
-					// console.log(e.target.scrollTop);
+					//
 					localStorage.setItem('scroll', e.target.scrollTop);
 				});
 
 				let scrollHeight = localStorage.getItem('scroll');
-				console.log(typeof scrollHeight);
+
 				let scrollOptions = {
 					top: parseInt(scrollHeight),
 					left: 0,
@@ -123,6 +119,11 @@ class Widget extends Component {
 				}
 				case 'data': {
 					this.setState({ settings: snapshot.data.settings });
+					setTimeout(() => {
+						let slideIndex = localStorage.getItem('currentSlide');
+						console.log(this.slider);
+						this.slider.slideTo(parseInt(slideIndex));
+					}, 100);
 					break;
 				}
 				default:
@@ -130,15 +131,13 @@ class Widget extends Component {
 			}
 		});
 		buildfire.messaging.onReceivedMessage = message => {
-			console.log(message);
-
 			if (message.color) {
 				document.querySelector('#sandbox').setAttribute('style', message.color);
 			} else {
 				if (message.scrollBottom) {
 					setTimeout(() => {
 						let slide = document.querySelector(`#slide${parseInt(localStorage.getItem('currentSlide'))}`);
-						console.log(slide.scrollHeight  - slide.clientHeight);
+
 						slide.scrollTo(0, slide.scrollHeight - slide.clientHeight);
 					}, 750);
 
@@ -146,43 +145,42 @@ class Widget extends Component {
 				} else if (message.nodeIndex || message.nodeIndex === 0) {
 					try {
 						setTimeout(() => {
-							
-						
-						let slide = document.querySelector(`#slide${message.pageIndex}`);
-						let nodes = slide.childNodes[0].childNodes[0].childNodes;
-						let node;
-						if (typeof message.nodeIndex === 'number') {
-							node = nodes[message.nodeIndex];
-						} else {
-							node = nodes[nodes.length - 1];
-						}
-						if (!node) return;
-						console.log(node, nodes, slide);
+							let slide = document.querySelector(`#slide${message.pageIndex}`);
+							let nodes = slide.childNodes[0].childNodes[0].childNodes;
+							let node;
+							if (typeof message.nodeIndex === 'number') {
+								node = nodes[message.nodeIndex];
+							} else {
+								node = nodes[nodes.length - 1];
+							}
+							if (!node) return;
 
-						let activeSlide = document.querySelector('.js_slide.active');
+							// let activeSlide = document.querySelector('.js_slide.active');
+							let pages = document.querySelector('.js_slides').childNodes;
+							let activeSlide = pages[message.pageIndex];
 
-						let scrollOptions = {
-							top: parseInt(node.offsetTop),
-							left: 0,
-							behavior: 'smooth'
-						};
+							let scrollOptions = {
+								top: parseInt(node.offsetTop),
+								// left: 0,
+								behavior: 'smooth'
+							};
 
-						activeSlide.scrollTo(scrollOptions);
+							this.slider.slideTo(message.pageIndex);
 
-						if (localStorage.getItem('currentSlide') != message.pageIndex) this.slider.slideTo(message.pageIndex);
+							activeSlide.scrollTo(scrollOptions);
 
-						node.classList.add('focus');
-						setTimeout(() => {
-							node.classList.remove('focus');
-						}, 1000);
-						return;
-					}, 600);
+							node.classList.add('focus');
+							setTimeout(() => {
+								node.classList.remove('focus');
+							}, 1000);
+							return;
+						}, 600);
 					} catch (err) {
 						console.error(err);
 					}
 				}
 				if (this.state.settings.pages.length === 0) return;
-				this.slider.slideTo(message.index);
+				if (message.index) this.slider.slideTo(message.index);
 			}
 		};
 	}
@@ -260,44 +258,6 @@ class Widget extends Component {
 		let slideIndex = localStorage.getItem('currentSlide');
 		let simple_dots = document.querySelector('.js_simple_dots');
 		let dot_container = simple_dots.querySelector('.js_dots');
-		// let dot_list_item = document.createElement('li');
-		// let dot_count = pages.length;
-
-		// EVENT HANDLER FOR NAV
-		// const handleDotEvent = e => {
-		// 	if (e.type === 'before.lory.init') {
-		// 		if (pages.length != this.state.settings.pages.length) return;
-		// 		for (let i = 0, len = dot_count; i < len; i++) {
-		// 			let clone = dot_list_item.cloneNode();
-		// 			if (dot_container.childNodes.length >= pages.length) return;
-
-		// 			dot_container.appendChild(clone);
-		// 		}
-		// 		dot_container.childNodes[0].classList.add('active');
-		// 	}
-		// 	if (e.type === 'after.lory.init') {
-		// 		for (let i = 0, len = dot_count; i < len; i++) {
-		// 			if (!dot_container.childNodes[i]) return;
-		// 			dot_container.childNodes[i].addEventListener('click', e => {
-		// 				this.slider.slideTo(Array.prototype.indexOf.call(dot_container.childNodes, e.target));
-		// 			});
-		// 		}
-		// 	}
-		// 	if (e.type === 'after.lory.slide') {
-		// 		for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
-		// 			dot_container.childNodes[i].classList.remove('active');
-		// 		}
-		// 		dot_container.childNodes[e.detail.currentSlide].classList.add('active');
-		// 		localStorage.setItem('currentSlide', e.detail.currentSlide);
-		// 	}
-		// 	if (e.type === 'on.lory.resize') {
-		// 		for (let i = 0, len = dot_container.childNodes.length; i < len; i++) {
-		// 			dot_container.childNodes[i].classList.remove('active');
-		// 		}
-		// 		if (!dot_container.childNodes[0]) return;
-		// 		dot_container.childNodes[0].classList.add('active');
-		// 	}
-		// };
 
 		// IF THERE IS ONLY ONE PAGE, DONT BIND EVENT HANDLERS AND HIDE NAVBAR
 		if (pages.length > 1) {
@@ -358,9 +318,15 @@ class Widget extends Component {
 		});
 
 		// SLIDE TO THE LAST PAGE THE USER WAS ON
-		setTimeout(() => {
-			this.slider.slideTo(parseInt(slideIndex));
-		}, 1);
+		if (this.state.settings.options.rememberPageIndex || window.location.protocol != 'file:' ) {
+			setTimeout(() => {
+				this.slider.slideTo(parseInt(slideIndex));
+			}, 1);
+		} else {
+			setTimeout(() => {
+				this.slider.slideTo(0);
+			}, 1);
+		}
 	}
 
 	getBG() {
@@ -383,7 +349,6 @@ class Widget extends Component {
 	// SETS UP AND RETURNS PAGE COMPONENTS
 	renderPages() {
 		// PREVENT ACCIDENTAL RENDERS
-		console.log(window.location.protocol);
 
 		if (this.state.settings.pages.length === 0 && window.location.protocol != 'file:') {
 			return (
@@ -426,22 +391,19 @@ class Widget extends Component {
 
 	render() {
 		let style = '';
-		this.state.settings.options.navShadow ? (this.state.settings.options.navPosition === 'top' ? (style += 'box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px 0px;') : (style += 'box-shadow: 0 -2px 4px 0 rgba(0,0,0,.15);')) : false;
+		let dropStyle = '';
 		this.state.settings.options.navBorder ? (style += 'border-top: 1px solid rgba(0, 0, 0, 0.24);') : null;
 		let dotNav = <ul className="dots js_dots sticky footerBackgroundColorTheme" id="dot-nav" style={style} />;
 		// let header = <div style={`background: url("${this.state.settings.options.headerImgSrc}");`} className="header-image"/>;
-
-		// let options = {
-		// 	width: window.innerWidth * 1.114,
-		// 	height: (window.innerHeight * 1.114) / 10
-		// };
+		this.state.settings.options.navShadow ? (this.state.settings.options.navPosition === 'top' ? (dropStyle += 'box-shadow: inset rgba(0, 0, 0, 0.15) 0px 4px 5px 0px;') : (dropStyle += 'box-shadow: inset rgba(0, 0, 0, 0.15) 0px -4px 5px 0px;')) : false;
+		this.state.settings.options.navPosition === 'top' ? (this.state.settings.options.headerImg ? (dropStyle += 'margin-top: 20vh;') : (dropStyle += 'margin-top: 10vh;')) : (dropStyle += 'margin-bottom: 10vh;');
 		let ratio = window.devicePixelRatio;
 		let options = {
 			width: document.body.clientWidth / ratio,
 			height: document.body.clientHeight / ratio / 10
 			// disablePixelRation: true
 		};
-		console.log(options, ratio);
+
 		let headerStyle = '';
 		let cropped;
 		if (this.state.settings.options.headerImgSrc === false) {
@@ -459,8 +421,9 @@ class Widget extends Component {
 		return (
 			<div className="backgroundColor" style={this.getBG()} id="container foo backgroundColor">
 				<div id="cover" className="hide-cover">
-					<div className="loader" />
+					<div className="loader" style={dropStyle} />
 				</div>
+				<div className="drop-shadow" style={dropStyle} />
 				<div id="sandbox" style={`${this.state.settings.options.backgroundCSS}`}>
 					{this.state.settings.options.headerImg ? header : false}
 					<div className="slider js_simple_dots simple" style={`text-align: ${this.state.settings.options.textAlign}`}>

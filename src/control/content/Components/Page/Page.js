@@ -34,7 +34,7 @@ class Page extends Component {
 
 	// ON MOUNT INIT SORTABLE NODE LIST
 	componentDidMount() {
-		console.warn(this.props);
+		
 
 		// Unknown bug caused main panel to render with the wrong attributes
 		let panel = document.getElementById(`panel${this.props.index}`);
@@ -52,7 +52,7 @@ class Page extends Component {
 	}
 	// ON UPDATE, REFRESH THE SORTABLE NODE LIST'S DATA
 	componentDidUpdate() {
-		console.warn(this.props);
+		
 
 		this.editor.loadItems(this.props.data.nodes, false);
 	}
@@ -276,7 +276,7 @@ class Page extends Component {
 									<div className="tab">
 										<button className="btn btn-success" id={`page${this.props.index}node${index}`} index={`${index}`} page={`${this.props.index}`} onClick={e => this.toggle(e, 'node')}>
 											{/* {document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'} */}
-											<span className="glyphicon glyphicon-ok" />
+											<span className="glyphicon glyphicon-ok" style='pointer-events: none;' />
 											{'  '}
 											Done
 										</button>
@@ -331,7 +331,7 @@ class Page extends Component {
 									<div className="tab">
 										<button className="btn btn-success" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{/* {document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'} */}
-											<span className="glyphicon glyphicon-ok" />
+											<span className="glyphicon glyphicon-ok" style='pointer-events: none;' />
 											{'  '}
 											Done
 										</button>
@@ -416,7 +416,7 @@ class Page extends Component {
 											</div> */}
 											<div className="input-group" style="line-height: 32px;">
 												<label htmlFor="size">Image height: </label>
-												<input
+												{/* <input
 													type="number"
 													value={node.data.height * 100}
 													style="width: 9vw"
@@ -425,13 +425,13 @@ class Page extends Component {
 														let height = parseFloat(e.target.value) / 100;
 														this.handleNodeChange(height, this.props.data.nodes.indexOf(node), 'img', false, this.props.index);
 													}}
-												/>
+												/> */}
 												<input
 													title="Sets the image height"
 													type="range"
 													min="1"
 													max="150"
-													// step="0.01"
+													step="1"
 													className="form-control img-slider"
 													style="width: 60vw; float: right;"
 													name="size"
@@ -442,6 +442,7 @@ class Page extends Component {
 													}}
 												/>
 											</div>
+											<div style='text-align: center; margin-top: -10px;'>{Math.floor(node.data.height * 100)}% of screen width</div>
 										</div>
 									) : (
 										<div />
@@ -461,7 +462,7 @@ class Page extends Component {
 									<div className="tab">
 										<button className="btn btn-success" id={`page${this.props.index}node${index}`} index={`${index}`} onClick={e => this.toggle(e, 'node')}>
 											{/* {document.getElementById(`page${this.props.index}nodepanel${index}`) ? (document.getElementById(`page${this.props.index}nodepanel${index}`).getAttribute('data-toggle') === 'hide' ? 'Edit' : 'Done') : 'Edit'} */}
-											<span className="glyphicon glyphicon-ok" />
+											<span className="glyphicon glyphicon-ok" style='pointer-events: none;' />
 											{'  '}
 											Done
 										</button>
@@ -652,7 +653,7 @@ class Page extends Component {
 												localStorage.removeItem(`prevImg${node.instanceId}`);
 												this.toggle(e, 'node');
 											}}>
-											<span className="glyphicon glyphicon-ok" />
+											<span className="glyphicon glyphicon-ok" style='pointer-events: none;' />
 											{'  '}
 											Done
 										</button>
@@ -689,7 +690,7 @@ class Page extends Component {
 			}
 		});
 		let applyIcons = () => {
-			console.log(this.apply);
+			
 			
 			if (this.apply) return;
 			// REPLACE DEFAULT SORTABLE LIST DELETE BUTTON
@@ -1064,7 +1065,7 @@ class Page extends Component {
 												// localStorage.setItem('tutorial', false);
 												this.toggle(e);
 											}}>
-											<span className="glyphicon glyphicon-ok" />
+											<span className="glyphicon glyphicon-ok" style='pointer-events: none;' />
 											{'  '}
 											Done
 										</button>

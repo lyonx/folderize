@@ -207,7 +207,7 @@ span {
 	z-index: 900;
 	top: 0px;
 	position: fixed;
-	background: #33333365;
+	background: #ffffffab;
 }
 
 .modal-wrap {
@@ -226,6 +226,7 @@ span {
 	margin-right: 5vw;
 	overflow: overlay;
 	width: 90vw;
+	box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 20px 16px;
 	top: 25%;
 	z-index: 9091;
 	background: white;

@@ -206,6 +206,7 @@ h6 {
 }
 
 .page-header {
+	border-bottom: 0px solid #333 !important;
 	margin-right: -15px;
 	margin-left: -15px;
 	padding-top: 20px;
@@ -344,6 +345,14 @@ span {
 
 .center {
 	text-align: center;
+}
+
+.drop-shadow {
+	position: absolute;
+	height: 90vh;
+	pointer-events: none;
+	width: 100vw;
+	z-index: 100;
 }
 
 ::-webkit-scrollbar {

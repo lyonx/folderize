@@ -20,8 +20,6 @@ class Page extends Component {
 
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
-		// this.setState({ data: this.props.data });
-
 		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
 		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
 	}
@@ -29,15 +27,6 @@ class Page extends Component {
 	componentWillUnmount() {
 		document.removeEventListener('after.lory.slide', this.getOffset);
 	}
-
-	// shouldComponentUpdate(nextProps, nextState) {
-	// 	if (nextProps.data.nodes.length === this.props.data.nodes.length) {
-	// 		console.warn('false');
-			
-	// 		return false;
-	// 	}
-
-	// }
 
 	// ------------------------- DATA HANDLING ------------------------- //
 
@@ -125,11 +114,6 @@ class Page extends Component {
 					node.data.border = border;
 					nodes.push(
 						<Header data={node.data} />
-						// <div className="col-sm-12">
-						// 	<div className="page-header" style={border}>
-						// 		<h1 style={`font-size: ${this.props.data.headerFontSize}px`}>{node.data.text}</h1>
-						// 	</div>
-						// </div>
 					);
 					break;
 				}
@@ -137,11 +121,6 @@ class Page extends Component {
 					node.data.bodyFontSize = this.props.data.bodyFontSize;
 					nodes.push(
 						<Desc data={node.data} />
-						// <div className="col-sm-12">
-						// 	<p className="description" style={`font-size: ${this.props.data.bodyFontSize}px`}>
-						// 		{node.data.text}
-						// 	</p>
-						// </div>
 					);
 					break;
 				}
@@ -228,7 +207,7 @@ class Page extends Component {
 								}}>
 								{croppedImg ? <img className="plugin-thumbnail" src={`${croppedImg}`} alt="..." /> : false}
 
-								<h3 style={node.format === 'linkOnly' ? `font-size: ${this.props.data.bodyFontSize}px` : false} className={node.format === 'linkOnly' ? 'plugin-title transition-half primary-color' : 'plugin-title'}>
+								<h3 style={node.format === 'linkOnly' ? `font-size: ${this.props.data.bodyFontSize}px; color: #09A3EE !important;` : false} className={node.format === 'linkOnly' ? 'plugin-title transition-half primary-color' : 'plugin-title'}>
 									{node.data.title}
 								</h3>
 							</div>
@@ -261,7 +240,7 @@ class Page extends Component {
 	}
 
 	render() {
-		console.warn('render');
+		
 		let content = (
 			<div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
 				<div className="row">{this.renderNodes()}</div>

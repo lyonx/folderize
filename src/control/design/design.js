@@ -10,6 +10,7 @@ class Design extends React.Component {
 			settings: {
 				pages: [],
 				options: {
+					rememberPageIndex: true,
 					backgroundImg: '',
 					backgroundLrg: '',
 					backgroundCSS: '',
@@ -29,14 +30,10 @@ class Design extends React.Component {
 	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
 	componentDidUpdate() {
-		console.warn(this.state);
-
 		this.debounceSync();
 	}
 
 	componentDidMount() {
-		console.warn(this.state);
-
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
@@ -96,7 +93,7 @@ class Design extends React.Component {
 		}
 		let onChange = (err, res) => {
 			if (err) throw err;
-			console.log(res);
+			
 
 			switch (res.colorType) {
 				case 'solid': {
@@ -113,8 +110,8 @@ class Design extends React.Component {
 		};
 		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, { backdrop: false }, onChange, (err, res) => {
 			if (err) throw err;
-			console.warn(res);
 			
+
 			switch (res.colorType) {
 				case 'solid': {
 					bgCSS = res.solid.backgroundCSS;
@@ -125,7 +122,7 @@ class Design extends React.Component {
 					break;
 				}
 				default: {
-					console.log('no color');
+					
 					this.colorPicker(true);
 					buildfire.messaging.sendMessageToWidget({ color: 'background: none;' });
 					return;
@@ -207,7 +204,7 @@ class Design extends React.Component {
 						</div>
 						<div className="copy pull-right">
 							<div className="pull-right">
-								<span className="btn-edit-icon btn-primary" style="display: inline-block" onClick={() => this.addHeaderImg(false)}/>
+								<span className="btn-edit-icon btn-primary" style="display: inline-block" onClick={() => this.addHeaderImg(false)} />
 								<span className="btn-icon btn-delete-icon btn-danger transition-third" style="display: inline-block; margin-left: 5px; pointer-events: all;" onClick={() => this.addHeaderImg(true)} />
 							</div>
 						</div>
@@ -219,12 +216,12 @@ class Design extends React.Component {
 			<div>
 				<div className="container">
 					<div className="row">
-						{/* HEADEER IMG */}
+						{/* HEADER IMG */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left" style="display: initial">
 								<span title="Add a header Image to appear at the top of the plugin.">Header Image: </span>
 							</div>
-							<div className='main col-md-9 pull-right'>
+							<div className="main col-md-9 pull-right">
 								<div title="Enables header image." className="radio radio-primary radio-inline">
 									<input
 										className="input-radio"
@@ -243,7 +240,7 @@ class Design extends React.Component {
 												}
 												case false: {
 													settings.options.headerImg = false;
-												this.setState({ settings });
+													this.setState({ settings });
 													break;
 												}
 												default:
@@ -273,7 +270,7 @@ class Design extends React.Component {
 												}
 												case true: {
 													settings.options.headerImg = false;
-												this.setState({ settings });
+													this.setState({ settings });
 													break;
 												}
 												default:
@@ -507,76 +504,11 @@ class Design extends React.Component {
 								</div>
 							</div>
 						</div>
-						{/* <br /> */}
-						{/* TITLEBAR DISPLAY */}
-						<div className="item row margin-bottom-twenty clearfix">
-							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span title="Toggle the display of the Buildfire titlebar.">Display Titlebar</span>
-							</div>
-							<div className="main col-md-9 pull-right">
-								<div title="Forces the Buildfire titlebar to show." className="radio radio-primary radio-inline">
-									<input
-										className="input-radio"
-										id="titlebar-true"
-										type="radio"
-										aria-label="..."
-										onClick={e => {
-											switch (e.target.checked) {
-												case true: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = true;
-													this.setState({ settings });
-													break;
-												}
-												case false: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = false;
-													this.setState({ settings });
-													break;
-												}
-												default:
-													return;
-											}
-										}}
-										checked={this.state.settings.options.renderTitlebar ? true : false}
-									/>
-									<label htmlFor="titlebar-true">True</label>
-								</div>
-								<div title="Forces the Buildfire titlebar to hide." className="radio radio-primary radio-inline">
-									<input
-										className="input-radio"
-										id="titlebar-false"
-										type="radio"
-										aria-label="..."
-										onClick={e => {
-											switch (e.target.checked) {
-												case true: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = false;
-													this.setState({ settings });
-													break;
-												}
-												case false: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = true;
-													this.setState({ settings });
-													break;
-												}
-												default:
-													return;
-											}
-										}}
-										checked={this.state.settings.options.renderTitlebar ? false : true}
-									/>
-									<label htmlFor="titlebar-false">False</label>
-								</div>
-							</div>
-						</div>
 						<hr />
 						{/* LAYOUTS */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span title="Change the appearance of all Action Items">Layout Style</span>
+								<span title="Change the appearance of all Action Items">Action Item Layout Style</span>
 							</div>
 							<div className="main col-md-9 pull-right">
 								<div className="screens clearfix">
@@ -621,7 +553,7 @@ class Design extends React.Component {
 						{/* COLOR PICKER */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span title="Set a background overlay behind all pages. Page background overlays can be individually set in their Options.">Background Overlay</span>
+								<span title="Set a background overlay behind all pages. Page background overlays can be individually set in their Options.">{this.state.settings.options.backgroundImg || this.state.settings.options.backgroundLrg ? 'Background Overlay' : 'Background Color'} </span>
 							</div>
 							{/* <div className="main col-md-9 pull-right">
 								<div className="tab">
@@ -647,7 +579,7 @@ class Design extends React.Component {
 							</div> */}
 							<div className="main col-md-9 pull-right">
 								<div className="col-md-2 pull-left">
-									<div className="colorgrid pull-left" style='margin-top: -2.5px;'>
+									<div className="colorgrid pull-left" style="margin-top: -2.5px;">
 										<div className="gradient-results">
 											<div className="coloritem margin-bottom-zero">
 												<a className="img-thumbnail">

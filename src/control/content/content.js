@@ -22,10 +22,10 @@ class Content extends Component {
 
 		this.editor = {};
 		this.state = {
-			// tutorials: false,
 			settings: {
 				pages: [],
 				options: {
+					rememberPageIndex: true,
 					headerImg: false,
 					headerImgSrc: false,
 					backgroundImg: '',
@@ -54,7 +54,7 @@ class Content extends Component {
 		// FETCH DATA
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
-			console.log(response);
+			
 			
 			// IF THERE IS NO DATA, RETURN
 			if (!response.id) {
@@ -72,7 +72,7 @@ class Content extends Component {
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
-		console.warn(this.state);
+		
 
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
@@ -237,7 +237,7 @@ class Content extends Component {
 	}
 	// USED BY THE PAGES TO DELETE THEMSELVES
 	deletePage(index) {
-		console.log(index);
+		
 
 		let settings = this.state.settings;
 		settings.pages.splice(index, 1);
@@ -275,7 +275,7 @@ class Content extends Component {
 					type: 'header',
 					title: 'Header',
 					instanceId: Date.now(),
-					data: { text: 'new page', border: true }
+					data: { text: 'You can edit this header in the control', border: false }
 				});
 				this.setState({ settings });
 				setTimeout(() => {
@@ -409,7 +409,7 @@ class Content extends Component {
 				break;
 			}
 			case 'img': {
-				console.log(event);
+				
 				if (typeof event === 'number') {
 					node.data.height = event;
 					this.setState({ settings });
@@ -679,12 +679,12 @@ class Content extends Component {
 		});
 		// return pages;
 		setTimeout(() => {
-			console.log(document.querySelector('#pages').childNodes);
+			
 			let pageDiv = document.querySelector('#pages');
 			let items = pageDiv.childNodes[pageDiv.childNodes.length - 1].childNodes[1].childNodes[2].childNodes;
 
 			items.forEach((item, index) => {
-				console.log(index);
+				
 
 				let btn = item.childNodes[1].childNodes[1].childNodes[0];
 				let tab = btn.parentNode;
