@@ -8,7 +8,9 @@ class Design extends React.Component {
 		this.layouts = ['./layouts/layout0.PNG', './layouts/layout1.PNG', './layouts/layout2.PNG', './layouts/layout3.PNG', './layouts/layout4.PNG', './layouts/layout5.PNG'];
 		this.state = {
 			settings: {
+				pages: [],
 				options: {
+					rememberPageIndex: true,
 					backgroundImg: '',
 					backgroundLrg: '',
 					backgroundCSS: '',
@@ -17,9 +19,8 @@ class Design extends React.Component {
 					headerFontSize: 36,
 					textAlign: 'left',
 					renderTitlebar: true,
-					navPosition: null,
+					navPosition: 'top',
 					navShadow: false,
-					colorOverrides: [],
 					layout: 0
 				}
 			}
@@ -29,92 +30,18 @@ class Design extends React.Component {
 	// ----------------------- LIFECYCLE METHODS ----------------------- //
 
 	componentDidUpdate() {
-		console.warn(this.state);
-
 		this.debounceSync();
 	}
 
 	componentDidMount() {
-		console.warn(this.state);
-
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
 			// if none are present, insert default data
-			if (!response.id) {
-				this.setState({
-					settings: {
-						pages: [
-							{
-								title: 'new page',
-								id: Date.now(),
-								customizations: [],
-								backgroundColor: {
-									colorType: false,
-									solid: {
-										backgroundCSS: ''
-									},
-									gradient: {
-										backgroundCSS: ''
-									}
-								},
-								nodes: [
-									{
-										type: 'header',
-										data: {
-											text: 'new page'
-										}
-									}
-								]
-							}
-						],
-						styleOverrides: [],
-						options: {
-							showTitleBar: false,
-							navPosition: 'top'
-						}
-					}
-				});
-			} else {
-				// otherwise, if all pages have been removed, insert default data
-				if (response.data.settings.pages.length === 0) {
-					this.setState({
-						settings: {
-							pages: [
-								{
-									title: 'New Page',
-									id: Date.now(),
-									customizations: [],
-									backgroundColor: {
-										colorType: false,
-										solid: {
-											backgroundCSS: ''
-										},
-										gradient: {
-											backgroundCSS: ''
-										}
-									},
-									nodes: [
-										{
-											type: 'header',
-											data: {
-												text: 'new page'
-											}
-										}
-									]
-								}
-							],
-							styleOverrides: [],
-							options: {
-								showTitleBar: false,
-								navPosition: 'top'
-							}
-						}
-					});
-				} else {
-					// update settings
-					this.setState({ settings: response.data.settings });
-				}
-			}
+			if (!response.id) return;
+			// otherwise, if all pages have been removed, insert default data
+			// if (response.data.settings.pages.length === 0) return;
+			// update settings
+			this.setState({ settings: response.data.settings });
 		});
 	}
 
@@ -166,7 +93,7 @@ class Design extends React.Component {
 		}
 		let onChange = (err, res) => {
 			if (err) throw err;
-			console.log(res);
+			
 
 			switch (res.colorType) {
 				case 'solid': {
@@ -183,6 +110,8 @@ class Design extends React.Component {
 		};
 		buildfire.colorLib.showDialog(this.state.settings.options.backgroundColor, { backdrop: false }, onChange, (err, res) => {
 			if (err) throw err;
+			
+
 			switch (res.colorType) {
 				case 'solid': {
 					bgCSS = res.solid.backgroundCSS;
@@ -192,9 +121,36 @@ class Design extends React.Component {
 					bgCSS = res.gradient.backgroundCSS;
 					break;
 				}
+				default: {
+					
+					this.colorPicker(true);
+					buildfire.messaging.sendMessageToWidget({ color: 'background: none;' });
+					return;
+				}
 			}
 			settings.options.backgroundColor = res;
 			settings.options.backgroundCSS = bgCSS;
+			buildfire.messaging.sendMessageToWidget({ color: bgCSS });
+			this.setState({ settings });
+		});
+	}
+
+	addHeaderImg(remove) {
+		if (!remove) remove = false;
+		let settings = this.state.settings;
+		if (remove) {
+			settings.options.headerImgSrc = false;
+			this.setState({ settings });
+			return;
+		}
+		buildfire.imageLib.showDialog({ multiSelection: false }, (err, res) => {
+			if (err) throw err;
+			if (!res.selectedFiles[0]) {
+				// settings.options.headerImg = false;
+				// this.setState({ settings });
+				return;
+			}
+			settings.options.headerImgSrc = res.selectedFiles[0];
 			this.setState({ settings });
 		});
 	}
@@ -239,10 +195,118 @@ class Design extends React.Component {
 	}
 
 	render() {
+		let headerImgDiag = (
+			<div className="main col-md-9 pull-right margin-top-twenty">
+				<div className="border-radius-four border-grey">
+					<div className="d-item">
+						<div className="media-holder pull-left" onClick={() => this.addHeaderImg(false)}>
+							<img src={this.state.settings.options.headerImgSrc ? this.state.settings.options.headerImgSrc : './assets/noImg.PNG'} />
+						</div>
+						<div className="copy pull-right">
+							<div className="pull-right">
+								<span className="btn-edit-icon btn-primary" style="display: inline-block" onClick={() => this.addHeaderImg(false)} />
+								<span className="btn-icon btn-delete-icon btn-danger transition-third" style="display: inline-block; margin-left: 5px; pointer-events: all;" onClick={() => this.addHeaderImg(true)} />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
 		return (
 			<div>
 				<div className="container">
 					<div className="row">
+						{/* HEADER IMG */}
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left" style="display: initial">
+								<span title="Add a header Image to appear at the top of the plugin.">Header Image: </span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<div title="Enables header image." className="radio radio-primary radio-inline">
+									<input
+										className="input-radio"
+										id="header-true"
+										type="radio"
+										name="header-true"
+										aria-label="..."
+										onClick={e => {
+											let settings = this.state.settings;
+											switch (e.target.checked) {
+												case true: {
+													settings.options.headerImg = true;
+													settings.options.headerImgSrc ? null : this.addHeaderImg(false);
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													settings.options.headerImg = false;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													return;
+											}
+										}}
+										checked={this.state.settings.options.headerImg ? true : false}
+									/>
+									<label htmlFor="header-true">True</label>
+								</div>
+
+								<div title="Desables header image." className="radio radio-primary radio-inline">
+									<input
+										className="input-radio"
+										id="header-false"
+										type="radio"
+										name="header-false"
+										aria-label="..."
+										onClick={e => {
+											let settings = this.state.settings;
+											switch (e.target.checked) {
+												case false: {
+													settings.options.headerImg = true;
+													settings.options.headerImgSrc ? null : this.addHeaderImg(false);
+													this.setState({ settings });
+													break;
+												}
+												case true: {
+													settings.options.headerImg = false;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													return;
+											}
+										}}
+										checked={this.state.settings.options.headerImg ? false : true}
+									/>
+									<label htmlFor="header-true">False</label>
+								</div>
+
+								{/* <input
+									type="checkbox"
+									name="header-img"
+									onChange={e => {
+										let settings = this.state.settings;
+										switch (e.target.checked) {
+											case true:
+												settings.options.headerImg = true;
+												settings.options.headerImgSrc ? null : this.addHeaderImg(false);
+												this.setState({ settings });
+												break;
+											case false:
+												settings.options.headerImg = false;
+												this.setState({ settings });
+												break;
+											default:
+												break;
+										}
+									}}
+									checked={this.state.settings.options.headerImg}
+								/> */}
+							</div>
+							{this.state.settings.options.headerImg ? headerImgDiag : false}
+						</div>
+						<hr />
 						{/* NAV POSITION> */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
@@ -311,7 +375,71 @@ class Design extends React.Component {
 								</div>
 							</div>
 						</div>
-						{/* NAV SHADOW */}
+						{/* NAV BORDER */}
+						<div className="item row margin-bottom-twenty clearfix">
+							<div className="labels col-md-3 padding-right-zero pull-left">
+								<span title="Toggle shadow below page navbar.">Page Navigation Border</span>
+							</div>
+							<div className="main col-md-9 pull-right">
+								<div title="Enable Border." className="radio radio-primary radio-inline">
+									<input
+										className="input-radio"
+										id="nav-border-on"
+										type="radio"
+										name="border-on"
+										aria-label="..."
+										onChange={e => {
+											let settings = this.state.settings;
+											switch (e.target.checked) {
+												case true: {
+													settings.options.navBorder = true;
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													settings.options.navBorder = false;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													break;
+											}
+										}}
+										checked={this.state.settings.options.navBorder ? true : false}
+									/>
+									<label htmlFor="nav-border-on">On</label>
+								</div>
+
+								<div title="Disable Border." className="radio radio-primary radio-inline">
+									<input
+										className="input-radio"
+										id="nav-border-off"
+										type="radio"
+										name="border-off"
+										aria-label="..."
+										onChange={e => {
+											let settings = this.state.settings;
+											switch (e.target.checked) {
+												case true: {
+													settings.options.navBorder = false;
+													this.setState({ settings });
+													break;
+												}
+												case false: {
+													settings.options.navBorder = true;
+													this.setState({ settings });
+													break;
+												}
+												default:
+													break;
+											}
+										}}
+										checked={this.state.settings.options.navBorder ? false : true}
+									/>
+									<label htmlFor="nav-border-on">Off</label>
+								</div>
+							</div>
+						</div>
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
 								<span title="Toggle shadow below page navbar.">Page Navigation Shadow</span>
@@ -347,13 +475,13 @@ class Design extends React.Component {
 								</div>
 
 								<div title="Disable Shadow." className="radio radio-primary radio-inline">
-									<input 
-									className="input-radio" 
-									id="nav-drop-off" 
-									type="radio" 
-									name="drop-off" 
-									aria-label="..." 
-									onChange={e => {
+									<input
+										className="input-radio"
+										id="nav-drop-off"
+										type="radio"
+										name="drop-off"
+										aria-label="..."
+										onChange={e => {
 											let settings = this.state.settings;
 											switch (e.target.checked) {
 												case true: {
@@ -371,73 +499,8 @@ class Design extends React.Component {
 											}
 										}}
 										checked={this.state.settings.options.navShadow ? false : true}
-										/>
+									/>
 									<label htmlFor="nav-drop-on">Off</label>
-								</div>
-							</div>
-						</div>
-						{/* <br /> */}
-						{/* TITLEBAR DISPLAY */}
-						<div className="item row margin-bottom-twenty clearfix">
-							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span title="Toggle the display of the Buildfire titlebar.">Display Titlebar</span>
-							</div>
-							<div className="main col-md-9 pull-right">
-								<div title="Forces the Buildfire titlebar to show." className="radio radio-primary radio-inline">
-									<input
-										className="input-radio"
-										id="titlebar-true"
-										type="radio"
-										aria-label="..."
-										onClick={e => {
-											switch (e.target.checked) {
-												case true: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = true;
-													this.setState({ settings });
-													break;
-												}
-												case false: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = false;
-													this.setState({ settings });
-													break;
-												}
-												default:
-													return;
-											}
-										}}
-										checked={this.state.settings.options.renderTitlebar ? true : false}
-									/>
-									<label htmlFor="titlebar-true">True</label>
-								</div>
-								<div title="Forces the Buildfire titlebar to hide." className="radio radio-primary radio-inline">
-									<input
-										className="input-radio"
-										id="titlebar-false"
-										type="radio"
-										aria-label="..."
-										onClick={e => {
-											switch (e.target.checked) {
-												case true: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = false;
-													this.setState({ settings });
-													break;
-												}
-												case false: {
-													let settings = this.state.settings;
-													settings.options.renderTitlebar = true;
-													this.setState({ settings });
-													break;
-												}
-												default:
-													return;
-											}
-										}}
-										checked={this.state.settings.options.renderTitlebar ? false : true}
-									/>
-									<label htmlFor="titlebar-false">False</label>
 								</div>
 							</div>
 						</div>
@@ -445,7 +508,7 @@ class Design extends React.Component {
 						{/* LAYOUTS */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span title="Change the appearance of all Action Items">Layout Style</span>
+								<span title="Change the appearance of all Action Items">Action Item Layout Style</span>
 							</div>
 							<div className="main col-md-9 pull-right">
 								<div className="screens clearfix">
@@ -469,7 +532,7 @@ class Design extends React.Component {
 									<div className="devices-screen mobile-device text-center pull-left">
 										<a onClick={() => this.changeBackground('small', false)}>
 											<span className="add-icon">+</span>
-											<img className="bg-sm" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundImg, { width: 66, height: 116 })} style={this.state.settings.options.backgroundImg ? false : 'display: none'} />
+											<img className="bg-sm" src={this.state.settings.options.backgroundImg ? buildfire.imageLib.cropImage(this.state.settings.options.backgroundImg, { width: 66, height: 116 }) : null} style={this.state.settings.options.backgroundImg ? false : 'display: none'} />
 										</a>
 										<label className="secondary">750x1334</label>
 										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundImg ? false : 'display: none'} onClick={() => this.changeBackground('small', true)} />
@@ -478,7 +541,7 @@ class Design extends React.Component {
 										<a onClick={() => this.changeBackground('large', false)}>
 											<span className="add-icon">+</span>
 
-											<img className="bg-lrg" src={buildfire.imageLib.cropImage(this.state.settings.options.backgroundLrg, { width: 135, height: 190 })} style={this.state.settings.options.backgroundLrg ? false : 'display: none'} />
+											<img className="bg-lrg" src={this.state.settings.options.backgroundLrg ? buildfire.imageLib.cropImage(this.state.settings.options.backgroundLrg, { width: 135, height: 190 }) : null} style={this.state.settings.options.backgroundLrg ? false : 'display: none'} />
 										</a>
 										<label className="secondary">1536x2048</label>
 										<span className="icon btn-icon btn-delete-bg btn-delete-icon btn-danger transition-third" style={this.state.settings.options.backgroundLrg ? false : 'display: none'} onClick={() => this.changeBackground('large', true)} />
@@ -490,9 +553,9 @@ class Design extends React.Component {
 						{/* COLOR PICKER */}
 						<div className="item row margin-bottom-twenty clearfix">
 							<div className="labels col-md-3 padding-right-zero pull-left">
-								<span title="Set a background overlay behind all pages. Page background overlays can be individually set in their Options.">Background Overlay</span>
+								<span title="Set a background overlay behind all pages. Page background overlays can be individually set in their Options.">{this.state.settings.options.backgroundImg || this.state.settings.options.backgroundLrg ? 'Background Overlay' : 'Background Color'} </span>
 							</div>
-							<div className="main col-md-9 pull-right">
+							{/* <div className="main col-md-9 pull-right">
 								<div className="tab">
 									<button
 										title="Click to change the overlay color."
@@ -502,11 +565,36 @@ class Design extends React.Component {
 										onClick={() => {
 											this.colorPicker(false);
 										}}>
-										<h5>{this.state.settings.options.backgroundColor.colorType ? this.state.settings.options.backgroundColor.colorType : 'Add Overlay Color'}</h5>
+										<h5>{this.state.settings.options.backgroundColor ? (this.state.settings.options.backgroundColor.colorType ? this.state.settings.options.backgroundColor.colorType : 'Add Overlay Color') : null}</h5>
 									</button>
 									<button
 										title="Click to remove overlay color."
 										className="btn btn-danger"
+										onClick={() => {
+											this.colorPicker(true);
+										}}>
+										Remove
+									</button>
+								</div>
+							</div> */}
+							<div className="main col-md-9 pull-right">
+								<div className="col-md-2 pull-left">
+									<div className="colorgrid pull-left" style="margin-top: -2.5px;">
+										<div className="gradient-results">
+											<div className="coloritem margin-bottom-zero">
+												<a className="img-thumbnail">
+													<span className="color border-radius-four border-grey relative-position" onClick={() => this.colorPicker(false)} style={this.state.settings.options.backgroundColor.colorType ? `${this.state.settings.options.backgroundCSS}; pointer-events: all; position: relative;` : 'pointer-events: all; position: relative;'}>
+														{this.state.settings.options.backgroundColor.colorType ? null : <div className="color-not-selected" />}
+													</span>
+												</a>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div className="col-md-3 pull-left">
+									<button
+										className="btn btn-danger"
+										disabled={this.state.settings.options.backgroundColor.colorType ? false : true}
 										onClick={() => {
 											this.colorPicker(true);
 										}}>

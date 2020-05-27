@@ -1,5 +1,34 @@
 /* ANIMATIONS */
 
+@keyframes focus-frame {
+	0% {
+		/* margin-left: 0vw;
+    margin-right: 0vw;
+    width: 100vw; */
+	}
+	50% {
+		background: #3498db
+
+	}
+	100% {
+	}
+}
+
+@keyframes focus {
+	0% {
+		/* margin-left: 0vw;
+    margin-right: 0vw;
+    width: 100vw; */
+	}
+	50% {
+		opacity: .5;
+
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
 @keyframes fadeout {
 	from {
 		opacity: 1;
@@ -34,6 +63,20 @@
 	100% {
 		transform: rotate(360deg);
 	}
+}
+
+.focus {
+	animation-name: focus-frame;
+	animation-duration: 1s;
+	animation-direction: normal;
+	animation-fill-mode: forwards;
+}
+
+.focus .image-wrap div, .focus div {
+	animation-name: focus;
+	animation-duration: 1s;
+	animation-direction: normal;
+	animation-fill-mode: forwards;
 }
 
 .img-loader {
@@ -123,6 +166,7 @@ li {
 
 .description {
 	padding-top: 15px;
+	margin-bottom: 0px;
 	padding-bottom: 15px;
 }
 
@@ -162,9 +206,13 @@ h6 {
 }
 
 .page-header {
+	border-bottom: 0px solid #333 !important;
 	margin-right: -15px;
 	margin-left: -15px;
-	margin-top: 10px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin-top: 0px;
+	margin-bottom: 0px;
 	width: 100vw;
 	padding-left: 15px;
 	padding-right: 15px;
@@ -198,6 +246,8 @@ h6 {
 .linkOnly {
 	padding-top: 0px;
 	padding-bottom: 0px;
+	line-height: 10vh;
+	min-height: 10vh !important;
 	border-bottom: 0px !important;
 	border-top: 0px !important;
 }
@@ -295,6 +345,14 @@ span {
 
 .center {
 	text-align: center;
+}
+
+.drop-shadow {
+	position: absolute;
+	height: 90vh;
+	pointer-events: none;
+	width: 100vw;
+	z-index: 100;
 }
 
 ::-webkit-scrollbar {

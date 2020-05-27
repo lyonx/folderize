@@ -1,3 +1,48 @@
+@keyframes focus-frame {
+	0% {
+		/* margin-left: 0vw;
+    margin-right: 0vw;
+    width: 100vw; */
+	}
+	50% {
+		background: #3498db
+
+	}
+	100% {
+	}
+}
+
+@keyframes focus {
+	0% {
+		/* margin-left: 0vw;
+    margin-right: 0vw;
+    width: 100vw; */
+	}
+	50% {
+		opacity: .5;
+
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.focus {
+	animation-name: focus-frame;
+	background-color: #ffffff !important;
+	animation-duration: 1s;
+	animation-direction: normal;
+	animation-fill-mode: forwards;
+}
+
+.focus .image-wrap div, .focus div {
+	animation-name: focus;
+	animation-duration: 1s;
+	animation-direction: normal;
+	animation-fill-mode: forwards;
+}
+
+
 .tooltip-info {
 	visibility: hidden;
 	font-size: 18px;
@@ -38,11 +83,11 @@
 }
 
 span {
-	pointer-events: none;
+	/* pointer-events: none; */
 }
 
 .copy > .pull-right > span {
-	display: none;
+	/* display: none; */
 }
 
 .tab,
@@ -162,7 +207,7 @@ span {
 	z-index: 900;
 	top: 0px;
 	position: fixed;
-	background: #33333365;
+	background: #ffffffab;
 }
 
 .modal-wrap {
@@ -181,6 +226,7 @@ span {
 	margin-right: 5vw;
 	overflow: overlay;
 	width: 90vw;
+	box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 20px 16px;
 	top: 25%;
 	z-index: 9091;
 	background: white;
@@ -336,4 +382,117 @@ label {
 
 .show > .checkbox-primary {
 	display: initial;
+}
+
+.custom-switch a.btn:first-child, .side-menu.plugin-page .item .main a.btn:first-child {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+	z-index: 0;
+	position: relative;
+	border-right: solid 1px #ddd;
+	border-left: solid 1px #ddd;
+}
+.custom-switch a.btn.btn-primary, .side-menu.plugin-page .item .main a.btn.btn-primary {
+	color: #fff!important;
+	border: solid 1px #00a1f1;
+}
+.custom-switch a.btn, .side-menu.plugin-page .item .main a.btn {
+	font-family: 'Conv_apercu_regular';
+	text-align: center;
+	color: #000;
+	font-size: 14px;
+	line-height: 26px;
+	min-width: 90px;
+	border: solid 1px #ddd;
+	float: left;
+	border-radius: 0;
+	border-left: 0;
+}
+
+.custom-switch a.btn:last-child, .side-menu.plugin-page .item .main a.btn:last-child {
+	border-top-right-radius: 4px;
+	margin-left: 0px;
+	border-bottom-right-radius: 4px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	z-index: 1;
+	position: relative;
+	border-right: solid 1px #ddd;
+}
+
+.list-group-item {
+	position: relative;
+	display: block;
+	padding: 10px 15px;
+	margin-bottom: -1px;
+	background-color: #fff;
+	border: 1px solid #ddd;
+}
+ol li, ul li {
+	list-style: none;
+}
+
+.colorgrid .coloritem a span {
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+	transition: all .25s;
+}
+
+.colorgrid .coloritem a.img-thumbnail {
+	padding: 6px;
+}
+.colorgrid .coloritem a {
+	display: inline-block;
+	width: 40px;
+	height: 40px;
+}
+
+hr {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	border: 0;
+	border-top: 1px solid #ddd;
+}
+
+.colorgrid .color-not-selected {
+	border: 1px solid #f50000;
+	-ms-transform: skewY(45deg);
+	-webkit-transform: skewY(45deg);
+	transform: skewY(45deg);
+	width: 100%;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	border-radius: 10px;
+}
+
+.img-slider {
+	-webkit-appearance: none;  /* Override default CSS styles */
+	appearance: none;
+	width: 100%; /* Full-width */
+	height: 25px; /* Specified height */
+	background: #d3d3d3; /* Grey background */
+	outline: none; /* Remove outline */
+	opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+	-webkit-transition: .2s; /* 0.2 seconds transition on hover */
+	transition: opacity .2s;
+}
+
+.img-slider::-webkit-slider-thumb {
+	-webkit-appearance: none; /* Override default look */
+	appearance: none;
+	width: 25px; /* Set a specific slider handle width */
+	height: 25px; /* Slider handle height */
+	background: #4CAF50; /* Green background */
+	cursor: pointer; /* Cursor on hover */
+}
+
+.img-slider::-moz-range-thumb {
+	width: 25px; /* Set a specific slider handle width */
+	height: 25px; /* Slider handle height */
+	background: #4CAF50; /* Green background */
+	cursor: pointer; /* Cursor on hover */
 }

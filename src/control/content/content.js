@@ -18,18 +18,22 @@ class Content extends Component {
 		this.reorderNodes = this.reorderNodes.bind(this);
 
 		this.renderPages = this.renderPages.bind(this);
-		this.debounceSync = debounce(this.syncState, 100);
+		this.debounceSync = debounce(this.syncState, 250);
 
 		this.editor = {};
 		this.state = {
-			// tutorials: false,
 			settings: {
 				pages: [],
 				options: {
+					rememberPageIndex: true,
 					headerImg: false,
 					headerImgSrc: false,
 					backgroundImg: '',
 					backgroundLrg: '',
+					backgroundColor: {},
+					bodyFontSize: 24,
+					headerFontSize: 36,
+					textAlign: 'left',
 					renderTitlebar: true,
 					navPosition: 'top',
 					navShadow: false,
@@ -44,88 +48,31 @@ class Content extends Component {
 	// ON MOUNT, LOOKS FOR ANY PREVIOUSLY SAVED SETTINGS
 	componentDidMount() {
 		// this.debugDB();
-		// debugger
+		// return;
+		// INIT SORTABLE LIST
 		this.initSortable();
-
-
-
-		// this.debugDB();
-
+		// FETCH DATA
 		buildfire.datastore.get('data', (err, response) => {
 			if (err) throw err;
-			// if none are present, insert default data
-			//
-
+			
+			
+			// IF THERE IS NO DATA, RETURN
 			if (!response.id) {
-				this.addPage();
-				// this.setState({
-				// 	settings: {
-				// 		pages: [
-				// 			{
-				// 				title: 'new page',
-				// 				id: Date.now(),
-				// 				customizations: [],
-				// 				backgroundColor: {
-				// 					colorType: false,
-				// 					solid: {
-				// 						backgroundCSS: ''
-				// 					},
-				// 					gradient: {
-				// 						backgroundCSS: ''
-				// 					}
-				// 				},
-				// 				nodes: [
-				// 					{
-				// 						type: 'header',
-				// 						data: {
-				// 							text: 'new page'
-				// 						}
-				// 					}
-				// 				]
-				// 			}
-				// 		],
-				// 		options: {
-				// 			showTitleBar: false,
-				// 			navPosition: 'top',
-				// 			colorOverrides: []
-				// 		}
-				// 	}
-				// });
-			} else {
-				// otherwise, if all pages have been removed, insert default data
-				if (response.data.settings.pages.length === 0) {
-					this.addPage();
-					// setTimeout(() => {
-					// 	document.querySelector(`#tab0`).click();
-					// }, 250);
-				} else {
-					// update settings
-					this.setState({
-						settings: response.data.settings
-					});
-				}
+				this.debounceSync();
+				return;
 			}
+			// IF THERE ARE NO PAGES, RETURN
+			// if (!response.data.settings.pages ||response.data.settings.pages.length === 0) return;
+			// UPDATE SETTINGS
+			this.setState({
+				settings: response.data.settings
+			});
 		});
-		// let tutorials = localStorage.getItem('tutorial');
-		// if (tutorials === 'true') {
-		// 	let tutorials = this.state.tutorials;
-		// 	tutorials = true;
-		// 	this.setState({
-		// 		tutorials
-		// 	});
-		// } else {
-		// 	let tutorials = this.state.tutorials;
-		// 	tutorials = false;
-		// 	this.setState({
-		// 		tutorials
-		// 	});
-		// }
-
 	}
 	// EVERY TIME THE STATE CHANGES, SYNC STATE WITH DB
 	componentDidUpdate() {
 		// DEBOUNCER THAT RUNS THIS.SYNCSTATE
-		console.warn(this.state);
+		
 
 		this.debounceSync();
 		this.editor.loadItems(this.state.settings.pages, false, false);
@@ -239,25 +186,6 @@ class Content extends Component {
 
 	// ADDS A NEW PAGE TO THE STATE
 	addPage() {
-		if (this.state.settings.pages.length === 0) {
-			// if (localStorage.getItem('tutorial') === 'true') {
-			// localStorage.setItem('tutorial', false);
-			// let tutorials = this.state.tutorials;
-			// tutorials = false;
-			// this.setState({ tutorials });
-			// return;
-		}
-
-		// localStorage.setItem('tutorial', true);
-		// let tutorials = this.state.tutorials;
-		// tutorials = true;
-		// this.setState({ tutorials });
-		// } else {
-		// localStorage.setItem('tutorial', false);
-		// let tutorials = this.state.tutorials;
-		// tutorials = false;
-		// this.setState({ tutorials });
-		// }
 
 		let newPage = {
 			title: 'New Page',
@@ -272,14 +200,14 @@ class Content extends Component {
 				}
 			},
 			nodes: [
-				{
-					type: 'header',
-					title: 'Header',
-					instanceId: Date.now(),
-					data: {
-						text: 'new page'
-					}
-				}
+				// {
+				// 	type: 'header',
+				// 	title: 'Header',
+				// 	instanceId: Date.now(),
+				// 	data: {
+				// 		text: 'new page'
+				// 	}
+				// }
 			]
 		};
 		let settings = this.state.settings;
@@ -287,7 +215,7 @@ class Content extends Component {
 		this.setState({
 			settings
 		});
-		// if (pages.length > 1) {
+
 		setTimeout(() => {
 			document.querySelector(`#tab${settings.pages.length - 1}`).click();
 		}, 250);
@@ -296,9 +224,21 @@ class Content extends Component {
 				index: settings.pages.length - 1
 			});
 		}, 750);
+
+		setTimeout(() => {
+			let btns = document.querySelector('#menu0').childNodes;
+			btns.forEach(btn => {
+				btn.classList.add('focus');
+				setTimeout(() => {
+					btn.classList.remove('focus');					
+				}, 1000);
+			});
+		}, 1000);
 	}
 	// USED BY THE PAGES TO DELETE THEMSELVES
 	deletePage(index) {
+		
+
 		let settings = this.state.settings;
 		settings.pages.splice(index, 1);
 		document.querySelector(`#tab${index}`).click();
@@ -335,7 +275,7 @@ class Content extends Component {
 					type: 'header',
 					title: 'Header',
 					instanceId: Date.now(),
-					data: { text: 'new page', border: true }
+					data: { text: 'You can edit this header in the control', border: false }
 				});
 				this.setState({ settings });
 				setTimeout(() => {
@@ -409,6 +349,10 @@ class Content extends Component {
 			default:
 				return;
 		}
+		buildfire.messaging.sendMessageToWidget({
+			nodeIndex: 'last',
+			pageIndex: index
+		});
 	}
 	// USED BY INPUT FEILDS TO UPDATE STATE
 	handleChange(event, index) {
@@ -465,7 +409,7 @@ class Content extends Component {
 				break;
 			}
 			case 'img': {
-				console.log(event);
+				
 				if (typeof event === 'number') {
 					node.data.height = event;
 					this.setState({ settings });
@@ -517,6 +461,7 @@ class Content extends Component {
 								throw err;
 							}
 						} else {
+							if (!result) return;
 							if (result.selectedButton.key === 'confirm') {
 								nodes.splice(index, 1);
 								this.setState({ settings });
@@ -617,7 +562,7 @@ class Content extends Component {
 			}
 			case 'background': {
 				if (remove) {
-					settings.pages[pageIndex].backgroundImg = {};
+					settings.pages[pageIndex].backgroundImg = false;
 					this.setState({ settings });
 					return;
 				}
@@ -733,60 +678,53 @@ class Content extends Component {
 			pages.push(<Page key={index} index={index} handleChange={this.handleChange} handleNodeChange={this.handleNodeChange} addImg={this.addImg} colorPicker={this.colorPicker} reorderNodes={this.reorderNodes} addNode={this.addNode} updatePage={this.updatePage} deletePage={this.deletePage} data={page} reorderPages={this.reorderPages} />);
 		});
 		// return pages;
+		setTimeout(() => {
+			
+			let pageDiv = document.querySelector('#pages');
+			let items = pageDiv.childNodes[pageDiv.childNodes.length - 1].childNodes[1].childNodes[2].childNodes;
 
+			items.forEach((item, index) => {
+				
+
+				let btn = item.childNodes[1].childNodes[1].childNodes[0];
+				let tab = btn.parentNode;
+				let clone = btn.cloneNode();
+				tab.removeChild(btn);
+				tab.appendChild(clone);
+				clone.addEventListener('click', e => {
+					buildfire.notifications.confirm(
+						{
+							title: 'Remove Page',
+							message: 'Are you sure? Page will be lost!',
+							buttonLabels: ['delete', 'cancel']
+						},
+						(err, result) => {
+							if (err) {
+								if (typeof err === 'boolean') {
+									this.deletePage(index);
+								} else {
+									throw err;
+								}
+							} else {
+								if (!result) return;
+
+								if (result.selectedButton.key === 'confirm') {
+									this.deletePage(index);
+								}
+							}
+						}
+					);
+				});
+			});
+		}, 300);
 		return pages;
 	}
 
 	render() {
-		let headerImgDiag = (
-			<div className="main col-md-9 pull-right">
-				<div className="border-radius-four border-grey">
-					<div className="d-item">
-						<div className="media-holder pull-left" onClick={() => this.addImg('header', false, false, false)}>
-							<img src={this.state.settings.options.headerImgSrc ? this.state.settings.options.headerImgSrc : './assets/noImg.PNG'} />
-						</div>
-						<div className="copy pull-right">
-							<div className="pull-right">
-								<span className="btn-edit-icon btn-primary" style="display: inline-block" />
-								<span className="btn-icon btn-delete-icon btn-danger transition-third" style="display: inline-block; margin-left: 5px; pointer-events: all;" onClick={() => this.addImg('header', false, false, true)}/>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
+	
 		return (
 			<div className="container-fluid">
 				<div className="row">
-					<div className="col-md-12">
-						<div className="item row margin-bottom-twenty clearfix">
-							<div className="labels col-md-3 padding-right-zero pull-left" style="display: initial">
-								<span title="Add a header Image to appear at the top of the plugin.">Header Image: </span>
-								<input
-									type="checkbox"
-									name="header-img"
-									onChange={e => {
-										let settings = this.state.settings;
-										switch (e.target.checked) {
-											case true:
-												settings.options.headerImg = true;
-												settings.options.headerImgSrc ? null : this.addImg('header', false, false, false);
-												this.setState({ settings });
-												break;
-											case false:
-												settings.options.headerImg = false;
-												this.setState({ settings });
-												break;
-											default:
-												break;
-										}
-									}}
-									checked={this.state.settings.options.headerImg}
-								/>
-							</div>
-							{this.state.settings.options.headerImg ? headerImgDiag : false}
-						</div>
-					</div>
 					<div className="col-md-12">
 						<div className="panel panel-default">
 							<div className="panel-body">
@@ -799,8 +737,7 @@ class Content extends Component {
 						</div>{' '}
 					</div>
 					<div title="Your pages appear in order here. Click a page title to edit it, or drag to reorder." className="col-md-12" id="pages">
-						{' '}
-						{/* <h4 className="text-center">Pages</h4> */} {this.renderPages()}{' '}
+						{this.renderPages()}
 					</div>
 				</div>
 			</div>

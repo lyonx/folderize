@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import Lazyload from 'react-lazy-load';
+import Header from "../Header/Header";
+import Desc from "../Desc/Desc";
 
 // --------------------------- WIDGET PAGE COMPONENT --------------------------- //
 class Page extends Component {
@@ -18,8 +20,6 @@ class Page extends Component {
 
 	// ON MOUNT, MOVE DATA TO STATE
 	componentDidMount() {
-		// this.setState({ data: this.props.data });
-
 		document.removeEventListener('after.lory.slide', this.getOffset.bind(this));
 		document.addEventListener('after.lory.slide', this.getOffset.bind(this));
 	}
@@ -101,28 +101,26 @@ class Page extends Component {
 	renderNodes() {
 		let nodes = [];
 		if (!this.props.data.nodes) return;
+		if (this.props.data.nodes.length === 0) {
+			return <h1>This page is empty! You can add elements by clicking the buttons below "Add Elements"!</h1>
+		}
 		this.props.data.nodes.forEach(node => {
 			if (!node) return;
 			switch (node.type) {
 				case 'header': {
 					let border;
 					node.data.border ? (border = '') : (border = `border-bottom: 0px !important;`);
+					node.data.headerFontSize = this.props.data.headerFontSize;
+					node.data.border = border;
 					nodes.push(
-						<div className="col-sm-12">
-							<div className="page-header" style={border}>
-								<h1 style={`font-size: ${this.props.data.headerFontSize}px`}>{node.data.text}</h1>
-							</div>
-						</div>
+						<Header data={node.data} />
 					);
 					break;
 				}
 				case 'desc': {
+					node.data.bodyFontSize = this.props.data.bodyFontSize;
 					nodes.push(
-						<div className="col-sm-12">
-							<p className="description" style={`font-size: ${this.props.data.bodyFontSize}px`}>
-								{node.data.text}
-							</p>
-						</div>
+						<Desc data={node.data} />
 					);
 					break;
 				}
@@ -144,9 +142,10 @@ class Page extends Component {
 					} else {
 						let height = false;
 						if (node.format === 'custom') {
+							// height = node.data.height * devicePixelRatio;
 							height = node.data.height;
 						}
-						console.log(node);
+						
 
 						nodes.push(
 							<div className="col-sm-12">
@@ -155,13 +154,14 @@ class Page extends Component {
 										offsetHorizontal={50}
 										// onContentVisible={() => {
 										// 	let ele = document.getElementById(`loader${node.instanceId}`);
-										// 	console.log(ele.parentNode);
+										// 	
 
 										// 	ele.parentNode.removeChild(ele);
 										// }}
 										height={node.format === 'custom' ? window.innerWidth * height : window.innerWidth * 0.54}>
 										{/* <div> */}
 											<div className="images" style={`background: url(${this.cropImg(node.data.src, false, height)})`} />
+											{/* <div className="images" style={`background: url("${node.data.src}")`} /> */}
 											{/* <div className="img-loader" id={`loader${node.instanceId}`} /> */}
 										{/* </div> */}
 									</Lazyload>
@@ -207,7 +207,7 @@ class Page extends Component {
 								}}>
 								{croppedImg ? <img className="plugin-thumbnail" src={`${croppedImg}`} alt="..." /> : false}
 
-								<h3 style={node.format === 'linkOnly' ? `font-size: ${this.props.data.bodyFontSize}px` : false} className={node.format === 'linkOnly' ? 'plugin-title transition-half primary-color' : 'plugin-title'}>
+								<h3 style={node.format === 'linkOnly' ? `font-size: ${this.props.data.bodyFontSize}px; color: #09A3EE !important;` : false} className={node.format === 'linkOnly' ? 'plugin-title transition-half primary-color' : 'plugin-title'}>
 									{node.data.title}
 								</h3>
 							</div>
@@ -240,6 +240,7 @@ class Page extends Component {
 	}
 
 	render() {
+		
 		let content = (
 			<div className="container-fluid page-content" style={`${this.props.data.backgroundColor} !important`}>
 				<div className="row">{this.renderNodes()}</div>
